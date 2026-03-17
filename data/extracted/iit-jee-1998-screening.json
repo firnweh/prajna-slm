@@ -1,0 +1,32 @@
+[
+  {
+    "id": "JEE_Advanced_1998_XZVevL71Gu6AD8cR",
+    "exam": "JEE Advanced",
+    "year": 1998,
+    "shift": "iit-jee-1998-screening",
+    "subject": "Physics",
+    "topic": "Work Power And Energy",
+    "micro_topic": "Work",
+    "question_text": "A force $$F =  - K\\left( {y\\widehat i + x\\widehat j} \\right)$$ (where K is a positive constant) acts on a particle moving in the xy plane. Starting from the origin, the particle is taken along the positive x axis to the point $$\\left( {a,0} \\right)$$, and then parallel to the y axis to the point $$\\left( {a,a} \\right)$$. The total work done by the force F on the particle is",
+    "question_type": "MCQ_single",
+    "difficulty": 3,
+    "concepts_tested": [],
+    "answer": "C",
+    "marks": 2
+  },
+  {
+    "id": "JEE_Advanced_1998_VyWoe9widDm9zT5t",
+    "exam": "JEE Advanced",
+    "year": 1998,
+    "shift": "iit-jee-1998-screening",
+    "subject": "Physics",
+    "topic": "Work Power And Energy",
+    "micro_topic": "Energy",
+    "question_text": "A stone tied to a string of length L is whirled in a vertical circle with the other end of the string at the center. At a certain instant of time, the stone is at its lowest position, and has a speed u. The magnitude of the change in its velocity as it reaches a position where the string is horizontal is",
+    "question_type": "MCQ_single",
+    "difficulty": 3,
+    "concepts_tested": [],
+    "answer": "D",
+    "marks": 2
+  }
+]

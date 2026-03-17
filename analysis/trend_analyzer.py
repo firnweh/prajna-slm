@@ -37,8 +37,10 @@ def find_hot_cold_topics(db_path="data/exam.db", recent_years=3, current_year=No
     return hot_topics, cold_topics
 
 
-def detect_cycles(db_path="data/exam.db", min_occurrences=4):
+def detect_cycles(db_path="data/exam.db", min_occurrences=4, exclude_years=None):
     df = get_questions_df(db_path)
+    if exclude_years:
+        df = df[~df["year"].isin(exclude_years)]
     results = []
 
     for (topic, micro_topic), group in df.groupby(["topic", "micro_topic"]):

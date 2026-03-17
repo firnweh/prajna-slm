@@ -1,0 +1,47 @@
+[
+  {
+    "id": "JEE_Advanced_1999_8hOi4fZ4bD3PHHU3",
+    "exam": "JEE Advanced",
+    "year": 1999,
+    "shift": "iit-jee-1999-screening",
+    "subject": "Physics",
+    "topic": "Motion",
+    "micro_topic": "Variable Acceleration",
+    "question_text": "The coordinates of a particle moving in a plane are given by x(t) = a cos(pt) and y(t) = b sin(pt) where a, b (< a) and p are positive constants of approprite dimensions. Then",
+    "question_type": "MCQ_single",
+    "difficulty": 3,
+    "concepts_tested": [],
+    "answer": "A,B,C",
+    "marks": 3
+  },
+  {
+    "id": "JEE_Advanced_1999_EhVraRZExTCEiMKo",
+    "exam": "JEE Advanced",
+    "year": 1999,
+    "shift": "iit-jee-1999-screening",
+    "subject": "Physics",
+    "topic": "Work Power And Energy",
+    "micro_topic": "Energy",
+    "question_text": "A spring of force-constant k is cut into two pieces such that one piece is double the length of the other. Then the long piece will have a force-constant of",
+    "question_type": "MCQ_single",
+    "difficulty": 3,
+    "concepts_tested": [],
+    "answer": "B",
+    "marks": 2
+  },
+  {
+    "id": "JEE_Advanced_1999_6UPbw5gPP9LNSu93",
+    "exam": "JEE Advanced",
+    "year": 1999,
+    "shift": "iit-jee-1999-screening",
+    "subject": "Physics",
+    "topic": "Simple Harmonic Motion",
+    "micro_topic": "Simple Harmonic Motion",
+    "question_text": "A particle free to move along the x-axis has potential energy given by $$U\\left( x \\right) = k\\left[ {1 - \\exp \\left( { - {x^2}} \\right)} \\right]$$ for $$ - \\infty  \\le x \\le  - \\infty $$, where k is a positive constant of appropriate dimensions. Then",
+    "question_type": "MCQ_single",
+    "difficulty": 3,
+    "concepts_tested": [],
+    "answer": "D",
+    "marks": 2
+  }
+]
