@@ -369,10 +369,50 @@ st.markdown("""
     .team-code { font-size: 12px; color: #a5b4fc; font-weight: 600; }
     .team-phone { font-size: 11px; color: rgba(255,255,255,0.3); }
 
-    /* Hide hamburger & footer */
+    /* Hide hamburger, footer & deploy button */
     #MainMenu { visibility: hidden; }
     footer { visibility: hidden; }
+    [data-testid="stToolbar"] { display: none !important; }
+    [data-testid="stDeployButton"] { display: none !important; }
+    button[title*="Deploy"] { display: none !important; }
+    .stDeployButton { display: none !important; }
+
+    /* ── Fix dataframe text for dark theme ── */
+    [data-testid="stDataFrame"] * { color: #e2e8f0 !important; }
+    [data-testid="stDataFrame"] th {
+        background: rgba(99,102,241,0.12) !important;
+        color: #a5b4fc !important; font-weight: 700 !important;
+    }
+    [data-testid="stDataFrame"] td { background: rgba(255,255,255,0.03) !important; }
+    [data-testid="stDataFrame"] tr:hover td { background: rgba(99,102,241,0.06) !important; }
+
+    /* ── PW Top-right fixed badge ── */
+    .pw-topbar {
+        position: fixed; top: 10px; right: 68px; z-index: 9999;
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(15,15,26,0.9); backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 24px; padding: 5px 14px 5px 8px;
+    }
+    .pw-topbar-logo {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: white; display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 900; color: #0a0a0f;
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    .pw-topbar-name {
+        font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8);
+        letter-spacing: 0.3px;
+    }
 </style>
+""", unsafe_allow_html=True)
+
+# Fixed PW logo top-right
+st.markdown("""
+<div class="pw-topbar">
+  <div class="pw-topbar-logo">PW</div>
+  <div class="pw-topbar-name">Physics Wallah</div>
+</div>
 """, unsafe_allow_html=True)
 
 if not os.path.exists(DB_PATH):
@@ -393,12 +433,12 @@ st.markdown("""
     <div>
       <span class="pw-brand-tag">Physics Wallah</span>
       &nbsp;&nbsp;
-      <span class="pw-hackathon-badge">🏆 AI Hackathon 2025</span>
+      <span class="pw-hackathon-badge">🏆 AI Hackathon 2026</span>
     </div>
   </div>
   <div class="prajna-title">PRAJNA</div>
   <div class="prajna-sub">Deep Dive — Predictive Research & Analysis for JEE/NEET Intelligence</div>
-  <div class="prajna-meaning">प्रज्ञा — Sanskrit: Supreme Knowledge &amp; Wisdom</div>
+  <div class="prajna-meaning">प्रज्ञा · P·R·A·J·N·A — Predictive Research & Analysis for JEE/NEET Intelligence</div>
   <div class="stat-grid">
     <div class="stat-chip"><div class="stat-chip-val">23,119</div><div class="stat-chip-lbl">Questions Analysed</div></div>
     <div class="stat-chip"><div class="stat-chip-val">292</div><div class="stat-chip-lbl">Papers in DB</div></div>
@@ -1230,18 +1270,7 @@ with tab_deep:
         else:
             st.info("No data found for this topic.")
     else:
-        st.info("Select a topic above to explore.")
-        # Default treemap
-        tree = get_topic_tree(DB_PATH, exam=exam_filter)
-        if selected_subject != "All":
-            tree = tree[tree["subject"] == selected_subject]
-        if not tree.empty:
-            fig = px.treemap(tree, path=["subject", "topic", "micro_topic"],
-                             values="count", color="avg_difficulty",
-                             color_continuous_scale="RdYlGn_r", color_continuous_midpoint=3,
-                             title="Topic Hierarchy (size = questions, color = difficulty)")
-            fig.update_layout(height=600)
-            st.plotly_chart(fig, use_container_width=True)
+        st.info("Select a chapter above to explore its full history, difficulty trend, and question breakdown.")
 
         # Hot & Cold topics
         st.markdown('<div class="section-divider">Hot & Cold Topics</div>', unsafe_allow_html=True)
@@ -1339,12 +1368,41 @@ with tab_lesson:
             lambda s: max((v for k, v in pred_scores.items()
                           if any(w in k.lower() for w in s.lower().split() if len(w) > 3)), default=0))
         summary["priority"] = summary["pred_score"] * 0.6 + (summary["frequency"] / max(summary["frequency"].max(), 1)) * 0.4
-        summary = summary.sort_values("priority", ascending=False).head(20)
-        fig = px.bar(summary, x="priority", y="subtopic", orientation="h", color="subject",
+        top20 = summary.sort_values("priority", ascending=False).head(20)
+        fig = px.bar(top20, x="priority", y="subtopic", orientation="h", color="subject",
                      hover_data=["chapter", "questions_found", "last_appeared"],
                      color_discrete_sequence=SUBJ_COLORS)
         fig.update_layout(**PLOT_LAYOUT, height=550, yaxis=dict(autorange="reversed"))
         st.plotly_chart(fig, use_container_width=True)
+
+        # ── Download buttons ──
+        dl_lp1, dl_lp2 = st.columns(2)
+        with dl_lp1:
+            dl_top20 = top20[["subtopic", "chapter", "subject", "questions_found",
+                               "last_appeared", "pred_score", "priority"]].copy()
+            dl_top20.columns = ["Subtopic", "Chapter", "Subject", "Questions Found",
+                                 "Last Appeared", "Prediction Score", "Priority Score"]
+            dl_top20["Priority Label"] = dl_top20["Priority Score"].apply(
+                lambda x: "Must Study" if x > 0.15 else "Important" if x > 0.08 else "Review")
+            st.download_button(
+                "⬇ Download Top 20 Important Topics (CSV)",
+                dl_top20.to_csv(index=False),
+                f"important_topics_{exam_ch}_{target_year}.csv", "text/csv",
+            )
+        with dl_lp2:
+            # Full lesson plan: all subtopics with priority
+            full_plan = summary.sort_values(["subject", "chapter", "priority"], ascending=[True, True, False])
+            full_plan = full_plan[["subtopic", "chapter", "subject", "questions_found",
+                                   "last_appeared", "pred_score", "priority"]].copy()
+            full_plan.columns = ["Subtopic", "Chapter", "Subject", "Questions Found",
+                                  "Last Appeared", "Prediction Score", "Priority Score"]
+            full_plan["Priority Label"] = full_plan["Priority Score"].apply(
+                lambda x: "Must Study" if x > 0.15 else "Important" if x > 0.08 else "Review" if x > 0 else "Low Yield")
+            st.download_button(
+                "⬇ Download Full Lesson Plan (CSV)",
+                full_plan.to_csv(index=False),
+                f"lesson_plan_{exam_ch}_{target_year}.csv", "text/csv",
+            )
 
 
 # ================================================================
@@ -1525,7 +1583,7 @@ with tab_paper:
 st.markdown("""
 <div class="prajna-footer">
   <div style="text-align:center; margin-bottom:24px;">
-    <div style="font-size:11px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px;">Built for AI Hackathon 2025</div>
+    <div style="font-size:11px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px;">Built for AI Hackathon 2026</div>
     <div style="font-size:20px; font-weight:800; color:white; font-family:'Space Grotesk',sans-serif;">PRAJNA — Deep Dive by Physics Wallah</div>
     <div style="font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px;">Predictive Research & Analysis for JEE/NEET Intelligence</div>
   </div>
