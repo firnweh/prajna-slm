@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.db import get_questions_df, get_topics_hierarchy
 from analysis.trend_analyzer import topic_frequency_by_year, find_hot_cold_topics, detect_cycles
 from analysis.predictor_v2 import predict_topics_v2, backtest, HOLDOUT_YEARS
-from analysis.predictor_v3 import predict_chapters_v3, predict_microtopics_v3, backtest_v3
+from analysis.predictor_v3 import predict_chapters_v3, predict_microtopics_v3, backtest_v3, backtest_single_year
 from analysis.predictor import predict_topics
 from analysis.deep_analysis import (
     get_topic_deep_dive, get_topic_tree, get_syllabus_coverage,
@@ -40,10 +40,10 @@ SYL_COLORS = {"RETAINED": C_HIGH, "MODIFIED": C_MED, "NEW": C_BLUE, "REMOVED": C
 PLOT_LAYOUT = dict(
     plot_bgcolor="rgba(0,0,0,0)",
     paper_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, system-ui, sans-serif", size=12, color="#334155"),
+    font=dict(family="Inter, system-ui, sans-serif", size=12, color="#cbd5e1"),
     margin=dict(l=10, r=10, t=40, b=10),
 )
-_GRID = dict(gridcolor="rgba(148,163,184,0.15)", zerolinecolor="rgba(148,163,184,0.2)")
+_GRID = dict(gridcolor="rgba(255,255,255,0.06)", zerolinecolor="rgba(255,255,255,0.08)")
 
 def _style_fig(fig):
     """Apply subtle grid styling to any plotly figure."""
@@ -59,31 +59,138 @@ st.plotly_chart = styled_plotly_chart
 
 
 # --- Page Config ---
-st.set_page_config(page_title="Exam Predictor", page_icon="📊", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_icon="🧠", layout="wide", initial_sidebar_state="collapsed")
 
 # --- Custom CSS ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
     /* ── Global ── */
     .stApp {
-        background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #ecfdf5 100%);
+        background: #0a0a0f;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
     [data-testid="stHeader"] { background: transparent; }
-    .block-container { padding-top: 1rem; max-width: 1440px; }
+    .block-container { padding-top: 0; max-width: 1480px; }
 
-    /* ── Hero title area ── */
-    .hero-title {
-        font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
-        background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+    /* ── PW Hero Banner ── */
+    .pw-hero {
+        background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 40%, #0d1f3c 100%);
+        border-bottom: 1px solid rgba(99,102,241,0.3);
+        padding: 32px 40px 28px 40px;
+        margin: -1rem -1rem 0 -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .pw-hero::before {
+        content: '';
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 60%),
+                    radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.12) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    .pw-logo-circle {
+        width: 56px; height: 56px; border-radius: 50%;
+        background: white;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 900; color: #0a0a0f;
+        font-family: 'Space Grotesk', sans-serif;
+        box-shadow: 0 0 24px rgba(255,255,255,0.15);
+        flex-shrink: 0;
+    }
+    .pw-brand-row {
+        display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
+    }
+    .pw-brand-tag {
+        font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+        color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08);
+        padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .pw-hackathon-badge {
+        font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+        color: #fbbf24; background: rgba(251,191,36,0.15);
+        padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(251,191,36,0.3);
+    }
+    .prajna-title {
+        font-size: 52px; font-weight: 900; letter-spacing: -2px; line-height: 1;
+        font-family: 'Space Grotesk', sans-serif;
+        background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 40%, #a78bfa 70%, #ec4899 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text; margin-bottom: 2px;
+        background-clip: text;
     }
-    .hero-subtitle {
-        font-size: 14px; color: #64748b; font-weight: 400; margin-bottom: 20px;
+    .prajna-sub {
+        font-size: 16px; color: rgba(255,255,255,0.55); font-weight: 400;
+        margin-top: 4px; letter-spacing: 0.2px;
     }
+    .prajna-meaning {
+        font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic;
+        margin-top: 2px;
+    }
+
+    /* ── Stat chips in hero ── */
+    .stat-grid {
+        display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;
+    }
+    .stat-chip {
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px; padding: 10px 16px;
+        display: flex; flex-direction: column; align-items: flex-start;
+    }
+    .stat-chip-val {
+        font-size: 22px; font-weight: 800; color: white;
+        font-family: 'Space Grotesk', sans-serif; line-height: 1;
+    }
+    .stat-chip-lbl {
+        font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.4);
+        text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+        background: rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        padding: 12px 40px;
+        margin: 0 -1rem 0 -1rem;
+    }
+
+    /* ── Section dividers ── */
+    .section-divider {
+        font-size: 15px; font-weight: 700; color: #e2e8f0;
+        letter-spacing: -0.2px;
+        border-left: 3px solid #6366f1; padding-left: 12px;
+        margin: 28px 0 14px 0;
+    }
+
+    /* ── Glass metric cards ── */
+    div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px; padding: 18px 20px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-2px);
+        border-color: rgba(99,102,241,0.3);
+        box-shadow: 0 8px 28px rgba(99,102,241,0.12);
+    }
+    div[data-testid="stMetric"] label {
+        font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        white-space: normal !important; line-height: 1.3;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+        font-size: 26px; font-weight: 800; color: #ffffff;
+    }
+    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
+        font-size: 11px;
+    }
+
+    /* ── Body text colors ── */
+    .stApp, p, li, span { color: #cbd5e1; }
+    h1, h2, h3, h4 { color: #f1f5f9 !important; }
 
     /* ── Section dividers ── */
     .section-divider {
@@ -122,20 +229,20 @@ st.markdown("""
     /* ── Tabs ── */
     .stTabs [data-baseweb="tab-list"] {
         gap: 2px;
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255,255,255,0.04);
         backdrop-filter: blur(8px);
-        border-radius: 12px; padding: 4px;
-        border: 1px solid rgba(226, 232, 240, 0.6);
+        border-radius: 14px; padding: 4px;
+        border: 1px solid rgba(255,255,255,0.08);
     }
     .stTabs [data-baseweb="tab"] {
-        border-radius: 10px; padding: 10px 20px;
+        border-radius: 10px; padding: 10px 18px;
         font-weight: 600; font-size: 13px;
-        color: #64748b; transition: all 0.2s ease;
+        color: rgba(255,255,255,0.45); transition: all 0.2s ease;
     }
     .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: white !important;
-        color: #6366f1 !important;
-        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.12);
+        background: rgba(99,102,241,0.2) !important;
+        color: #a5b4fc !important;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.15);
     }
 
     /* ── Selectboxes / inputs ── */
@@ -143,56 +250,58 @@ st.markdown("""
     [data-testid="stNumberInput"] > div > div > input,
     [data-testid="stTextInput"] > div > div > input {
         border-radius: 10px !important;
-        border-color: #e2e8f0 !important;
-        background: rgba(255,255,255,0.8) !important;
+        border-color: rgba(255,255,255,0.1) !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: #e2e8f0 !important;
     }
 
     /* ── Buttons ── */
     .stButton > button {
         border-radius: 10px; font-weight: 600; font-size: 13px;
-        border: 1px solid #e2e8f0; padding: 8px 20px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.06) !important;
+        color: #e2e8f0 !important;
         transition: all 0.2s ease;
     }
     .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
         border: none !important; color: white !important;
-        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 16px rgba(99,102,241,0.35);
     }
     .stButton > button[kind="primary"]:hover {
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+        box-shadow: 0 6px 24px rgba(99,102,241,0.5);
         transform: translateY(-1px);
     }
 
     /* ── Expander ── */
     .streamlit-expanderHeader {
-        font-weight: 600; font-size: 14px; color: #334155;
+        font-weight: 600; font-size: 14px; color: #cbd5e1;
         border-radius: 10px;
     }
     details {
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(226, 232, 240, 0.6) !important;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 12px !important;
     }
 
     /* ── Dataframe ── */
     [data-testid="stDataFrame"] {
         border-radius: 12px; overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        border: 1px solid rgba(226, 232, 240, 0.6);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.08);
     }
 
     /* ── Download buttons ── */
     .stDownloadButton > button {
         border-radius: 10px; font-weight: 500;
-        border: 1px solid #e2e8f0 !important;
-        background: rgba(255,255,255,0.8) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        background: rgba(255,255,255,0.06) !important;
+        color: #cbd5e1 !important;
         transition: all 0.2s;
     }
     .stDownloadButton > button:hover {
-        background: white !important;
-        border-color: #6366f1 !important;
-        color: #6366f1 !important;
+        border-color: rgba(99,102,241,0.5) !important;
+        color: #a5b4fc !important;
     }
 
     /* ── Badge styles ── */
@@ -200,21 +309,20 @@ st.markdown("""
         display: inline-block; padding: 3px 12px; border-radius: 20px;
         font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
     }
-    .badge-high { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
-    .badge-medium { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
-    .badge-low { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
-    .badge-spec { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569; }
-    .badge-retained { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
-    .badge-modified { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
-    .badge-new { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; }
-    .badge-removed { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
+    .badge-high { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-medium { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-low { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-spec { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+    .badge-retained { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-modified { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-new { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+    .badge-removed { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
 
     /* ── Plotly chart containers ── */
     .stPlotlyChart {
-        background: rgba(255, 255, 255, 0.5);
-        backdrop-filter: blur(8px);
-        border-radius: 12px; padding: 4px;
-        border: 1px solid rgba(226, 232, 240, 0.4);
+        background: rgba(255,255,255,0.03);
+        border-radius: 14px; padding: 4px;
+        border: 1px solid rgba(255,255,255,0.07);
     }
 
     /* ── Slider ── */
@@ -224,24 +332,42 @@ st.markdown("""
 
     /* ── Captions ── */
     .stCaption, [data-testid="stCaptionContainer"] {
-        color: #94a3b8 !important; font-size: 12px;
+        color: rgba(255,255,255,0.35) !important; font-size: 12px;
     }
 
     /* ── Info / Warning boxes ── */
     [data-testid="stAlert"] {
-        border-radius: 12px; border: none;
-        background: rgba(255, 255, 255, 0.6);
-        backdrop-filter: blur(8px);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
     }
 
     /* ── Spinner ── */
     .stSpinner > div { border-top-color: #6366f1 !important; }
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+
+    /* ── Footer ── */
+    .prajna-footer {
+        background: linear-gradient(135deg, #0f0f1a, #1a0a2e);
+        border-top: 1px solid rgba(99,102,241,0.2);
+        padding: 32px 40px;
+        margin: 48px -1rem 0 -1rem;
+    }
+    .team-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px; padding: 16px 20px;
+        text-align: center;
+    }
+    .team-name { font-size: 15px; font-weight: 700; color: #e2e8f0; }
+    .team-org { font-size: 11px; color: rgba(255,255,255,0.4); margin: 3px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+    .team-code { font-size: 12px; color: #a5b4fc; font-weight: 600; }
+    .team-phone { font-size: 11px; color: rgba(255,255,255,0.3); }
 
     /* Hide hamburger & footer */
     #MainMenu { visibility: hidden; }
@@ -260,10 +386,35 @@ holdout_str = ", ".join(str(y) for y in sorted(HOLDOUT_YEARS))
 # ================================================================
 # FILTER BAR
 # ================================================================
-st.markdown('<div class="hero-title">Exam Predictor</div>', unsafe_allow_html=True)
-st.markdown('<div class="hero-subtitle">What\'s likely to come, why the model thinks so, and how preparation should shift.</div>', unsafe_allow_html=True)
+st.markdown("""
+<div class="pw-hero">
+  <div class="pw-brand-row">
+    <div class="pw-logo-circle">PW</div>
+    <div>
+      <span class="pw-brand-tag">Physics Wallah</span>
+      &nbsp;&nbsp;
+      <span class="pw-hackathon-badge">🏆 AI Hackathon 2025</span>
+    </div>
+  </div>
+  <div class="prajna-title">PRAJNA</div>
+  <div class="prajna-sub">Deep Dive — Predictive Research & Analysis for JEE/NEET Intelligence</div>
+  <div class="prajna-meaning">प्रज्ञा — Sanskrit: Supreme Knowledge &amp; Wisdom</div>
+  <div class="stat-grid">
+    <div class="stat-chip"><div class="stat-chip-val">23,119</div><div class="stat-chip-lbl">Questions Analysed</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">292</div><div class="stat-chip-lbl">Papers in DB</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">48</div><div class="stat-chip-lbl">Years (1978–2026)</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">36</div><div class="stat-chip-lbl">NEET Papers</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">178</div><div class="stat-chip-lbl">JEE Main Papers</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">78</div><div class="stat-chip-lbl">JEE Advanced Papers</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">755</div><div class="stat-chip-lbl">Micro-Topics</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">143</div><div class="stat-chip-lbl">Chapters</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">82.1%</div><div class="stat-chip-lbl">Backtest Score</div></div>
+    <div class="stat-chip"><div class="stat-chip-val">74.9%</div><div class="stat-chip-lbl">Coverage@50</div></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
-f1, f2, f3, f4, f5 = st.columns([1.2, 1, 1, 0.8, 0.8])
+f1, f2, f3, f4, f5, f6 = st.columns([1.2, 1, 0.9, 0.9, 0.7, 0.7])
 with f1:
     exams = ["All"] + sorted(df["exam"].unique().tolist())
     selected_exam = st.selectbox("Exam", exams, key="gx_exam")
@@ -273,10 +424,12 @@ with f2:
 with f3:
     target_year = st.number_input("Predict for", value=2026, min_value=2024, max_value=2030, key="gx_yr")
 with f4:
-    top_n = st.selectbox("Show top", [10, 15, 20, 30, 50, 100], index=2, key="gx_topn")
+    top_n = st.selectbox("Top K", [20, 40, 60, 80, 100], index=1, key="gx_topn")
 with f5:
+    pred_level = st.selectbox("Level", ["Micro-Topic", "Chapter"], key="gx_level")
+with f6:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.caption(f"Trained excluding {holdout_str}")
+    st.caption(f"Excl. {holdout_str}")
 
 exam_filter = selected_exam if selected_exam != "All" else None
 
@@ -293,24 +446,32 @@ def get_predictions_v2(db, year, exam):
 
 @st.cache_data(ttl=300)
 def get_predictions_v3(db, year, exam, k):
+    # Each K gets its own independent reranking — not a slice of a larger set
     return predict_chapters_v3(db, target_year=year, exam=exam, top_k=k)
 
 @st.cache_data(ttl=300)
 def get_predictions_micro_v3(db, year, exam, k):
+    # Each K gets its own independent reranking
     return predict_microtopics_v3(db, target_year=year, exam=exam, top_k=k)
 
-# v3 micro-topic level (primary for Predictions tab)
-preds_micro = get_predictions_micro_v3(DB_PATH, target_year, exam_filter, max(top_n * 3, 150))
+@st.cache_data(ttl=600)
+def run_backtest_single(db, test_year, exam, k, level):
+    return backtest_single_year(db, test_year=test_year, exam=exam, k=k, level=level)
+
+# --- Load predictions for selected K (separate reranking per K) ---
+preds_micro = get_predictions_micro_v3(DB_PATH, target_year, exam_filter, top_n)
 active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_micro = [p for p in active_micro if p["subject"] == selected_subject]
-pred_list = active_micro[:top_n]
 
-# v3 chapter-level (for blueprint simulator + backtest)
-preds_v3 = get_predictions_v3(DB_PATH, target_year, exam_filter, max(top_n, 50))
+preds_v3 = get_predictions_v3(DB_PATH, target_year, exam_filter, top_n)
 active_v3 = [p for p in preds_v3 if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_v3 = [p for p in active_v3 if p["subject"] == selected_subject]
+
+# Active list depends on selected level
+pred_list = active_micro if pred_level == "Micro-Topic" else active_v3
+pred_list = pred_list[:top_n]
 
 # v2: micro-topic level (for deep analysis / lesson plan)
 predictions_v2 = get_predictions_v2(DB_PATH, target_year, exam_filter)
@@ -318,9 +479,9 @@ active_preds_v2 = [p for p in predictions_v2 if p["syllabus_status"] != "REMOVED
 
 
 # --- Tabs ---
-tab_main, tab_deep, tab_lesson, tab_timeline, tab_explorer, tab_paper = st.tabs([
-    "Predictions", "Topic Deep Dive", "Lesson Plan",
-    "Historical Timeline", "Question Explorer", "Paper Generator",
+tab_main, tab_backtest, tab_deep, tab_lesson, tab_timeline, tab_explorer, tab_paper = st.tabs([
+    "📊 Predictions", "🎯 Backtest", "🔬 Topic Deep Dive", "📚 Lesson Plan",
+    "📈 Historical Timeline", "❓ Question Explorer", "📄 Paper Generator",
 ])
 
 
@@ -336,17 +497,15 @@ with tab_main:
     # ── SECTION 1: KPI STRIP ──
     st.markdown('<div class="section-divider">Executive Summary</div>', unsafe_allow_html=True)
 
-    all_active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
-    if selected_subject != "All":
-        all_active_micro = [p for p in all_active_micro if p["subject"] == selected_subject]
-
-    high_prob = sum(1 for p in all_active_micro if p["appearance_probability"] >= 0.7)
+    all_active_for_kpi = pred_list  # already filtered and K-limited
+    high_prob = sum(1 for p in all_active_for_kpi if p["appearance_probability"] >= 0.7)
     total_exp_qs = sum(p["expected_questions"] for p in pred_list)
-    new_topics = sum(1 for p in preds_micro if p["syllabus_status"] == "NEW")
-    removed_topics = sum(1 for p in preds_micro if p["syllabus_status"] == "REMOVED")
+    src_preds = preds_micro if pred_level == "Micro-Topic" else preds_v3
+    new_topics = sum(1 for p in src_preds if p["syllabus_status"] == "NEW")
+    removed_topics = sum(1 for p in src_preds if p["syllabus_status"] == "REMOVED")
     avg_conf = np.mean([p["confidence_score"] for p in pred_list]) if pred_list else 0
-    rising = sum(1 for p in all_active_micro[:50] if p["trend_direction"] == "RISING")
-    declining = sum(1 for p in all_active_micro[:50] if p["trend_direction"] == "DECLINING")
+    rising = sum(1 for p in pred_list if p["trend_direction"] == "RISING")
+    declining = sum(1 for p in pred_list if p["trend_direction"] == "DECLINING")
     shift = "More rising topics" if rising > declining * 1.5 else "Classic topics leading" if declining > rising * 1.5 else "Balanced mix"
 
     from collections import Counter
@@ -354,28 +513,27 @@ with tab_main:
     subj_str = " | ".join(f"{s}: {c}" for s, c in subj_dist.most_common())
 
     k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("High-Prob Micro-Topics", f"{high_prob} (>70%)")
+    level_label = "Micro-Topics" if pred_level == "Micro-Topic" else "Chapters"
+    k1.metric(f"High-Prob {level_label}", f"{high_prob} (>70%)")
     k2.metric(f"Expected Qs (Top {top_n})", f"~{total_exp_qs:.0f}")
     k3.metric("Syllabus Changes", f"+{new_topics} new", delta=f"-{removed_topics} removed", delta_color="inverse")
     k4.metric("Model Confidence", f"{avg_conf:.0%}")
     k5.metric("Pattern Shift", shift)
 
-    st.caption(f"{len(all_active_micro)} unique micro-topics | {len(pred_list)} in shortlist | Subject split: {subj_str} | {len(filtered):,} questions in DB")
+    st.caption(f"Top-{top_n} {pred_level} predictions | Reranked independently for K={top_n} | Subject split: {subj_str} | {len(filtered):,} questions in DB")
 
-    # ── SECTION 2: MAIN PREDICTION TABLE (Micro-Topic-Level v3) ──
-    st.markdown('<div class="section-divider">Ranked Micro-Topic Predictions</div>', unsafe_allow_html=True)
-    st.caption("Each row = one unique micro-topic. Subject-balanced ranking. Parent chapter shown for context.")
+    # ── SECTION 2: RANKED PREDICTION TABLE ──
+    is_micro = pred_level == "Micro-Topic"
+    st.markdown(f'<div class="section-divider">Ranked {pred_level} Predictions — Top {top_n}</div>', unsafe_allow_html=True)
+    st.caption(f"Subject-balanced reranking for K={top_n}. {'Micro-topic + parent chapter.' if is_micro else 'Chapter-level aggregation.'}")
 
     TREND_ICONS = {"RISING": "↑ Rising", "STABLE": "→ Stable", "DECLINING": "↓ Declining", "NEW": "★ New", "REMOVED": "✗ Removed"}
-    TREND_COLORS = {"↑ Rising": "#10b981", "→ Stable": "#6366f1", "↓ Declining": "#f43f5e", "★ New": "#a855f7", "✗ Removed": "#94a3b8"}
 
     table_rows = []
     for i, p in enumerate(pred_list, 1):
-        table_rows.append({
+        row = {
             "#": i,
             "Subject": p["subject"],
-            "Micro-Topic": p["micro_topic"],
-            "Chapter": p["chapter"],
             "P(Appear)": p["appearance_probability"],
             "Exp. Qs": p["expected_questions"],
             "Range": f"{p['expected_qs_min']}–{p['expected_qs_max']}",
@@ -383,9 +541,15 @@ with tab_main:
             "Last Year": int(p["last_appeared"]),
             "Format": ", ".join(p["likely_formats"][:2]),
             "Diff.": round(p["likely_difficulty"], 1),
-            "Syllabus": p["syllabus_status"],
             "Confidence": p["confidence"],
-        })
+        }
+        if is_micro:
+            row["Micro-Topic"] = p["micro_topic"]
+            row["Chapter"] = p["chapter"]
+        else:
+            row["Chapter"] = p["chapter"]
+            row["Top Micro-Topic"] = p.get("top_micro_topic", "")
+        table_rows.append(row)
 
     tbl = pd.DataFrame(table_rows)
     st.dataframe(
@@ -419,11 +583,12 @@ with tab_main:
         st.download_button(f"Download ALL {len(dl_df)} (CSV)", dl_df.to_csv(index=False),
                            f"all_{target_year}.csv", "text/csv")
 
-    # ── SECTION 3: TOP MICRO-TOPIC PROBABILITY + EXPECTED QUESTIONS ──
-    st.markdown('<div class="section-divider">Micro-Topic Probability & Expected Weightage</div>', unsafe_allow_html=True)
+    # ── SECTION 3: TOP PROBABILITY + EXPECTED QUESTIONS ──
+    st.markdown(f'<div class="section-divider">{pred_level} Probability & Expected Weightage</div>', unsafe_allow_html=True)
 
+    name_key = "micro_topic" if is_micro else "chapter"
     bar_data = pd.DataFrame([{
-        "Micro-Topic": p["micro_topic"],
+        "Name": p[name_key],
         "Chapter": p["chapter"],
         "Probability": p["appearance_probability"],
         "Confidence": p["confidence"],
@@ -435,7 +600,7 @@ with tab_main:
 
     with bar_col1:
         fig = px.bar(
-            bar_data, x="Probability", y="Micro-Topic", orientation="h",
+            bar_data, x="Probability", y="Name", orientation="h",
             color="Confidence", color_discrete_map=CONF_COLORS,
             text=bar_data["Probability"].apply(lambda x: f"{x:.0%}"),
             custom_data=["Chapter", "Expected Qs", "Format"],
@@ -445,7 +610,7 @@ with tab_main:
             hovertemplate="<b>%{y}</b><br>Chapter: %{customdata[0]}<br>P(Appear): %{x:.0%}<br>Exp Qs: %{customdata[1]}<br>Format: %{customdata[2]}<extra></extra>",
         )
         fig.update_layout(
-            **PLOT_LAYOUT, title="P(Micro-Topic Appears)",
+            **PLOT_LAYOUT, title=f"P({pred_level} Appears)",
             height=max(380, len(bar_data) * 32),
             yaxis=dict(autorange="reversed", title=""),
             xaxis=dict(title="Appearance Probability", tickformat=".0%", range=[0, 1.12]),
@@ -455,7 +620,7 @@ with tab_main:
 
     with bar_col2:
         fig = px.bar(
-            bar_data, x="Expected Qs", y="Micro-Topic", orientation="h",
+            bar_data, x="Expected Qs", y="Name", orientation="h",
             color="Confidence", color_discrete_map=CONF_COLORS,
             text=bar_data["Expected Qs"].apply(lambda x: f"{x:.1f}"),
             custom_data=["Chapter"],
@@ -488,13 +653,18 @@ with tab_main:
                               legend=dict(orientation="h", yanchor="bottom", y=1.02))
             st.plotly_chart(fig, use_container_width=True)
 
-        # Interactive micro-topic trend
-        trend_choices = [f"{p['micro_topic']} ({p['chapter']})" for p in pred_list[:10]]
-        trend_map = {f"{p['micro_topic']} ({p['chapter']})": p["micro_topic"] for p in pred_list[:10]}
-        if trend_choices:
+        # Interactive topic/micro trend
+        if is_micro:
+            trend_choices = [f"{p['micro_topic']} ({p['chapter']})" for p in pred_list[:10]]
+            trend_map = {f"{p['micro_topic']} ({p['chapter']})": p["micro_topic"] for p in pred_list[:10]}
             sel_trend = st.selectbox("Micro-topic weightage trend", trend_choices, key="trend_sel")
-            sel_micro_name = trend_map.get(sel_trend, "")
-            topic_yr = filtered[filtered["micro_topic"] == sel_micro_name].groupby("year").size().reset_index(name="count")
+            sel_name = trend_map.get(sel_trend, "")
+            topic_yr = filtered[filtered["micro_topic"] == sel_name].groupby("year").size().reset_index(name="count")
+        else:
+            trend_choices = [p["chapter"] for p in pred_list[:10]]
+            sel_trend = st.selectbox("Chapter weightage trend", trend_choices, key="trend_sel")
+            sel_name = sel_trend
+            topic_yr = filtered[filtered["topic"] == sel_name].groupby("year").size().reset_index(name="count")
             if not topic_yr.empty:
                 fig = px.bar(topic_yr, x="year", y="count", color_discrete_sequence=[C_BLUE])
                 fig.update_layout(**PLOT_LAYOUT, height=220, xaxis_title="", yaxis_title="Questions")
@@ -583,8 +753,11 @@ with tab_main:
     # ── SECTION 6: WHY THIS PREDICTION? ──
     st.markdown('<div class="section-divider">Why This Prediction? — Score Decomposition</div>', unsafe_allow_html=True)
 
-    explain_opts = [f"{p['micro_topic']} · {p['chapter']} ({p['appearance_probability']:.0%}, ~{p['expected_questions']:.0f} Qs)" for p in pred_list]
-    sel_explain = st.selectbox("Select a micro-topic to see score drivers", explain_opts, key="explain_sel")
+    if is_micro:
+        explain_opts = [f"{p['micro_topic']} · {p['chapter']} ({p['appearance_probability']:.0%}, ~{p['expected_questions']:.0f} Qs)" for p in pred_list]
+    else:
+        explain_opts = [f"{p['chapter']} ({p['appearance_probability']:.0%}, ~{p['expected_questions']:.0f} Qs)" for p in pred_list]
+    sel_explain = st.selectbox(f"Select a {pred_level.lower()} to see score drivers", explain_opts, key="explain_sel")
 
     if sel_explain:
         idx = explain_opts.index(sel_explain)
@@ -611,16 +784,18 @@ with tab_main:
                     text=sdf["Value"].apply(lambda x: f"{x:.2f}"),
                     textposition="outside",
                 ))
+                title_name = p["micro_topic"] if is_micro else p["chapter"]
                 fig.update_layout(**PLOT_LAYOUT, height=320, xaxis_title="Signal Value",
                                   yaxis=dict(autorange="reversed"),
-                                  title=f"Signal Breakdown: {p['micro_topic']}")
+                                  title=f"Signal Breakdown: {title_name}")
                 st.plotly_chart(fig, use_container_width=True)
 
             with detail_col:
                 st.markdown("**Reasoning:**")
                 for r in p["reasons"]:
                     st.markdown(f"- {r}")
-                st.markdown(f"**Micro-Topic:** {p['micro_topic']}")
+                if is_micro:
+                    st.markdown(f"**Micro-Topic:** {p['micro_topic']}")
                 st.markdown(f"**Chapter:** {p['chapter']}")
                 st.markdown(f"**Format:** {', '.join(p['likely_formats'])}")
                 st.markdown(f"**Difficulty:** {p['likely_difficulty']}")
@@ -633,16 +808,19 @@ with tab_main:
     risk_col, tier_col = st.columns([2, 1])
 
     with risk_col:
-        sc_data = [{"Micro-Topic": p["micro_topic"], "Chapter": p["chapter"],
-                    "Probability": p["appearance_probability"],
-                    "Confidence Score": p["confidence_score"],
-                    "Expected Qs": max(p["expected_questions"], 0.5),
-                    "Confidence": p["confidence"], "Subject": p["subject"]}
-                   for p in active_micro[:80]]
+        sc_source = active_micro if is_micro else active_v3
+        sc_data = [{
+            "Name": p["micro_topic"] if is_micro else p["chapter"],
+            "Chapter": p["chapter"],
+            "Probability": p["appearance_probability"],
+            "Confidence Score": p["confidence_score"],
+            "Expected Qs": max(p["expected_questions"], 0.5),
+            "Confidence": p["confidence"], "Subject": p["subject"]}
+                   for p in sc_source[:80]]
         if sc_data:
             scdf = pd.DataFrame(sc_data)
             fig = px.scatter(scdf, x="Probability", y="Confidence Score",
-                             size="Expected Qs", hover_name="Micro-Topic",
+                             size="Expected Qs", hover_name="Name",
                              hover_data={"Chapter": True},
                              color="Confidence", color_discrete_map=CONF_COLORS, symbol="Subject")
             fig.update_layout(**PLOT_LAYOUT, height=440,
@@ -668,11 +846,15 @@ with tab_main:
             ("LOW", "Low", "Weak trend data"),
             ("SPECULATIVE", "Speculative", "Mostly syllabus-driven"),
         ]:
-            tier_items = [p for p in active_micro[:80] if p["confidence"] == tier]
+            tier_src = active_micro if is_micro else active_v3
+            tier_items = [p for p in tier_src[:80] if p["confidence"] == tier]
             if tier_items:
                 st.markdown(f"**{label}** ({len(tier_items)})")
                 for tp in tier_items[:4]:
-                    st.caption(f"  {tp['micro_topic']} ({tp['chapter']}) — {tp['appearance_probability']:.0%} (~{tp['expected_questions']:.0f} Qs)")
+                    if is_micro:
+                        st.caption(f"  {tp['micro_topic']} ({tp['chapter']}) — {tp['appearance_probability']:.0%}")
+                    else:
+                        st.caption(f"  {tp['chapter']} — {tp['appearance_probability']:.0%} (~{tp['expected_questions']:.0f} Qs)")
 
     # ── SECTION 8: PAPER BLUEPRINT SIMULATOR ──
     st.markdown('<div class="section-divider">Paper Blueprint Simulator</div>', unsafe_allow_html=True)
@@ -767,8 +949,12 @@ with tab_main:
         pred_qs = st.slider("Questions for practice paper", 10, 90, 30, key="main_qs")
     with qp2:
         if st.button("Generate Predicted-Topics PDF", key="main_pdf", type="primary"):
-            top_micros = [p["micro_topic"] for p in active_micro[:30]]
-            pool = filtered[filtered["micro_topic"].isin(top_micros)]
+            if is_micro:
+                top_items = [p["micro_topic"] for p in active_micro[:30]]
+                pool = filtered[filtered["micro_topic"].isin(top_items)]
+            else:
+                top_items = [p["chapter"] for p in active_v3[:20]]
+                pool = filtered[filtered["topic"].isin(top_items)]
             if not pool.empty:
                 practice = pool.sample(n=min(pred_qs, len(pool)), random_state=42)
                 ename = selected_exam if selected_exam != "All" else "NEET"
@@ -778,7 +964,190 @@ with tab_main:
 
 
 # ================================================================
-# TAB 2: DEEP TOPIC ANALYSIS
+# TAB 2: INTERACTIVE BACKTEST
+# ================================================================
+with tab_backtest:
+    st.markdown('<div class="section-divider">Interactive Backtest — Select a Year</div>', unsafe_allow_html=True)
+    st.caption("Train on all data before the selected year. Predict that year. Match against actual paper questions.")
+
+    bt_c1, bt_c2, bt_c3, bt_c4 = st.columns([1.5, 1, 1, 1])
+    with bt_c1:
+        # Usable test years: those in DB (need at least 5 years of training data before them)
+        all_years_in_db = sorted(df["exam" if exam_filter is None else "exam"].unique() if False else
+                                  df["year"].unique().tolist())
+        usable_years = [y for y in all_years_in_db if y >= 1990 and y <= 2025]
+        bt_year = st.select_slider("Test Year", options=usable_years, value=2022)
+    with bt_c2:
+        bt_level = st.selectbox("Prediction Level", ["chapter", "micro"], index=0,
+                                 format_func=lambda x: "Chapter" if x == "chapter" else "Micro-Topic",
+                                 key="bt_level")
+    with bt_c3:
+        bt_k = st.selectbox("K (predictions)", [20, 40, 60, 80, 100], index=2, key="bt_k")
+    with bt_c4:
+        st.markdown("<br>", unsafe_allow_html=True)
+        run_bt = st.button("▶ Run Backtest", type="primary", key="run_bt")
+
+    if run_bt:
+        with st.spinner(f"Training on data before {bt_year}, predicting {bt_year}..."):
+            bt_exam = exam_filter
+            summary, actual_df = run_backtest_single(DB_PATH, bt_year, bt_exam, bt_k, bt_level)
+
+        if summary is None:
+            st.warning(f"No data found for year {bt_year} with exam filter '{bt_exam}'.")
+        else:
+            st.success(f"Backtest complete: predicted Top-{bt_k} {'chapters' if bt_level == 'chapter' else 'micro-topics'} for {bt_year}")
+
+            # ── KPI Row ──
+            bk1, bk2, bk3, bk4, bk5, bk6 = st.columns(6)
+            bk1.metric("Combined Score", f"{summary['combined_score']:.1%}",
+                       help="0.35×Precision + 0.40×Coverage + 0.15×HeavyRecall + 0.10×SubjCov")
+            bk2.metric(f"Precision@{bt_k}", f"{summary['precision_at_k']:.1%}",
+                       help="Predicted topics that actually appeared")
+            bk3.metric(f"Coverage@{bt_k}", f"{summary['coverage_at_k']:.1%}",
+                       help="Fraction of actual exam questions covered by predictions")
+            bk4.metric("Heavy-Topic Recall", f"{summary['heavy_topic_recall']:.1%}",
+                       help="Recall of topics with 3+ questions")
+            bk5.metric("Subj. Coverage", f"{summary['avg_subject_coverage']:.1%}")
+            bk6.metric("Questions Covered", f"{summary['questions_covered']}/{summary['actual_questions']}")
+
+            # ── Subject breakdown ──
+            st.markdown('<div class="section-divider">Subject-wise Coverage</div>', unsafe_allow_html=True)
+            subj_data = [{"Subject": s, "Coverage": v, "Type": "Covered"}
+                         for s, v in summary["subject_coverage"].items()]
+            if subj_data:
+                sdf = pd.DataFrame(subj_data)
+                fig = px.bar(sdf, x="Subject", y="Coverage", color="Subject",
+                             color_discrete_sequence=SUBJ_COLORS,
+                             text=sdf["Coverage"].apply(lambda x: f"{x:.0%}"))
+                fig.update_traces(textposition="outside")
+                fig.update_layout(**PLOT_LAYOUT, height=280,
+                                  yaxis=dict(tickformat=".0%", range=[0, 1.1]),
+                                  showlegend=False, title=f"Subject Coverage — {bt_year} Paper")
+                st.plotly_chart(fig, use_container_width=True)
+
+            # ── Hit / Miss Table ──
+            st.markdown('<div class="section-divider">Topic-by-Topic Breakdown</div>', unsafe_allow_html=True)
+            bd_col1, bd_col2 = st.columns(2)
+
+            breakdown_df = pd.DataFrame(summary["topic_breakdown"])
+            if not breakdown_df.empty:
+                hit_df = breakdown_df[breakdown_df["status"] == "HIT"].sort_values("actual_qs", ascending=False)
+                miss_df = breakdown_df[breakdown_df["status"] == "MISSED"].sort_values("actual_qs", ascending=False)
+
+                with bd_col1:
+                    st.markdown(f"#### ✅ Hits ({len(hit_df)}) — {summary['questions_covered']} Qs covered")
+                    hit_display = hit_df[["topic", "subject", "actual_qs", "predicted_rank", "is_heavy"]].copy()
+                    hit_display.columns = ["Topic", "Subject", "Actual Qs", "Pred. Rank", "Heavy?"]
+                    st.dataframe(
+                        hit_display.style.background_gradient(subset=["Actual Qs"], cmap="Greens"),
+                        hide_index=True, use_container_width=True, height=400
+                    )
+
+                with bd_col2:
+                    st.markdown(f"#### ❌ Missed ({len(miss_df)}) — topics we didn't predict")
+                    miss_display = miss_df[["topic", "subject", "actual_qs", "is_heavy"]].copy()
+                    miss_display.columns = ["Topic", "Subject", "Actual Qs", "Heavy?"]
+                    st.dataframe(
+                        miss_display.style.background_gradient(subset=["Actual Qs"], cmap="Reds"),
+                        hide_index=True, use_container_width=True, height=400
+                    )
+
+            # ── False Positives ──
+            with st.expander(f"False Positives — {summary['false_positives']} predicted but not asked"):
+                if summary["fp_breakdown"]:
+                    fp_df = pd.DataFrame(summary["fp_breakdown"])
+                    fp_df.columns = ["Topic", "Subject", "Pred. Rank", "P(Appear)", "Confidence"]
+                    st.dataframe(fp_df, hide_index=True, use_container_width=True)
+
+            # ── Rank correlation chart ──
+            st.markdown('<div class="section-divider">Prediction Quality Summary</div>', unsafe_allow_html=True)
+            sum_col1, sum_col2 = st.columns(2)
+
+            with sum_col1:
+                metrics_radar = {
+                    "Precision": summary["precision_at_k"],
+                    "Coverage": summary["coverage_at_k"],
+                    "Heavy Recall": summary["heavy_topic_recall"],
+                    "Subj. Balance": summary["avg_subject_coverage"],
+                }
+                fig = go.Figure(go.Bar(
+                    x=list(metrics_radar.keys()),
+                    y=list(metrics_radar.values()),
+                    marker_color=["#6366f1", "#10b981", "#f59e0b", "#a855f7"],
+                    text=[f"{v:.0%}" for v in metrics_radar.values()],
+                    textposition="outside",
+                ))
+                fig.update_layout(**PLOT_LAYOUT, height=300,
+                                  yaxis=dict(tickformat=".0%", range=[0, 1.15]),
+                                  title=f"Model Performance — {bt_year} (K={bt_k})")
+                st.plotly_chart(fig, use_container_width=True)
+
+            with sum_col2:
+                st.markdown("#### Summary")
+                st.markdown(f"- **Year tested:** {bt_year}")
+                st.markdown(f"- **Exam:** {bt_exam or 'All'}")
+                st.markdown(f"- **Level:** {'Chapter' if bt_level == 'chapter' else 'Micro-Topic'}")
+                st.markdown(f"- **K:** {bt_k} predictions")
+                st.markdown(f"- **Actual paper:** {summary['actual_topics']} topics, {summary['actual_questions']} questions")
+                st.markdown(f"- **Hits:** {summary['hits']} / {summary['actual_topics']} topics")
+                st.markdown(f"- **Questions covered:** {summary['questions_covered']} / {summary['actual_questions']}")
+                st.markdown(f"- **Heavy topics (3+ Qs) hit:** {summary['heavy_topics_hit']} / {summary['heavy_topics_total']}")
+                st.markdown(f"- **Rank correlation:** {summary['rank_correlation']:.3f}")
+                st.markdown(f"---")
+                st.markdown(f"**Combined Score: {summary['combined_score']:.1%}**")
+
+            # ── Multi-K comparison for same year ──
+            st.markdown('<div class="section-divider">Coverage vs K — Same Year</div>', unsafe_allow_html=True)
+            st.caption("How does coverage improve as you increase K?")
+            if st.button("Compute Coverage@K curve", key="cov_curve"):
+                with st.spinner("Computing for K = 20, 40, 60, 80, 100..."):
+                    curve_rows = []
+                    for ck in [20, 40, 60, 80, 100]:
+                        cs, _ = run_backtest_single(DB_PATH, bt_year, bt_exam, ck, bt_level)
+                        if cs:
+                            curve_rows.append({"K": ck, "Coverage": cs["coverage_at_k"],
+                                               "Precision": cs["precision_at_k"],
+                                               "Combined": cs["combined_score"]})
+                    if curve_rows:
+                        cdf = pd.DataFrame(curve_rows)
+                        fig = px.line(cdf, x="K", y=["Coverage", "Precision", "Combined"],
+                                      markers=True, color_discrete_sequence=["#10b981", "#6366f1", "#f59e0b"])
+                        fig.update_layout(**PLOT_LAYOUT, height=320,
+                                          yaxis=dict(tickformat=".0%"),
+                                          title=f"Coverage@K vs K — {bt_year}")
+                        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("Select a year and click **▶ Run Backtest** to see prediction performance against the actual paper.")
+
+        # Preview: show multi-year trend of combined scores
+        if st.checkbox("Preview: multi-year backtest (2018–2023)", key="bt_preview"):
+            with st.spinner("Running across 2018–2023..."):
+                bt_exam_prev = exam_filter
+                prev_rows = []
+                for yr in [2018, 2019, 2020, 2021, 2022, 2023]:
+                    s, _ = run_backtest_single(DB_PATH, yr, bt_exam_prev, 50, "chapter")
+                    if s:
+                        prev_rows.append({
+                            "Year": yr, "Precision": s["precision_at_k"],
+                            "Coverage": s["coverage_at_k"],
+                            "Heavy Recall": s["heavy_topic_recall"],
+                            "Combined": s["combined_score"],
+                        })
+                if prev_rows:
+                    prev_df = pd.DataFrame(prev_rows)
+                    fig = px.line(prev_df, x="Year",
+                                  y=["Precision", "Coverage", "Heavy Recall", "Combined"],
+                                  markers=True,
+                                  color_discrete_sequence=["#6366f1", "#10b981", "#f59e0b", "#f43f5e"])
+                    fig.update_layout(**PLOT_LAYOUT, height=360,
+                                      yaxis=dict(tickformat=".0%"),
+                                      title="Multi-Year Model Performance (Chapter@50)")
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.dataframe(prev_df, hide_index=True, use_container_width=True)
+
+
+# ================================================================
+# TAB 3: DEEP TOPIC ANALYSIS
 # ================================================================
 with tab_deep:
     st.markdown('<div class="section-divider">Deep Topic Analysis</div>', unsafe_allow_html=True)
@@ -1149,3 +1518,33 @@ with tab_paper:
                 pdf = generate_paper_pdf(practice, title=paper_title, exam_name=ename, include_answers=inc_ans)
                 st.download_button("Download PDF", pdf, "practice_paper.pdf", "application/pdf", type="primary")
                 st.success(f"Paper with {len(practice)} questions!")
+
+# ================================================================
+# PRAJNA FOOTER — Team Credits
+# ================================================================
+st.markdown("""
+<div class="prajna-footer">
+  <div style="text-align:center; margin-bottom:24px;">
+    <div style="font-size:11px; font-weight:700; letter-spacing:2px; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:8px;">Built for AI Hackathon 2025</div>
+    <div style="font-size:20px; font-weight:800; color:white; font-family:'Space Grotesk',sans-serif;">PRAJNA — Deep Dive by Physics Wallah</div>
+    <div style="font-size:13px; color:rgba(255,255,255,0.4); margin-top:4px;">Predictive Research & Analysis for JEE/NEET Intelligence</div>
+  </div>
+  <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:24px;">
+    <div class="team-card" style="min-width:220px;">
+      <div class="team-name">Aman Arora</div>
+      <div class="team-org">Curious Labs</div>
+      <div class="team-code">PW16130</div>
+      <div class="team-phone">📞 7505484120</div>
+    </div>
+    <div class="team-card" style="min-width:220px;">
+      <div class="team-name">Himanshu Sharma</div>
+      <div class="team-org">Curious Labs</div>
+      <div class="team-code">PW1925</div>
+      <div class="team-phone">📞 9694948108</div>
+    </div>
+  </div>
+  <div style="text-align:center; font-size:11px; color:rgba(255,255,255,0.2);">
+    PRAJNA v1.0 · 23,119 questions · 292 papers · 1978–2026 · Model: 3-Stage SLM with subject-balanced reranking
+  </div>
+</div>
+""", unsafe_allow_html=True)

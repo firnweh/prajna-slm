@@ -448,14 +448,20 @@ def predict_chapters_v3(db_path="data/exam.db", target_year=2026, exam=None, top
             app_signals.get("recent_3yr", 0), slope
         )
 
+        # --- Recent yield bonus (promotes heavy chapters in last 3 years) ---
+        recent_qs = [v for y, v in qs_per_year.items() if y >= max_year - 2]
+        recent_yield = np.mean(recent_qs) if recent_qs else 0
+        yield_bonus = min(recent_yield / 6.0, 1.0)  # 6+ avg qs recently = max
+
         # --- Final combined score ---
-        # 0.45 * P(appear) + 0.35 * normalized_expected_qs + 0.10 * subject_balance + 0.10 * syllabus
+        # 0.40 * P(appear) + 0.30 * normalized_expected_qs + 0.15 * yield_bonus + 0.10 * cross + 0.05 * syllabus
         normalized_exp_qs = min(exp_qs / 8.0, 1.0)  # 8+ questions = max
         final_score = (
-            0.45 * app_prob +
-            0.35 * normalized_exp_qs +
+            0.40 * app_prob +
+            0.30 * normalized_exp_qs +
+            0.15 * yield_bonus +
             0.10 * cross_score +
-            0.10 * syl_gate
+            0.05 * syl_gate
         )
 
         # Build reasons
@@ -638,13 +644,19 @@ def predict_microtopics_v3(db_path="data/exam.db", target_year=2026, exam=None, 
             app_signals.get("recent_3yr", 0), slope
         )
 
+        # --- Recent yield bonus ---
+        recent_qs_mt = [v for y, v in qs_per_year.items() if y >= max_year - 2]
+        recent_yield_mt = np.mean(recent_qs_mt) if recent_qs_mt else 0
+        yield_bonus_mt = min(recent_yield_mt / 3.0, 1.0)  # 3+ avg qs recently = max
+
         # --- Final score ---
         normalized_exp_qs = min(exp_qs / 4.0, 1.0)  # micro-topics: 4+ qs = max
         final_score = (
-            0.45 * app_prob +
-            0.35 * normalized_exp_qs +
+            0.40 * app_prob +
+            0.30 * normalized_exp_qs +
+            0.15 * yield_bonus_mt +
             0.10 * cross_score +
-            0.10 * syl_gate
+            0.05 * syl_gate
         )
 
         # Build reasons
@@ -837,3 +849,163 @@ def backtest_v3(db_path="data/exam.db", test_years=None, exam=None, k=50):
         })
 
     return results
+
+
+# ================================================================
+# INTERACTIVE SINGLE-YEAR BACKTEST
+# ================================================================
+
+def backtest_single_year(db_path="data/exam.db", test_year=2020, exam=None,
+                         k=50, level="chapter"):
+    """
+    Train on data strictly before test_year, predict for test_year,
+    compare predictions against actual paper.
+
+    level: "chapter" or "micro"
+
+    Returns (summary_dict, actual_df) where summary_dict has:
+      - precision_at_k, coverage_at_k, heavy_topic_recall
+      - subject_coverage per subject
+      - combined_score (0.35P + 0.40C + 0.15H + 0.10S)
+      - hit_topics, missed_topics, false_positives
+      - per-topic breakdown with predicted_rank, actual_qs
+    """
+    import analysis.predictor_v3 as self_mod
+    from scipy.stats import spearmanr
+
+    full_df = get_questions_df(db_path)
+    if exam:
+        full_df = full_df[full_df["exam"] == exam]
+
+    actual = full_df[full_df["year"] == test_year]
+    if actual.empty:
+        return None, None
+
+    # Override holdout: exclude test_year and everything after
+    orig_holdout = self_mod.HOLDOUT_YEARS
+    self_mod.HOLDOUT_YEARS = set(range(test_year, 2030))
+
+    try:
+        if level == "micro":
+            preds = predict_microtopics_v3(db_path, target_year=test_year, exam=exam, top_k=k)
+        else:
+            preds = predict_chapters_v3(db_path, target_year=test_year, exam=exam, top_k=k)
+    finally:
+        self_mod.HOLDOUT_YEARS = orig_holdout
+
+    if not preds:
+        return None, actual
+
+    active_preds = [p for p in preds if p["syllabus_status"] != "REMOVED"][:k]
+
+    # Build actual paper stats
+    if level == "micro":
+        actual_key = "micro_topic"
+        pred_key = "micro_topic"
+    else:
+        actual_key = "topic"
+        pred_key = "chapter"
+
+    actual_set = set(actual[actual_key].unique())
+    actual_qs_map = actual.groupby(actual_key).size().to_dict()
+    actual_subj_qs = actual.groupby("subject").size().to_dict()
+    actual_total = len(actual)
+
+    pred_list_names = [p[pred_key] for p in active_preds]
+    pred_set = set(pred_list_names)
+    pred_ranks = {name: i + 1 for i, name in enumerate(pred_list_names)}
+
+    # Core metrics
+    hits = pred_set & actual_set
+    missed = actual_set - pred_set
+    false_pos = pred_set - actual_set
+
+    precision = len(hits) / k if k > 0 else 0
+
+    covered_qs = sum(actual_qs_map.get(t, 0) for t in pred_set)
+    coverage = covered_qs / actual_total if actual_total > 0 else 0
+
+    heavy_actual = {t for t, c in actual_qs_map.items() if c >= 3}
+    heavy_hits = pred_set & heavy_actual
+    heavy_recall = len(heavy_hits) / len(heavy_actual) if heavy_actual else 0
+
+    # Subject coverage
+    subj_covered_qs = {}
+    for t in pred_set:
+        qs = actual_qs_map.get(t, 0)
+        subj = actual[actual[actual_key] == t]["subject"].mode()
+        if len(subj) > 0:
+            s = subj.iloc[0]
+            subj_covered_qs[s] = subj_covered_qs.get(s, 0) + qs
+
+    subj_coverage = {}
+    for s, qs in actual_subj_qs.items():
+        subj_coverage[s] = round(subj_covered_qs.get(s, 0) / qs, 3) if qs > 0 else 0
+
+    avg_subj_cov = np.mean(list(subj_coverage.values())) if subj_coverage else 0
+
+    combined = 0.35 * precision + 0.40 * coverage + 0.15 * heavy_recall + 0.10 * avg_subj_cov
+
+    # Rank correlation
+    common = hits
+    rank_corr = 0.0
+    if len(common) >= 5:
+        pred_r = [pred_ranks[t] for t in common]
+        actual_r = [actual_qs_map[t] for t in common]
+        rank_corr, _ = spearmanr(pred_r, [-x for x in actual_r])
+
+    # Per-topic breakdown (for hit/miss table)
+    topic_breakdown = []
+    for t in sorted(actual_set, key=lambda x: -actual_qs_map.get(x, 0)):
+        status = "HIT" if t in pred_set else "MISSED"
+        rank = pred_ranks.get(t, None)
+        # Get subject for this topic
+        t_subj = actual[actual[actual_key] == t]["subject"].mode()
+        t_subj = t_subj.iloc[0] if len(t_subj) > 0 else "Unknown"
+        topic_breakdown.append({
+            "topic": t,
+            "subject": t_subj,
+            "actual_qs": actual_qs_map.get(t, 0),
+            "status": status,
+            "predicted_rank": rank,
+            "is_heavy": t in heavy_actual,
+        })
+
+    # False positives (predicted but not asked)
+    fp_breakdown = []
+    for p in active_preds:
+        name = p[pred_key]
+        if name not in actual_set:
+            fp_breakdown.append({
+                "topic": name,
+                "subject": p["subject"],
+                "predicted_rank": pred_ranks.get(name, 0),
+                "appearance_prob": p["appearance_probability"],
+                "confidence": p["confidence"],
+            })
+
+    summary = {
+        "test_year": test_year,
+        "exam": exam or "All",
+        "level": level,
+        "k": k,
+        "precision_at_k": round(precision, 3),
+        "coverage_at_k": round(coverage, 3),
+        "heavy_topic_recall": round(heavy_recall, 3),
+        "avg_subject_coverage": round(avg_subj_cov, 3),
+        "rank_correlation": round(rank_corr, 3),
+        "combined_score": round(combined, 3),
+        "hits": len(hits),
+        "misses": len(missed),
+        "false_positives": len(false_pos),
+        "actual_topics": len(actual_set),
+        "actual_questions": actual_total,
+        "questions_covered": covered_qs,
+        "heavy_topics_hit": len(heavy_hits),
+        "heavy_topics_total": len(heavy_actual),
+        "subject_coverage": subj_coverage,
+        "topic_breakdown": topic_breakdown,
+        "fp_breakdown": fp_breakdown,
+    }
+
+    return summary, actual
