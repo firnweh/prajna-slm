@@ -846,6 +846,169 @@
     }
 
     /* ════════════════════════════════════
+       DASHBOARD SECTION
+    ════════════════════════════════════ */
+    .tab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 2.5rem 0;
+    }
+    .tab-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .tab-card:hover {
+      border-color: rgba(99,102,241,0.4);
+      transform: translateY(-2px);
+    }
+    .tab-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+    .tab-emoji {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .tab-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+    }
+    .tab-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(99,102,241,0.15);
+      color: var(--indigo);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .tab-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 0.9rem;
+    }
+    .tab-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .tab-feat-pill {
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: var(--bg3);
+      border: 1px solid rgba(99,102,241,0.15);
+      border-radius: 20px;
+      padding: 2px 10px;
+    }
+
+    /* ─ Model evolution ─ */
+    .evolution-track {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 2rem 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .evo-node {
+      flex: 1;
+      min-width: 150px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1rem;
+      position: relative;
+    }
+    .evo-node + .evo-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 0.5rem;
+      color: var(--indigo);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .evo-ver {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--indigo);
+      margin-bottom: 0.35rem;
+    }
+    .evo-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+    .evo-desc {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .evo-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-top: 0.5rem;
+    }
+    .evo-node.evo-current {
+      border-color: rgba(168,85,247,0.4);
+      background: rgba(168,85,247,0.06);
+    }
+
+    /* ─ Deployment ─ */
+    .deploy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+    .deploy-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .deploy-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--indigo);
+      margin-bottom: 0.75rem;
+    }
+    .deploy-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      margin: 0.3rem 0;
+      line-height: 1.6;
+    }
+    .deploy-comment {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+    @media (max-width: 768px) {
+      .deploy-grid { grid-template-columns: 1fr; }
+      .evolution-track { flex-direction: column; }
+      .evo-node + .evo-arrow { transform: rotate(90deg); align-self: center; }
+    }
+
+    /* ════════════════════════════════════
        CHATBOT SECTION
     ════════════════════════════════════ */
     .chatbot-layout {
@@ -993,6 +1156,7 @@
     <a href="#data">Data</a>
     <a href="#architecture">Model</a>
     <a href="#slm">SLM</a>
+    <a href="#dashboard">Dashboard</a>
     <a href="#chatbot">Chatbot</a>
     <a href="#backtest">Results</a>
     <a href="#team">Team</a>
@@ -1041,8 +1205,9 @@
       </div>
     </div>
 
-    <div class="reveal reveal-delay-4">
+    <div class="reveal reveal-delay-4" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
       <a href="#architecture" class="hero-cta">Explore PRAJNA →</a>
+      <a href="#dashboard" class="hero-cta" style="background:rgba(34,197,94,0.12); border:1.5px solid rgba(34,197,94,0.4); color:#86efac;">View Dashboard →</a>
     </div>
   </div>
 </section>
@@ -1082,6 +1247,41 @@
         It goes beyond chapter-level analysis all the way down to <strong>micro-topic level predictions</strong>:
         470 micro-topics for NEET and 285 for JEE, each with an individual probability score, expected question count, and confidence rating.
       </p>
+    </div>
+
+    <!-- Model evolution -->
+    <div class="reveal" style="margin-top:3rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.5rem;">Model Evolution — v1 → SLM</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.5rem;">Four generations of prediction algorithms, each addressing the limitations of the previous</p>
+    </div>
+    <div class="evolution-track reveal">
+      <div class="evo-node">
+        <div class="evo-ver">v1</div>
+        <div class="evo-name">Frequency Heuristic</div>
+        <div class="evo-desc">Simple topic frequency + recency weighting. No subject balance, no gap analysis.</div>
+        <div class="evo-score">~68% combined</div>
+      </div>
+      <div class="evo-node + evo-arrow">→</div>
+      <div class="evo-node">
+        <div class="evo-ver">v2</div>
+        <div class="evo-name">Micro-Topic Engine</div>
+        <div class="evo-desc">Drilled down to micro-topic level. Added weightage model and subject filtering.</div>
+        <div class="evo-score">~74% combined</div>
+      </div>
+      <div class="evo-node + evo-arrow">→</div>
+      <div class="evo-node">
+        <div class="evo-ver">v3</div>
+        <div class="evo-name">3-Stage Pipeline</div>
+        <div class="evo-desc">Appearance × Weightage × Format. 7-signal ensemble + cycle detection + subject-quota reranking.</div>
+        <div class="evo-score">82.2% combined</div>
+      </div>
+      <div class="evo-node + evo-arrow">→</div>
+      <div class="evo-node evo-current">
+        <div class="evo-ver">SLM ★</div>
+        <div class="evo-name">Neural Predictor</div>
+        <div class="evo-desc">22M-param model. Learns feature interactions + semantic embeddings. Multi-task output heads.</div>
+        <div class="evo-score">85.9% combined</div>
+      </div>
     </div>
   </div>
 </section>
@@ -2055,6 +2255,182 @@
 
 <div class="gradient-divider"></div>
 
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<section id="dashboard">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">07 · Dashboard</div>
+      <h2 class="section-title">Streamlit Dashboard — 8 Tabs</h2>
+      <p class="section-sub">A fully interactive analytics platform built on Streamlit with Plotly visualizations, PDF exports, and a live chatbot</p>
+    </div>
+
+    <!-- Global filters callout -->
+    <div class="reveal" style="background:var(--bg3); border:1px solid rgba(99,102,241,0.25); border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; gap:1.25rem; flex-wrap:wrap; align-items:center;">
+      <div style="font-size:0.78rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">Global Filters (all tabs)</div>
+      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <span class="tab-feat-pill">Exam: NEET / JEE Main / JEE Advanced / All</span>
+        <span class="tab-feat-pill">Subject: Physics / Chemistry / Biology / Mathematics / All</span>
+        <span class="tab-feat-pill">Target Year (2024–2030)</span>
+        <span class="tab-feat-pill">Top K: 20 / 40 / 60 / 80 / 100</span>
+        <span class="tab-feat-pill">Level: Micro-Topic / Chapter</span>
+      </div>
+    </div>
+
+    <div class="tab-grid">
+
+      <!-- Tab 1 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">📊</div>
+          <div class="tab-name">Predictions</div>
+          <div class="tab-tag">Core</div>
+        </div>
+        <div class="tab-desc">Main prediction dashboard. Ranked list of top-K topics/micro-topics with probability scores, expected question counts, confidence ratings, and signal breakdowns. Shows KPI strip with aggregate stats.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Score bar chart</span>
+          <span class="tab-feat-pill">Confidence breakdown</span>
+          <span class="tab-feat-pill">Subject distribution</span>
+          <span class="tab-feat-pill">SLM vs v3 toggle</span>
+          <span class="tab-feat-pill">Trend tags (RISING/DECLINING)</span>
+          <span class="tab-feat-pill">Syllabus status badges</span>
+        </div>
+      </div>
+
+      <!-- Tab 2 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">🎯</div>
+          <div class="tab-name">Backtest</div>
+          <div class="tab-tag">Validation</div>
+        </div>
+        <div class="tab-desc">Interactive historical validation. Pick any year (2018–2023), run predictions using only pre-year data, and see side-by-side comparison of predicted vs actual paper. Full metric breakdown.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Year selector</span>
+          <span class="tab-feat-pill">Precision@K</span>
+          <span class="tab-feat-pill">Coverage@K</span>
+          <span class="tab-feat-pill">Heavy-Topic Recall</span>
+          <span class="tab-feat-pill">Subject coverage heatmap</span>
+          <span class="tab-feat-pill">Miss analysis</span>
+        </div>
+      </div>
+
+      <!-- Tab 3 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">🔬</div>
+          <div class="tab-name">Topic Deep Dive</div>
+          <div class="tab-tag">Analysis</div>
+        </div>
+        <div class="tab-desc">Full historical analysis for any specific topic. 48-year frequency timeline, difficulty evolution, question type breakdown, micro-topic tree, cross-exam presence, and gap analysis.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Frequency timeline</span>
+          <span class="tab-feat-pill">Micro-topic tree</span>
+          <span class="tab-feat-pill">Difficulty evolution</span>
+          <span class="tab-feat-pill">Cross-exam heatmap</span>
+          <span class="tab-feat-pill">Gap signal viz</span>
+          <span class="tab-feat-pill">Signal breakdown table</span>
+        </div>
+      </div>
+
+      <!-- Tab 4 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">📚</div>
+          <div class="tab-name">Lesson Plan</div>
+          <div class="tab-tag">Study Tool</div>
+        </div>
+        <div class="tab-desc">Auto-generated study plan based on predictions. Ranked list with time allocation, priority buckets, and one-click CSV export. Separate Top-20 focused plan and full coverage plan available.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Priority buckets</span>
+          <span class="tab-feat-pill">Top-20 CSV export</span>
+          <span class="tab-feat-pill">Full plan CSV export</span>
+          <span class="tab-feat-pill">Subject-wise breakdown</span>
+          <span class="tab-feat-pill">Time allocation estimate</span>
+        </div>
+      </div>
+
+      <!-- Tab 5 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">📈</div>
+          <div class="tab-name">Historical Timeline</div>
+          <div class="tab-tag">Exploration</div>
+        </div>
+        <div class="tab-desc">48-year macro trend analysis. Year-by-year subject weightage evolution, question type distribution over time, difficulty trends per subject, and cross-exam correlation matrix.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Subject weightage over time</span>
+          <span class="tab-feat-pill">Question type drift</span>
+          <span class="tab-feat-pill">Difficulty trends</span>
+          <span class="tab-feat-pill">Cross-exam correlation</span>
+          <span class="tab-feat-pill">Historical events overlay</span>
+        </div>
+      </div>
+
+      <!-- Tab 6 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">❓</div>
+          <div class="tab-name">Question Explorer</div>
+          <div class="tab-tag">Drill-Down</div>
+        </div>
+        <div class="tab-desc">Direct question-level database search. Filter by exam, year, subject, topic, difficulty, and question type. View full question text, correct answer, and source paper metadata.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Full-text search</span>
+          <span class="tab-feat-pill">Multi-filter</span>
+          <span class="tab-feat-pill">Year range</span>
+          <span class="tab-feat-pill">Difficulty filter</span>
+          <span class="tab-feat-pill">Question type filter</span>
+          <span class="tab-feat-pill">Answer reveal</span>
+        </div>
+      </div>
+
+      <!-- Tab 7 -->
+      <div class="tab-card reveal">
+        <div class="tab-header">
+          <div class="tab-emoji">📄</div>
+          <div class="tab-name">Paper Generator</div>
+          <div class="tab-tag">Export</div>
+        </div>
+        <div class="tab-desc">Generate a custom mock exam paper from predicted topics. Selects real historical questions matching predicted chapters, formats into a proper exam paper, and exports to PDF using fpdf2.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">Question selection from DB</span>
+          <span class="tab-feat-pill">PDF generation (fpdf2)</span>
+          <span class="tab-feat-pill">Subject balance enforcement</span>
+          <span class="tab-feat-pill">Difficulty mix control</span>
+          <span class="tab-feat-pill">One-click download</span>
+        </div>
+      </div>
+
+      <!-- Tab 8 -->
+      <div class="tab-card reveal" style="border-color:rgba(34,197,94,0.25);">
+        <div class="tab-header">
+          <div class="tab-emoji">🤖</div>
+          <div class="tab-name">Ask PRAJNA</div>
+          <div class="tab-tag" style="background:rgba(34,197,94,0.15); color:var(--green);">AI Chat</div>
+        </div>
+        <div class="tab-desc">Natural language chatbot with persistent conversation history. Routes queries through intent classifier (6 types) then either executes a handler or falls back to semantic search over 23,119 questions.</div>
+        <div class="tab-features">
+          <span class="tab-feat-pill">6 intent types</span>
+          <span class="tab-feat-pill">Semantic search fallback</span>
+          <span class="tab-feat-pill">Chat history</span>
+          <span class="tab-feat-pill">Intent-based chart rendering</span>
+          <span class="tab-feat-pill">Example queries</span>
+          <span class="tab-feat-pill">SLM badge</span>
+        </div>
+      </div>
+
+    </div><!-- /tab-grid -->
+
+    <!-- Stack details -->
+    <div class="reveal" style="margin-top:1rem; padding:1.1rem 1.5rem; background:var(--bg3); border:1px solid var(--border); border-radius:12px; font-size:0.82rem; color:var(--muted); line-height:1.6;">
+      <strong style="color:var(--text);">Technical details:</strong> All prediction calls are cached with <code style="color:var(--indigo);">@st.cache_data(ttl=300s)</code>. Dark-theme Plotly charts via custom <code style="color:var(--indigo);">PLOT_LAYOUT</code> dict with transparent backgrounds. Custom CSS hides Streamlit's deploy button and default footer. Streamlit session state manages chatbot history and backtest runs. Deployed on <strong style="color:var(--text);">Railway</strong> with a Procfile.
+    </div>
+
+  </div>
+</section>
+
+<div class="gradient-divider"></div>
+
 <!-- ═══════════════════════ ASK PRAJNA CHATBOT ═══════════════════════ -->
 <section id="chatbot">
   <div class="container">
@@ -2068,12 +2444,13 @@
 
       <!-- Intent types panel -->
       <div class="chatbot-panel">
-        <div class="chatbot-panel-title">🎯 5 Intent Types Detected Automatically</div>
+        <div class="chatbot-panel-title">🎯 6 Intent Types — Auto-Detected</div>
         <ul class="intent-list">
           <li class="intent-item">
             <span class="intent-icon">📊</span>
             <div>
               <div class="intent-name">Count / Frequency</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "how many", "count", "total", "number of"</div>
               <div class="intent-ex">"How many times has Thermodynamics appeared in NEET?"</div>
             </div>
           </li>
@@ -2081,28 +2458,40 @@
             <span class="intent-icon">📈</span>
             <div>
               <div class="intent-name">Trend Analysis</div>
-              <div class="intent-ex">"Is Organic Chemistry getting more important in JEE?"</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "trend", "rising", "declining", "hot", "cold", "popular"</div>
+              <div class="intent-ex">"Is Organic Chemistry getting more important in JEE Main?"</div>
             </div>
           </li>
           <li class="intent-item">
             <span class="intent-icon">🎯</span>
             <div>
-              <div class="intent-name">Difficulty Breakdown</div>
-              <div class="intent-ex">"What is the difficulty level of Mechanics questions?"</div>
+              <div class="intent-name">Difficulty Analysis</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "difficult", "hardest", "easiest", "hard", "easy", "tough"</div>
+              <div class="intent-ex">"What are the hardest Physics topics in JEE Advanced?"</div>
             </div>
           </li>
           <li class="intent-item">
             <span class="intent-icon">⏰</span>
             <div>
-              <div class="intent-name">Gap / Return Prediction</div>
-              <div class="intent-ex">"Which chapters haven't appeared in 3+ years in JEE Advanced?"</div>
+              <div class="intent-name">Gap / Overdue</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "gap", "overdue", "missing", "not appeared", "absent"</div>
+              <div class="intent-ex">"Which chapters are overdue in NEET 2026?"</div>
+            </div>
+          </li>
+          <li class="intent-item">
+            <span class="intent-icon">⚖️</span>
+            <div>
+              <div class="intent-name">Subject Comparison</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "compare", "vs", "versus", "comparison", "difference"</div>
+              <div class="intent-ex">"Compare Physics vs Chemistry difficulty in NEET"</div>
             </div>
           </li>
           <li class="intent-item">
             <span class="intent-icon">🔍</span>
             <div>
-              <div class="intent-name">Semantic Search</div>
-              <div class="intent-ex">"Show me questions about electric field lines from 2020–2023"</div>
+              <div class="intent-name">Topic Detail + Semantic Search</div>
+              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Detected topic in query → handler · otherwise → ST cosine-sim fallback</div>
+              <div class="intent-ex">"Tell me everything about Thermodynamics in JEE Main"</div>
             </div>
           </li>
         </ul>
@@ -2151,7 +2540,7 @@
         <div class="avg-lbl">Embedding Dimensions</div>
       </div>
       <div class="avg-card">
-        <div class="avg-val avg-comb">5</div>
+        <div class="avg-val avg-comb">6</div>
         <div class="avg-lbl">Intent Types Detected</div>
       </div>
     </div>
@@ -2173,89 +2562,76 @@
     <div class="tech-grid">
       <div class="tech-card reveal reveal-delay-1">
         <div class="tech-icon">🐍</div>
-        <div>
-          <div class="tech-name">Python 3.9</div>
-          <div class="tech-role">Core language</div>
-        </div>
+        <div><div class="tech-name">Python 3.9+</div><div class="tech-role">Core language</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-1">
         <div class="tech-icon">🗄️</div>
-        <div>
-          <div class="tech-name">SQLite</div>
-          <div class="tech-role">Question database</div>
-        </div>
+        <div><div class="tech-name">SQLite 3</div><div class="tech-role">23,119-question DB</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-2">
         <div class="tech-icon">🐼</div>
-        <div>
-          <div class="tech-name">Pandas + NumPy</div>
-          <div class="tech-role">Data manipulation</div>
-        </div>
+        <div><div class="tech-name">Pandas ≥2.0</div><div class="tech-role">Data manipulation</div></div>
+      </div>
+      <div class="tech-card reveal reveal-delay-2">
+        <div class="tech-icon">🔢</div>
+        <div><div class="tech-name">NumPy</div><div class="tech-role">Signal computation</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-2">
         <div class="tech-icon">📐</div>
-        <div>
-          <div class="tech-name">Scipy</div>
-          <div class="tech-role">Spearman correlation</div>
-        </div>
+        <div><div class="tech-name">SciPy ≥1.11</div><div class="tech-role">Spearman correlation</div></div>
+      </div>
+      <div class="tech-card reveal reveal-delay-3">
+        <div class="tech-icon">🔥</div>
+        <div><div class="tech-name">PyTorch ≥2.0</div><div class="tech-role">SLM training + inference</div></div>
+      </div>
+      <div class="tech-card reveal reveal-delay-3">
+        <div class="tech-icon">🤗</div>
+        <div><div class="tech-name">sentence-transformers ≥2.2</div><div class="tech-role">all-MiniLM-L6-v2 encoder</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-3">
         <div class="tech-icon">🎈</div>
-        <div>
-          <div class="tech-name">Streamlit</div>
-          <div class="tech-role">Interactive UI</div>
-        </div>
+        <div><div class="tech-name">Streamlit ≥1.28</div><div class="tech-role">8-tab interactive dashboard</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-3">
         <div class="tech-icon">📊</div>
-        <div>
-          <div class="tech-name">Plotly</div>
-          <div class="tech-role">Visualizations</div>
-        </div>
+        <div><div class="tech-name">Plotly ≥5.15</div><div class="tech-role">Dark-theme visualizations</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-4">
         <div class="tech-icon">📄</div>
-        <div>
-          <div class="tech-name">Custom PDF Generator</div>
-          <div class="tech-role">Export predictions</div>
-        </div>
+        <div><div class="tech-name">fpdf2 ≥2.7</div><div class="tech-role">Mock paper PDF export</div></div>
       </div>
       <div class="tech-card reveal reveal-delay-4">
-        <div class="tech-icon">🧠</div>
-        <div>
-          <div class="tech-name">3-Stage ML Pipeline</div>
-          <div class="tech-role">Appear → Weight → Format</div>
-        </div>
+        <div class="tech-icon">🤖</div>
+        <div><div class="tech-name">scikit-learn ≥1.3</div><div class="tech-role">Preprocessing utilities</div></div>
       </div>
-      <div class="tech-card reveal reveal-delay-1">
-        <div class="tech-icon">⚖️</div>
-        <div>
-          <div class="tech-name">Subject Reranking</div>
-          <div class="tech-role">Quota enforcement</div>
-        </div>
-      </div>
-      <div class="tech-card reveal reveal-delay-1">
-        <div class="tech-icon">📉</div>
-        <div>
-          <div class="tech-name">Exponential Decay</div>
-          <div class="tech-role">Recency-weighted signals</div>
-        </div>
-      </div>
-      <div class="tech-card reveal reveal-delay-2">
-        <div class="tech-icon">🔧</div>
-        <div>
-          <div class="tech-name">Git + GitHub</div>
-          <div class="tech-role">Version control</div>
-        </div>
-      </div>
-      <div class="tech-card reveal reveal-delay-2">
+      <div class="tech-card reveal reveal-delay-4">
         <div class="tech-icon">🚂</div>
-        <div>
-          <div class="tech-name">Railway</div>
-          <div class="tech-role">Deployment</div>
-        </div>
+        <div><div class="tech-name">Railway</div><div class="tech-role">Cloud deployment</div></div>
       </div>
     </div>
+
+    <!-- Deployment details -->
+    <div class="reveal" style="margin-top:2.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem;">Deployment Configuration</h3>
+    </div>
+    <div class="deploy-grid reveal">
+      <div class="deploy-card">
+        <div class="deploy-title">Procfile</div>
+        <div class="deploy-line"><span style="color:var(--indigo);">web:</span> streamlit run dashboard/app.py \</div>
+        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.port $PORT \</div>
+        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.headless true \</div>
+        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.address 0.0.0.0</div>
+      </div>
+      <div class="deploy-card">
+        <div class="deploy-title">railway.toml</div>
+        <div class="deploy-line"><span style="color:var(--purple);">[build]</span></div>
+        <div class="deploy-line">builder = <span style="color:var(--green);">"NIXPACKS"</span></div>
+        <div class="deploy-line"><span style="color:var(--purple);">[deploy]</span></div>
+        <div class="deploy-line">startCommand = <span style="color:var(--green);">"streamlit run ..."</span></div>
+        <div class="deploy-line">healthcheckPath = <span style="color:var(--green);">"/"</span></div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -2273,37 +2649,35 @@
     <div class="steps steps-wrapper">
       <div class="step-card reveal reveal-delay-1" data-step="1">
         <div class="step-num">1</div>
-        <div class="step-title">Select Exam</div>
-        <div class="step-desc">Choose which exam you are preparing for. Each exam has its own calibrated model trained on its specific historical data.</div>
+        <div class="step-title">Set Global Filters</div>
+        <div class="step-desc">Use the filter bar at the top of every tab to select your exam, subject, target year, and top-K count. All 8 tabs update simultaneously.</div>
         <div class="step-options">
-          <span class="opt-pill">NEET</span>
-          <span class="opt-pill">JEE Main</span>
-          <span class="opt-pill">JEE Advanced</span>
+          <span class="opt-pill">NEET / JEE Main / JEE Advanced</span>
+          <span class="opt-pill">Target Year 2024–2030</span>
+          <span class="opt-pill">Top K 20–100</span>
         </div>
       </div>
 
       <div class="step-card reveal reveal-delay-2" data-step="2">
         <div class="step-num">2</div>
-        <div class="step-title">Choose K</div>
-        <div class="step-desc">Select how many top topics to receive. Smaller K = more focused, higher precision. Larger K = broader safety net with higher coverage.</div>
+        <div class="step-title">Explore Predictions &amp; Backtest</div>
+        <div class="step-desc">Open the Predictions tab for your ranked topic list. Use the Backtest tab to validate on any historical year — see exactly which topics PRAJNA would have predicted vs what actually appeared.</div>
         <div class="step-options">
-          <span class="opt-pill">Top 20</span>
-          <span class="opt-pill">Top 40</span>
-          <span class="opt-pill">Top 60</span>
-          <span class="opt-pill">Top 80</span>
-          <span class="opt-pill">Top 100</span>
+          <span class="opt-pill">📊 Predictions tab</span>
+          <span class="opt-pill">🎯 Backtest tab</span>
+          <span class="opt-pill">SLM vs v3 toggle</span>
         </div>
       </div>
 
       <div class="step-card reveal reveal-delay-3" data-step="3">
         <div class="step-num">3</div>
-        <div class="step-title">Get Predictions + Backtest</div>
-        <div class="step-desc">Receive your ranked micro-topic list with probability scores and expected question counts. Optionally run backtest on any historical year to validate the model's performance.</div>
+        <div class="step-title">Deep Dive &amp; Export</div>
+        <div class="step-desc">Use Topic Deep Dive for any chapter's 48-year history. Export a Lesson Plan CSV or generate a full mock paper PDF. Ask the chatbot anything about trends, difficulty, or gaps.</div>
         <div class="step-options">
-          <span class="opt-pill">Ranked list</span>
-          <span class="opt-pill">PDF export</span>
-          <span class="opt-pill">Backtest any year</span>
-          <span class="opt-pill">Subject breakdown</span>
+          <span class="opt-pill">🔬 Deep Dive</span>
+          <span class="opt-pill">📚 Lesson Plan CSV</span>
+          <span class="opt-pill">📄 Paper PDF</span>
+          <span class="opt-pill">🤖 Ask PRAJNA</span>
         </div>
       </div>
     </div>
