@@ -13,6 +13,24 @@ from analysis.trend_analyzer import topic_frequency_by_year, find_hot_cold_topic
 from analysis.predictor_v2 import predict_topics_v2, backtest, HOLDOUT_YEARS
 from analysis.predictor_v3 import predict_chapters_v3, predict_microtopics_v3, backtest_v3, backtest_single_year
 from analysis.predictor import predict_topics
+
+# SLM model (optional — falls back to v3 if not trained)
+SLM_AVAILABLE = False
+try:
+    from analysis.slm_model import predict_with_slm, backtest_slm
+    import os as _os
+    # Check if any SLM model exists
+    if _os.path.exists("models") and any(f.endswith(".pt") for f in _os.listdir("models")):
+        SLM_AVAILABLE = True
+except ImportError:
+    pass
+
+# Chatbot
+try:
+    from analysis.chatbot import PrajnaChatbot
+    HAS_CHATBOT = True
+except ImportError:
+    HAS_CHATBOT = False
 from analysis.deep_analysis import (
     get_topic_deep_dive, get_topic_tree, get_syllabus_coverage,
     get_subject_weightage_timeline, get_difficulty_evolution,
@@ -498,6 +516,12 @@ def get_predictions_micro_v3(db, year, exam, k):
 def run_backtest_single(db, test_year, exam, k, level):
     return backtest_single_year(db, test_year=test_year, exam=exam, k=k, level=level)
 
+@st.cache_data(ttl=600)
+def get_slm_predictions(db, year, exam, k, level):
+    if SLM_AVAILABLE:
+        return predict_with_slm(db, target_year=year, exam=exam, top_k=k, level=level)
+    return []
+
 # --- Load predictions for selected K (separate reranking per K) ---
 preds_micro = get_predictions_micro_v3(DB_PATH, target_year, exam_filter, top_n)
 active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
@@ -509,6 +533,15 @@ active_v3 = [p for p in preds_v3 if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_v3 = [p for p in active_v3 if p["subject"] == selected_subject]
 
+# SLM predictions (if available)
+if SLM_AVAILABLE:
+    slm_preds_raw = get_slm_predictions(DB_PATH, target_year, exam_filter, top_n, "chapter")
+    active_slm = [p for p in slm_preds_raw if p["syllabus_status"] != "REMOVED"]
+    if selected_subject != "All":
+        active_slm = [p for p in active_slm if p["subject"] == selected_subject]
+else:
+    active_slm = []
+
 # Active list depends on selected level
 pred_list = active_micro if pred_level == "Micro-Topic" else active_v3
 pred_list = pred_list[:top_n]
@@ -519,9 +552,9 @@ active_preds_v2 = [p for p in predictions_v2 if p["syllabus_status"] != "REMOVED
 
 
 # --- Tabs ---
-tab_main, tab_backtest, tab_deep, tab_lesson, tab_timeline, tab_explorer, tab_paper = st.tabs([
+tab_main, tab_backtest, tab_deep, tab_lesson, tab_timeline, tab_explorer, tab_paper, tab_chat = st.tabs([
     "📊 Predictions", "🎯 Backtest", "🔬 Topic Deep Dive", "📚 Lesson Plan",
-    "📈 Historical Timeline", "❓ Question Explorer", "📄 Paper Generator",
+    "📈 Historical Timeline", "❓ Question Explorer", "📄 Paper Generator", "🤖 Ask PRAJNA",
 ])
 
 
@@ -1576,6 +1609,126 @@ with tab_paper:
                 pdf = generate_paper_pdf(practice, title=paper_title, exam_name=ename, include_answers=inc_ans)
                 st.download_button("Download PDF", pdf, "practice_paper.pdf", "application/pdf", type="primary")
                 st.success(f"Paper with {len(practice)} questions!")
+
+# ================================================================
+# TAB 8: ASK PRAJNA (Chatbot)
+# ================================================================
+with tab_chat:
+    st.markdown('<div class="section-divider">🤖 Ask PRAJNA — Exam Intelligence Chatbot</div>', unsafe_allow_html=True)
+    st.caption("Ask questions about 23,119 exam questions across 48 years. Powered by semantic search + intent detection.")
+
+    # Model badge
+    if SLM_AVAILABLE:
+        st.markdown("""
+        <div style="display:inline-flex;gap:8px;margin-bottom:16px;">
+            <span style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;">
+                ✓ SLM Model Loaded (22M params)
+            </span>
+            <span style="background:rgba(99,102,241,0.15);color:#a5b4fc;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;">
+                Chatbot Active
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Example queries
+    with st.expander("💡 Example questions you can ask", expanded=False):
+        st.markdown("""
+        - **Counts**: "How many Physics questions in NEET?"
+        - **Trends**: "What topics are trending in JEE Main?"
+        - **Difficulty**: "What are the hardest topics in NEET?"
+        - **Gaps**: "Which topics are overdue for NEET 2026?"
+        - **Comparison**: "Compare Physics vs Chemistry in NEET"
+        - **Topic details**: "Tell me about Thermodynamics in JEE"
+        """)
+
+    # Chat interface
+    if "chat_messages" not in st.session_state:
+        st.session_state.chat_messages = []
+
+    # Display chat history
+    for msg in st.session_state.chat_messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if "details" in msg and msg["details"]:
+                details = msg["details"]
+                if details.get("by_year"):
+                    yr_df = pd.DataFrame(list(details["by_year"].items()), columns=["Year", "Questions"])
+                    fig = px.bar(yr_df, x="Year", y="Questions", color_discrete_sequence=["#6366f1"])
+                    fig.update_layout(**PLOT_LAYOUT, height=250, title="Questions by Year")
+                    st.plotly_chart(fig, use_container_width=True)
+                if details.get("rising"):
+                    rdf = pd.DataFrame(details["rising"][:8])
+                    if not rdf.empty and "topic" in rdf.columns:
+                        fig = px.bar(rdf, x="trend_ratio", y="topic", orientation="h",
+                                     color="subject", color_discrete_sequence=SUBJ_COLORS)
+                        fig.update_layout(**PLOT_LAYOUT, height=280, title="Rising Topics",
+                                          yaxis=dict(autorange="reversed"))
+                        st.plotly_chart(fig, use_container_width=True)
+                if details.get("gap_topics"):
+                    gdf = pd.DataFrame(details["gap_topics"][:10])
+                    if not gdf.empty:
+                        fig = px.bar(gdf, x="overdue_ratio", y="topic", orientation="h",
+                                     color="subject", color_discrete_sequence=SUBJ_COLORS,
+                                     hover_data=["last_appeared", "gap_years", "avg_gap"])
+                        fig.update_layout(**PLOT_LAYOUT, height=300, title="Overdue Topics",
+                                          yaxis=dict(autorange="reversed"))
+                        st.plotly_chart(fig, use_container_width=True)
+
+    # Chat input
+    user_query = st.chat_input("Ask about exam patterns, topics, trends...")
+
+    if user_query:
+        st.session_state.chat_messages.append({"role": "user", "content": user_query})
+        with st.chat_message("user"):
+            st.markdown(user_query)
+
+        if HAS_CHATBOT:
+            with st.chat_message("assistant"):
+                with st.spinner("Searching 23,119 questions..."):
+                    if "chatbot_instance" not in st.session_state:
+                        st.session_state.chatbot_instance = PrajnaChatbot(DB_PATH)
+                    bot = st.session_state.chatbot_instance
+                    response = bot.ask(user_query)
+
+                st.markdown(response["answer"])
+                details = response.get("details", {})
+
+                # Render charts for specific response types
+                if details.get("by_year"):
+                    yr_df = pd.DataFrame(list(details["by_year"].items()), columns=["Year", "Questions"])
+                    fig = px.bar(yr_df, x="Year", y="Questions", color_discrete_sequence=["#6366f1"])
+                    fig.update_layout(**PLOT_LAYOUT, height=250, title="Questions by Year")
+                    st.plotly_chart(fig, use_container_width=True)
+                if details.get("rising"):
+                    rdf = pd.DataFrame(details["rising"][:8])
+                    if not rdf.empty and "topic" in rdf.columns:
+                        fig = px.bar(rdf, x="trend_ratio", y="topic", orientation="h",
+                                     color="subject", color_discrete_sequence=SUBJ_COLORS)
+                        fig.update_layout(**PLOT_LAYOUT, height=280, title="Rising Topics",
+                                          yaxis=dict(autorange="reversed"))
+                        st.plotly_chart(fig, use_container_width=True)
+                if details.get("gap_topics"):
+                    gdf = pd.DataFrame(details["gap_topics"][:10])
+                    if not gdf.empty:
+                        fig = px.bar(gdf, x="overdue_ratio", y="topic", orientation="h",
+                                     color="subject", color_discrete_sequence=SUBJ_COLORS,
+                                     hover_data=["last_appeared", "gap_years", "avg_gap"])
+                        fig.update_layout(**PLOT_LAYOUT, height=300, title="Overdue Topics",
+                                          yaxis=dict(autorange="reversed"))
+                        st.plotly_chart(fig, use_container_width=True)
+
+                st.session_state.chat_messages.append({
+                    "role": "assistant", "content": response["answer"],
+                    "details": details,
+                })
+        else:
+            with st.chat_message("assistant"):
+                st.warning("Chatbot module not available. Install: `pip install sentence-transformers`")
+                st.session_state.chat_messages.append({
+                    "role": "assistant", "content": "Chatbot module not available.",
+                    "details": {},
+                })
+
 
 # ================================================================
 # PRAJNA FOOTER — Team Credits
