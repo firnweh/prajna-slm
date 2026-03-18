@@ -1508,28 +1508,130 @@
       </div>
     </div>
 
-    <!-- Training details -->
-    <div class="reveal">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem;">Training Details</h3>
+    <!-- Heuristic v3 End-to-End -->
+    <div class="reveal" style="margin-top:2.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Heuristic v3 — End-to-End Pipeline</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem;">Pure signal engineering, no gradient descent. Deterministic and fully interpretable.</p>
     </div>
-    <div class="reveal" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-      <div style="background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:1.25rem;">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem;">Optimizer &amp; Schedule</div>
-        <div style="font-size:0.85rem; color:var(--text); line-height:1.8;">
-          <div>• <strong>AdamW</strong> with weight decay 0.01</div>
-          <div>• <strong>CosineAnnealingLR</strong> scheduler</div>
-          <div>• Early stopping on validation loss</div>
-          <div>• Best checkpoint saved per exam</div>
+
+    <div class="reveal" style="display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">1</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Data Loading + Holdout Exclusion</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Load all 23,119 questions from SQLite. Exclude holdout years {2024, 2025, 2026}. Filter by exam if specified. Group by (subject, chapter).</div>
         </div>
       </div>
-      <div style="background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:1.25rem;">
-        <div style="font-size:0.8rem; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.75rem;">Multi-Task Loss</div>
-        <div style="font-size:0.85rem; color:var(--text); line-height:1.8;">
-          <div>• <strong>BCE</strong> for P(appear) head</div>
-          <div>• <strong>MSE</strong> for expected questions head</div>
-          <div>• <strong>CrossEntropy</strong> for difficulty head</div>
-          <div>• Strict temporal train/test split</div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">2</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Syllabus Gate</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Check each chapter against 2024 syllabus changes. REMOVED → gate=0.0 (score floored to 0). NEWLY ADDED → gate=0.5. RETAINED → gate=1.0.</div>
         </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">3</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 1 — Appearance Probability (7-signal weighted ensemble)</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
+            ① <strong>Recency-Weighted Freq ×0.25</strong>: Σ 1/(gap^1.5+1) normalized over full year range<br/>
+            ② <strong>Appearance Rate ×0.20</strong>: count_years_appeared / year_span<br/>
+            ③ <strong>Recent 3yr ×0.15</strong>: appearances in last 3 exams / 3<br/>
+            ④ <strong>Gap Return ×0.15</strong>: gap/mean_gap capped at 2, peaks when 2× overdue<br/>
+            ⑤ <strong>Trend Slope ×0.12</strong>: np.polyfit on last 10 years of frequency<br/>
+            ⑥ <strong>Cycle Match ×0.08</strong>: modular arithmetic on inter-gap variance (σ² ≤ 1.5)<br/>
+            ⑦ <strong>Recent 5yr ×0.05</strong>: appearances in last 5 exams / 5<br/>
+            Result: min(weighted_sum × 1.8, 0.99) × syllabus_gate
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">4</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 2 — Expected Questions (Weightage Model)</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Blend: <strong>50%</strong> recency-weighted avg (decay 1/√gap) + <strong>30%</strong> recent 5yr avg + <strong>20%</strong> overall median. Confidence = 1 − coefficient_of_variation. Range = [Q25, Q75].</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">5</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 3 — Format Prediction + Final Scoring</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">
+            Format: top-3 historical question types by frequency. Difficulty: recency-weighted mean of last 5 years.<br/>
+            <strong>Final</strong> = 0.40×P(appear) + 0.30×norm_qs + 0.15×yield_bonus + 0.10×cross_exam + 0.05×syl_gate<br/>
+            Subject-balanced reranking: NEET → Bio 50% / Phy 25% / Chem 25% · JEE → equal thirds. Chapter deduplication via alias map.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLM End-to-End -->
+    <div class="reveal" style="margin-top:2.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">PRAJNA SLM — End-to-End Training Pipeline</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem;">Data → Features → Embeddings → Multi-task training → Best checkpoint → Inference</p>
+    </div>
+
+    <div class="reveal" style="display:flex; flex-direction:column; gap:0.75rem;">
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">1</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Training Data Construction (2010–2023)</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">For each (topic, target_year) pair: extract 15 features using <em>only</em> data before target_year. Labels from the actual paper that year (appeared=1/0, num_qs, difficulty_class). Class ratio ~15:1 (negative:positive) → corrected via pos_weight = neg_count / pos_count.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">2</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Semantic Embedding (Frozen Backbone)</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">All topic names → <strong>all-MiniLM-L6-v2</strong> → 384-dim vectors (batch_size=64). Cached to <code style="color:var(--indigo);">*_embeddings.npz</code> after first run. Concatenated with 15 numerical features → <strong>399-dim input tensor</strong>.</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">3</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Model Architecture (PrajnaSLM)</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
+            <strong>Backbone</strong>: 399→256→128→64, each layer = Linear + LayerNorm + GELU + Dropout(0.2)<br/>
+            <strong>Appear head</strong>: 64→16→GELU→1→Sigmoid → P(appear) ∈ [0,1]<br/>
+            <strong>Questions head</strong>: 64→16→GELU→1→ReLU → expected count ≥ 0<br/>
+            <strong>Difficulty head</strong>: 64→16→GELU→3 → logits, softmax at inference → Easy/Med/Hard
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">4</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Multi-Task Loss + Optimization</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
+            <strong>Loss</strong> = 0.50 × BCE(appear, pos_weighted) + 0.35 × MSE(qs | appeared=1) + 0.15 × CrossEntropy(difficulty)<br/>
+            MSE is <em>masked</em> — computed only on positive samples, preventing zero-inflation from non-appearing chapters.<br/>
+            <strong>Optimizer</strong>: AdamW lr=1e-3, weight_decay=0.01 &nbsp;·&nbsp; <strong>Scheduler</strong>: CosineAnnealingLR eta_min=1e-5<br/>
+            Gradient clip = 1.0 &nbsp;·&nbsp; 150 epochs, batch_size=128 &nbsp;·&nbsp; Best checkpoint: NEET epoch 126, loss 0.8702
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">5</div>
+        <div>
+          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Inference + Final Scoring</div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">
+            Load best checkpoint, set model to inference mode, run with no-gradient context.<br/>
+            <strong>SLM Score</strong> = 0.45×P(appear) + 0.35×norm_exp_qs + 0.10×yield_bonus + 0.05×cross_exam + 0.05×syl_gate<br/>
+            Apply same subject-balanced reranking as heuristic v3. Embedding cache loaded from npz — avoids re-encoding at inference.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strength comparison callout -->
+    <div class="reveal" style="margin-top:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+      <div style="background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.25); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-size:0.78rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem;">Heuristic v3 — Key Strength</div>
+        <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">Fully interpretable — every signal and weight is human-defined. Great when you need to justify a prediction to a student or teacher. No training required; works with as few as 5 historical papers.</div>
+      </div>
+      <div style="background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.25); border-radius:12px; padding:1.1rem 1.25rem;">
+        <div style="font-size:0.78rem; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem;">PRAJNA SLM — Key Strength</div>
+        <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">Learns feature interactions automatically. Semantic embeddings generalize across similar topics. Masked MSE teaches <em>how heavy</em> a chapter will be — not just if it appears — driving the +4.2% coverage gain.</div>
       </div>
     </div>
 
