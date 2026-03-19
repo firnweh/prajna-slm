@@ -1,0 +1,101 @@
+student_id,name,city,coaching,target,ability_physics,ability_chemistry,ability_biology,ability_mathematics
+STU001,Rekha Kumar,Kota,FIITJEE,Both,0.7426,0.6401,0.691,0.872
+STU002,Akash Verma,Hyderabad,Vibrant,NEET,0.7242,0.6409,0.6152,0.5484
+STU003,Om Shukla,Jaipur,PACE,JEE,0.536,0.9377,0.6549,0.4322
+STU004,Arnav Yadav,Bhopal,PACE,Both,0.7572,0.5815,0.7065,0.5996
+STU005,Shreya Iyer,Mumbai,Narayana,Both,0.7923,0.6678,0.89,0.8693
+STU006,Ritu Bhat,Hyderabad,Narayana,NEET,0.7525,0.4596,0.6371,0.4912
+STU007,Kiara Subramaniam,Kolkata,PACE,NEET,0.717,0.6966,0.556,0.4065
+STU008,Lata Pandey,Pune,Resonance,NEET,0.5186,0.3883,0.8419,0.6732
+STU009,Gaurav Shah,Kolkata,Allen Kota,NEET,0.5487,0.9817,0.61,0.4197
+STU010,Arjun Iyer,Indore,PACE,NEET,0.5432,0.7358,0.7371,0.99
+STU011,Sunita Saxena,Hyderabad,Narayana,Both,0.2836,0.8364,0.5362,0.5901
+STU012,Vishal Mehta,Pune,Self Study,NEET,0.7456,0.5233,0.7496,0.99
+STU013,Pinki Verma,Ahmedabad,FIITJEE,JEE,0.6666,0.5494,0.7714,0.8051
+STU014,Harsh Tripathi,Delhi,FIITJEE,Both,0.8208,0.6152,0.943,0.4782
+STU015,Amit Menon,Lucknow,Allen Kota,Both,0.5728,0.8477,0.7725,0.6878
+STU016,Nisha Pandey,Kota,Narayana,Both,0.9002,0.5724,0.5789,0.5454
+STU017,Ravi Tripathi,Indore,Allen Kota,Both,0.655,0.7669,0.846,0.9709
+STU018,Raj Saxena,Chennai,Resonance,NEET,0.99,0.6649,0.8549,0.2893
+STU019,Isha Bhat,Patna,Aakash,NEET,0.5335,0.5934,0.6187,0.1844
+STU020,Savita Saxena,Hyderabad,Resonance,Both,0.7022,0.5885,0.4482,0.5027
+STU021,Sneha Shah,Mumbai,Resonance,NEET,0.8607,0.6129,0.4824,0.6416
+STU022,Krishna Joshi,Chandigarh,Allen Kota,NEET,0.8267,0.6468,0.6347,0.5373
+STU023,Krishna Bhat,Lucknow,Resonance,Both,0.7581,0.6481,0.5293,0.5356
+STU024,Kabir Pillai,Patna,Vibrant,NEET,0.8152,0.5379,0.391,0.6099
+STU025,Advik Kumar,Delhi,FIITJEE,NEET,0.5089,0.4942,0.396,0.7617
+STU026,Parth Pillai,Lucknow,Aakash,JEE,0.4095,0.8894,0.6508,0.6799
+STU027,Aanya Pandey,Bhopal,FIITJEE,NEET,0.2433,0.6958,0.8925,0.7157
+STU028,Sunita Chaturvedi,Bangalore,Vibrant,JEE,0.8441,0.2584,0.9109,0.3765
+STU029,Sumit Yadav,Jaipur,Narayana,JEE,0.8562,0.3606,0.655,0.5613
+STU030,Tanvi Mehta,Lucknow,Aakash,NEET,0.504,0.3754,0.696,0.2619
+STU031,Pooja Yadav,Delhi,Allen Kota,Both,0.8323,0.5789,0.4097,0.463
+STU032,Sumit Srivastava,Bhopal,Aakash,NEET,0.7937,0.5245,0.8173,0.6333
+STU033,Lokesh Singh,Hyderabad,Allen Kota,Both,0.5403,0.5155,0.88,0.8376
+STU034,Shaurya Mehta,Kota,PACE,NEET,0.4723,0.4475,0.6028,0.6921
+STU035,Shreya Shah,Indore,FIITJEE,NEET,0.7764,0.7888,0.3174,0.6722
+STU036,Lakshay Tripathi,Chennai,Aakash,JEE,0.99,0.6148,0.7431,0.6115
+STU037,Priya Patel,Patna,Allen Kota,Both,0.5578,0.7877,0.5273,0.5045
+STU038,Sandeep Dubey,Indore,FIITJEE,Both,0.6766,0.5889,0.7347,0.4414
+STU039,Sandeep Gupta,Kota,Narayana,Both,0.5657,0.8359,0.6295,0.4178
+STU040,Rohit Pandey,Chennai,Allen Kota,NEET,0.8884,0.4466,0.7817,0.665
+STU041,Karan Menon,Chandigarh,Vibrant,Both,0.9423,0.9474,0.7354,0.7335
+STU042,Vivaan Kumar,Bhopal,PACE,Both,0.932,0.771,0.8051,0.4074
+STU043,Naman Gupta,Delhi,PACE,NEET,0.7656,0.6596,0.99,0.3315
+STU044,Meena Tiwari,Ahmedabad,Aakash,NEET,0.5162,0.4904,0.3657,0.4002
+STU045,Anaya Iyer,Kolkata,Vibrant,Both,0.7385,0.3134,0.892,0.6007
+STU046,Radha Iyer,Delhi,Self Study,NEET,0.6012,0.7142,0.6056,0.3627
+STU047,Avni Krishnan,Hyderabad,Allen Kota,Both,0.7455,0.5472,0.7803,0.1841
+STU048,Aadhya Shah,Kota,Vibrant,Both,0.4301,0.9019,0.7687,0.5166
+STU049,Amit Joshi,Chennai,Allen Kota,NEET,0.6827,0.5905,0.7425,0.5268
+STU050,Lokesh Mehta,Mumbai,Vibrant,Both,0.4211,0.8518,0.2519,0.7742
+STU051,Aadhya Pandey,Kota,Resonance,JEE,0.7852,0.6671,0.3803,0.5047
+STU052,Naman Singh,Mumbai,Narayana,Both,0.9846,0.5062,0.4917,0.3437
+STU053,Sneha Reddy,Jaipur,Vibrant,Both,0.4468,0.7084,0.6279,0.6501
+STU054,Puja Bhat,Chennai,Narayana,NEET,0.7073,0.8044,0.4139,0.7608
+STU055,Naman Iyer,Hyderabad,Self Study,Both,0.37,0.5076,0.4918,0.5972
+STU056,Diya Reddy,Bhopal,Resonance,Both,0.7866,0.7178,0.5591,0.416
+STU057,Sneha Tiwari,Ahmedabad,FIITJEE,JEE,0.6354,0.5353,0.99,0.7146
+STU058,Varun Bhat,Hyderabad,Aakash,Both,0.5188,0.5434,0.5921,0.3296
+STU059,Usha Sharma,Hyderabad,Aakash,Both,0.879,0.4217,0.8458,0.3211
+STU060,Suresh Agarwal,Patna,Self Study,Both,0.7296,0.6576,0.746,0.37
+STU061,Ajay Chaturvedi,Chandigarh,Vibrant,Both,0.2363,0.3989,0.8104,0.3763
+STU062,Om Bhat,Bhopal,Narayana,Both,0.7934,0.8877,0.4118,0.653
+STU063,Rohit Rao,Kolkata,PACE,Both,0.6131,0.7919,0.6251,0.4076
+STU064,Shaurya Gupta,Jaipur,Vibrant,JEE,0.7032,0.7477,0.7097,0.6637
+STU065,Pawan Agarwal,Ahmedabad,Allen Kota,Both,0.4942,0.675,0.3648,0.7586
+STU066,Harsh Saxena,Bhopal,Vibrant,Both,0.7675,0.6255,0.6564,0.1581
+STU067,Puja Pillai,Jaipur,Self Study,NEET,0.3655,0.5578,0.6694,0.6884
+STU068,Dev Joshi,Indore,Aakash,Both,0.4429,0.3702,0.6036,0.1718
+STU069,Amit Sharma,Jaipur,Aakash,JEE,0.8009,0.5018,0.6173,0.4785
+STU070,Aanya Verma,Indore,Vibrant,JEE,0.5898,0.7622,0.5194,0.601
+STU071,Pinki Krishnan,Delhi,PACE,NEET,0.299,0.7637,0.4049,0.6117
+STU072,Sunita Singh,Hyderabad,Allen Kota,Both,0.651,0.3921,0.6598,0.1
+STU073,Arnav Tiwari,Chandigarh,Narayana,JEE,0.7879,0.7896,0.5532,0.4951
+STU074,Diya Tripathi,Chennai,FIITJEE,Both,0.3665,0.4543,0.8587,0.7938
+STU075,Vihaan Kaur,Chandigarh,Resonance,NEET,0.4972,0.8427,0.7956,0.4978
+STU076,Pratik Nair,Kota,FIITJEE,Both,0.6651,0.5156,0.6086,0.3898
+STU077,Sai Patel,Delhi,Vibrant,JEE,0.3406,0.5719,0.8466,0.6713
+STU078,Pranav Mehta,Jaipur,Aakash,Both,0.848,0.5646,0.7616,0.274
+STU079,Suresh Rao,Jaipur,Narayana,JEE,0.5588,0.9085,0.4825,0.4954
+STU080,Priya Krishnan,Ahmedabad,Vibrant,JEE,0.7335,0.5683,0.4119,0.6514
+STU081,Vihaan Saxena,Kolkata,Narayana,Both,0.6676,0.5383,0.7132,0.8975
+STU082,Anita Bhat,Chandigarh,Vibrant,JEE,0.5958,0.6425,0.7101,0.5229
+STU083,Ritesh Menon,Delhi,FIITJEE,JEE,0.6124,0.8016,0.6112,0.3382
+STU084,Navya Shah,Pune,PACE,JEE,0.545,0.4922,0.502,0.439
+STU085,Puja Chaturvedi,Mumbai,Resonance,JEE,0.4637,0.8378,0.635,0.7009
+STU086,Dhruv Pillai,Lucknow,Narayana,Both,0.3026,0.5594,0.6915,0.6782
+STU087,Pratik Menon,Hyderabad,PACE,NEET,0.4549,0.5999,0.7295,0.6276
+STU088,Divya Sharma,Chennai,Aakash,Both,0.5756,0.5396,0.6982,0.5689
+STU089,Pinki Saxena,Kolkata,Aakash,NEET,0.6226,0.6351,0.6133,0.773
+STU090,Neha Subramaniam,Kota,Allen Kota,NEET,0.2688,0.6615,0.6022,0.5958
+STU091,Arnav Iyer,Patna,Vibrant,Both,0.4586,0.5676,0.7253,0.5462
+STU092,Lokesh Iyer,Chennai,Vibrant,JEE,0.371,0.4326,0.4103,0.8487
+STU093,Ashish Tripathi,Kota,Resonance,JEE,0.99,0.7701,0.8566,0.7481
+STU094,Savita Singh,Lucknow,Self Study,JEE,0.6613,0.7025,0.6598,0.5567
+STU095,Arjun Tiwari,Hyderabad,Narayana,Both,0.5652,0.7467,0.6866,0.4907
+STU096,Pratik Reddy,Bangalore,Narayana,NEET,0.6397,0.5198,0.7304,0.6442
+STU097,Ishaan Verma,Chennai,Self Study,NEET,0.6778,0.7385,0.6487,0.2904
+STU098,Gaurav Nair,Lucknow,FIITJEE,Both,0.5391,0.7731,0.624,0.7968
+STU099,Sai Bhat,Kota,Allen Kota,Both,0.4555,0.6785,0.6498,0.6375
+STU100,Kavya Shukla,Indore,Narayana,NEET,0.8928,0.6872,0.4359,0.6035
