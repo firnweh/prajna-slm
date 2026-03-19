@@ -1879,6 +1879,31 @@
       </table>
     </div>
 
+    <!-- ── Interactive Architecture Explorer ── -->
+    <div class="reveal" style="margin-top:3.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">
+        🧠 Interactive Architecture Explorer
+      </h3>
+      <p style="font-size:0.83rem; color:var(--muted); margin-bottom:1.25rem;">
+        Hover any layer to see its shape, parameter count, and purpose. Switch between Full Network, Backbone Only, Heads Only, and Param Heatmap views.
+      </p>
+      <div style="border:1px solid rgba(99,102,241,0.3); border-radius:16px; overflow:hidden; box-shadow:0 0 40px rgba(99,102,241,0.08);">
+        <iframe
+          src="prajna-slm-architecture.html"
+          width="100%"
+          height="620"
+          scrolling="no"
+          frameborder="0"
+          title="PRAJNA SLM Neural Architecture"
+          style="display:block; border:none;"
+          loading="lazy"
+        ></iframe>
+      </div>
+      <p style="font-size:0.75rem; color:var(--muted); margin-top:0.65rem; text-align:center;">
+        147,653 trainable params · backbone.0 alone = 69% of weights · 3 multi-task output heads
+      </p>
+    </div>
+
   </div>
 </section>
 
