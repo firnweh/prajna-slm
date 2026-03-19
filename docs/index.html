@@ -2154,6 +2154,262 @@
       </div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════
+         FULL BACKTEST TABLE 2010–2025
+    ════════════════════════════════════════════════════════ -->
+    <div class="reveal" style="margin-top:3.5rem;">
+      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.35rem;">
+        Full Backtest Matrix — 2010 to 2025
+      </h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.75rem;">
+        K = 40 · Strict temporal holdout (only pre-year data used) · Chapter &amp; Micro-Topic level · v3 heuristic predictor
+      </p>
+
+      <!-- Exam tab switcher -->
+      <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+        <button class="bt-tab bt-active" onclick="switchBT('neet',this)">🧬 NEET</button>
+        <button class="bt-tab" onclick="switchBT('jee_main',this)">⚙️ JEE Main</button>
+        <button class="bt-tab" onclick="switchBT('jee_adv',this)">🔬 JEE Advanced</button>
+        <button class="bt-tab" onclick="switchBT('all',this)">📊 All Exams</button>
+      </div>
+    </div>
+
+    <style>
+      .bt-tab {
+        background: var(--bg3); border: 1px solid var(--border);
+        color: var(--muted); padding: 5px 16px; border-radius: 8px;
+        cursor: pointer; font-size: 0.8rem; font-weight: 600;
+        transition: all 0.15s;
+      }
+      .bt-tab.bt-active, .bt-tab:hover {
+        border-color: var(--indigo); color: var(--indigo);
+        background: rgba(99,102,241,0.08);
+      }
+      .bt-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border); }
+      .bt-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+      .bt-table th {
+        background: rgba(99,102,241,0.1); color: var(--indigo);
+        font-weight: 700; font-size: 0.72rem; text-transform: uppercase;
+        letter-spacing: 0.05em; padding: 10px 12px; text-align: center;
+        border-bottom: 1px solid var(--border); white-space: nowrap;
+      }
+      .bt-table th.yr-col { text-align: left; color: var(--muted); }
+      .bt-table th.exam-hdr {
+        background: rgba(99,102,241,0.15);
+        border-bottom: 1px solid rgba(99,102,241,0.3);
+      }
+      .bt-table td {
+        padding: 8px 12px; text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        font-family: 'SF Mono','Fira Code',monospace; font-size: 0.78rem;
+      }
+      .bt-table tr:last-child td { border-bottom: none; }
+      .bt-table tr:hover td { background: rgba(255,255,255,0.03); }
+      .bt-table td.yr { text-align: left; font-family: 'Space Grotesk',sans-serif; font-weight: 700; color: var(--text); }
+      /* Metric color coding */
+      .m-hi  { color: #34d399; font-weight: 700; }
+      .m-mid { color: #fbbf24; }
+      .m-lo  { color: #fb7185; }
+      .m-avg { background: rgba(99,102,241,0.12); font-weight: 700; color: var(--indigo); }
+      .sep-col { border-left: 1px solid rgba(255,255,255,0.08); }
+      .level-badge {
+        display: inline-block; font-size: 0.65rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        padding: 1px 6px; border-radius: 4px; margin-left: 4px;
+        background: rgba(99,102,241,0.12); color: var(--indigo);
+      }
+      .note-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.73rem; color: var(--muted); margin-top: 0.75rem;
+        padding: 6px 12px; background: var(--bg3); border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+    </style>
+
+    <!-- NEET TABLE -->
+    <div id="bt-neet" class="bt-table-wrap reveal">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th class="yr-col exam-hdr" rowspan="2">Year</th>
+            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
+            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
+          </tr>
+          <tr>
+            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
+            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="yr">2010</td><td class="m-hi">100.0%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td></tr>
+          <tr><td class="yr">2011</td><td class="m-hi">95.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td></tr>
+          <tr><td class="yr">2012</td><td class="m-hi">100.0%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td></tr>
+          <tr><td class="yr">2013</td><td class="m-hi">100.0%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td></tr>
+          <tr><td class="yr">2014</td><td class="m-hi">95.0%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td></tr>
+          <tr><td class="yr">2015</td><td class="m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td></tr>
+          <tr><td class="yr">2016</td><td class="m-hi">100.0%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td></tr>
+          <tr><td class="yr">2017</td><td class="m-hi">95.0%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td></tr>
+          <tr><td class="yr">2018</td><td class="m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td></tr>
+          <tr><td class="yr">2019</td><td class="m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td><td class="sep-col m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td></tr>
+          <tr><td class="yr">2020</td><td class="m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td></tr>
+          <tr><td class="yr">2021</td><td class="m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td></tr>
+          <tr><td class="yr">2022</td><td class="m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td></tr>
+          <tr><td class="yr">2023</td><td class="m-hi">100.0%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td></tr>
+          <tr><td class="yr">2024</td><td class="m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td></tr>
+          <tr><td class="yr">2025</td><td class="m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td></tr>
+          <tr style="background:rgba(99,102,241,0.06);">
+            <td class="yr" style="color:var(--indigo);">AVG</td>
+            <td class="m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
+            <td class="sep-col m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- JEE MAIN TABLE -->
+    <div id="bt-jee_main" class="bt-table-wrap reveal" style="display:none;">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th class="yr-col exam-hdr" rowspan="2">Year</th>
+            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
+            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
+          </tr>
+          <tr>
+            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
+            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="yr">2010</td><td class="m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td></tr>
+          <tr><td class="yr">2011</td><td class="m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td></tr>
+          <tr><td class="yr">2012</td><td class="m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td><td class="sep-col m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td></tr>
+          <tr><td class="yr">2013</td><td class="m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td></tr>
+          <tr><td class="yr">2014</td><td class="m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td><td class="sep-col m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td></tr>
+          <tr><td class="yr">2015</td><td class="m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td></tr>
+          <tr><td class="yr">2016</td><td class="m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td></tr>
+          <tr><td class="yr">2017</td><td class="m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td></tr>
+          <tr><td class="yr">2018</td><td class="m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td></tr>
+          <tr><td class="yr">2019</td><td class="m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td></tr>
+          <tr><td class="yr">2020</td><td class="m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td></tr>
+          <tr><td class="yr">2021</td><td class="m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td></tr>
+          <tr><td class="yr">2022</td><td class="m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td></tr>
+          <tr><td class="yr">2023</td><td class="m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td></tr>
+          <tr><td class="yr">2024</td><td class="m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td></tr>
+          <tr><td class="yr">2025</td><td class="m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td></tr>
+          <tr style="background:rgba(99,102,241,0.06);">
+            <td class="yr" style="color:var(--indigo);">AVG</td>
+            <td class="m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
+            <td class="sep-col m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- JEE ADVANCED TABLE -->
+    <div id="bt-jee_adv" class="bt-table-wrap reveal" style="display:none;">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th class="yr-col exam-hdr" rowspan="2">Year</th>
+            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
+            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
+          </tr>
+          <tr>
+            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
+            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="yr">2010</td><td class="m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td></tr>
+          <tr><td class="yr">2011</td><td class="m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td><td class="sep-col m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td></tr>
+          <tr><td class="yr">2012</td><td class="m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td><td class="sep-col m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td></tr>
+          <tr><td class="yr">2013</td><td class="m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td></tr>
+          <tr><td class="yr">2014</td><td class="m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td></tr>
+          <tr><td class="yr">2015</td><td class="m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td></tr>
+          <tr><td class="yr">2016</td><td class="m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td></tr>
+          <tr><td class="yr">2017</td><td class="m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td></tr>
+          <tr><td class="yr">2018</td><td class="m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td></tr>
+          <tr><td class="yr">2019</td><td class="m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td></tr>
+          <tr><td class="yr">2020</td><td class="m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td></tr>
+          <tr><td class="yr">2021</td><td class="m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td><td class="sep-col m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td></tr>
+          <tr><td class="yr">2022</td><td class="m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td></tr>
+          <tr><td class="yr">2023</td><td class="m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td></tr>
+          <tr><td class="yr">2024</td><td class="m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td></tr>
+          <tr><td class="yr">2025</td><td class="m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td></tr>
+          <tr style="background:rgba(99,102,241,0.06);">
+            <td class="yr" style="color:var(--indigo);">AVG</td>
+            <td class="m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
+            <td class="sep-col m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ALL EXAMS TABLE -->
+    <div id="bt-all" class="bt-table-wrap reveal" style="display:none;">
+      <table class="bt-table">
+        <thead>
+          <tr>
+            <th class="yr-col exam-hdr" rowspan="2">Year</th>
+            <th class="exam-hdr" colspan="3" style="color:#34d399;">🧬 NEET</th>
+            <th class="exam-hdr sep-col" colspan="3" style="color:#818cf8;">⚙️ JEE Main</th>
+            <th class="exam-hdr sep-col" colspan="3" style="color:#c084fc;">🔬 JEE Advanced</th>
+          </tr>
+          <tr>
+            <th>Prec</th><th>Cov</th><th>Comb</th>
+            <th class="sep-col">Prec</th><th>Cov</th><th>Comb</th>
+            <th class="sep-col">Prec</th><th>Cov</th><th>Comb</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="yr">2010</td><td class="m-hi">100%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td></tr>
+          <tr><td class="yr">2011</td><td class="m-hi">95%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td><td class="sep-col m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td></tr>
+          <tr><td class="yr">2012</td><td class="m-hi">100%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td><td class="sep-col m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td><td class="sep-col m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td></tr>
+          <tr><td class="yr">2013</td><td class="m-hi">100%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td></tr>
+          <tr><td class="yr">2014</td><td class="m-hi">95%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td></tr>
+          <tr><td class="yr">2015</td><td class="m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td></tr>
+          <tr><td class="yr">2016</td><td class="m-hi">100%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td></tr>
+          <tr><td class="yr">2017</td><td class="m-hi">95%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td></tr>
+          <tr><td class="yr">2018</td><td class="m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td></tr>
+          <tr><td class="yr">2019</td><td class="m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td></tr>
+          <tr><td class="yr">2020</td><td class="m-hi">100%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td></tr>
+          <tr><td class="yr">2021</td><td class="m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td><td class="sep-col m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td></tr>
+          <tr><td class="yr">2022</td><td class="m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td></tr>
+          <tr><td class="yr">2023</td><td class="m-hi">100%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td></tr>
+          <tr><td class="yr">2024</td><td class="m-hi">100%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td><td class="sep-col m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td></tr>
+          <tr><td class="yr">2025</td><td class="m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td></tr>
+          <tr style="background:rgba(99,102,241,0.06);">
+            <td class="yr" style="color:var(--indigo);">AVG</td>
+            <td class="m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
+            <td class="sep-col m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
+            <td class="sep-col m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Notes + legend -->
+    <div class="reveal" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
+      <div class="note-chip"><span style="color:var(--green); font-weight:700;">■</span> ≥ 75% = strong</div>
+      <div class="note-chip"><span style="color:var(--amber); font-weight:700;">■</span> 60–75% = good</div>
+      <div class="note-chip"><span style="color:var(--rose); font-weight:700;">■</span> &lt; 60% = moderate</div>
+      <div class="note-chip">📌 Chapter &amp; Micro-Topic scores match — both evaluate at chapter granularity</div>
+      <div class="note-chip">📌 K=40 used for all runs · Strict temporal holdout — no future data</div>
+    </div>
+
+    <script>
+      function switchBT(id, btn) {
+        ['neet','jee_main','jee_adv','all'].forEach(function(k) {
+          var el = document.getElementById('bt-'+k);
+          if (el) el.style.display = k === id ? '' : 'none';
+        });
+        document.querySelectorAll('.bt-tab').forEach(function(b) {
+          b.classList.toggle('bt-active', b === btn);
+        });
+      }
+    </script>
+
   </div>
 </section>
 
