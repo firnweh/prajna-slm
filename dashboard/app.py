@@ -314,6 +314,12 @@ st.markdown("""
   .team-code  { font-size:11px; color:#a5b4fc; font-weight:600; }
   .team-phone { font-size:10px; color:rgba(255,255,255,.3); }
 
+  /* ── Collapsible prediction cards ── */
+  details summary::-webkit-details-marker { display:none; }
+  details summary::marker { display:none; }
+  details[open] .pred-chevron { transform:rotate(90deg); }
+  details[open] { border-color:rgba(99,102,241,.3) !important; }
+
   /* Hide Streamlit chrome ── */
   #MainMenu { visibility:hidden; }
   footer { visibility:hidden; }
@@ -588,53 +594,66 @@ with tab_main:
         reasons_html = "".join(f'<li style="font-size:11px;color:#94a3b8;margin:2px 0">{r}</li>' for r in reasons[:3])
 
         card = f"""
-        <div style="background:#131320;border:1px solid rgba(255,255,255,0.07);border-radius:14px;
-                    padding:16px 20px;margin:8px 0;border-left:3px solid {sc};
-                    transition:border-color .2s"
-             onmouseover="this.style.borderColor='{cc}'" onmouseout="this.style.borderColor='{sc}'">
-          <!-- Header row -->
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <details style="background:#131320;border:1px solid rgba(255,255,255,0.07);border-radius:14px;
+                         margin:6px 0;border-left:3px solid {sc};overflow:hidden">
+          <summary style="display:flex;align-items:center;gap:10px;padding:13px 18px;
+                           cursor:pointer;list-style:none;user-select:none;
+                           transition:background .15s"
+                   onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+                   onmouseout="this.style.background='transparent'">
+            <!-- Chevron -->
+            <span class="pred-chevron" style="font-size:11px;color:#8888aa;transition:transform .2s;flex-shrink:0">▶</span>
+            <!-- Rank -->
             <span style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);
-                          border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700">#{i}</span>
-            <span style="font-size:15px;font-weight:700;color:#f1f5f9;flex:1">{name}</span>
+                          border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0">#{i}</span>
+            <!-- Name -->
+            <span style="font-size:14px;font-weight:700;color:#f1f5f9;flex:1;min-width:0;
+                          overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{name}</span>
+            <!-- Compact stats -->
+            <span style="font-size:16px;font-weight:800;color:{cc};flex-shrink:0">{prob_pct}</span>
+            <span style="font-size:12px;color:#8888aa;flex-shrink:0">{trend} ~{exp_q:.0f}q</span>
+            <!-- Badges -->
             <span style="background:{sc}22;color:{sc};border:1px solid {sc}55;
-                          border-radius:20px;padding:2px 10px;font-size:11px;font-weight:600">{subj}</span>
+                          border-radius:20px;padding:2px 9px;font-size:10px;font-weight:600;flex-shrink:0">{subj}</span>
             <span style="background:{cc}22;color:{cc};border:1px solid {cc}55;
-                          border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">{conf}</span>
+                          border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;flex-shrink:0">{conf}</span>
+          </summary>
+          <!-- Expanded body -->
+          <div style="padding:0 18px 16px 18px;border-top:1px solid rgba(255,255,255,0.05)">
+            <!-- Stats row -->
+            <div style="display:flex;flex-wrap:wrap;gap:20px;margin:14px 0 12px 0">
+              <div>
+                <div style="font-size:26px;font-weight:800;color:{cc};line-height:1">{prob_pct}</div>
+                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px">P(Appear) {trend}</div>
+              </div>
+              <div>
+                <div style="font-size:18px;font-weight:700;color:#e2e8f0">~{exp_q:.0f} Qs</div>
+                <div style="font-size:10px;color:#8888aa">Range {q_min}–{q_max}</div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:#e2e8f0">{fmts}</div>
+                <div style="font-size:10px;color:#8888aa">Format · Diff {diff}</div>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:#e2e8f0">{last}</div>
+                <div style="font-size:10px;color:#8888aa">Last Seen</div>
+              </div>
+            </div>
+            <!-- Signals + Reasons -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div>
+                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Model Signals</div>
+                {sig_bars if sig_bars else '<div style="font-size:11px;color:#8888aa">No signal data</div>'}
+              </div>
+              <div>
+                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Why Predicted</div>
+                <ul style="margin:0;padding-left:14px">
+                  {reasons_html if reasons_html else '<li style="font-size:11px;color:#8888aa">No reasons available</li>'}
+                </ul>
+              </div>
+            </div>
           </div>
-          <!-- Stats row -->
-          <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:10px">
-            <div>
-              <div style="font-size:28px;font-weight:800;color:{cc};line-height:1">{prob_pct}</div>
-              <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px">P(Appear) {trend}</div>
-            </div>
-            <div>
-              <div style="font-size:20px;font-weight:700;color:#e2e8f0">~{exp_q:.0f} Qs</div>
-              <div style="font-size:10px;color:#8888aa">Range {q_min}–{q_max}</div>
-            </div>
-            <div>
-              <div style="font-size:14px;font-weight:600;color:#e2e8f0">{fmts}</div>
-              <div style="font-size:10px;color:#8888aa">Format · Diff {diff}</div>
-            </div>
-            <div>
-              <div style="font-size:14px;font-weight:600;color:#e2e8f0">{last}</div>
-              <div style="font-size:10px;color:#8888aa">Last Seen</div>
-            </div>
-          </div>
-          <!-- Signals + Reasons -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-            <div>
-              <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Model Signals</div>
-              {sig_bars if sig_bars else '<div style="font-size:11px;color:#8888aa">No signal data</div>'}
-            </div>
-            <div>
-              <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Why Predicted</div>
-              <ul style="margin:0;padding-left:14px">
-                {reasons_html if reasons_html else '<li style="font-size:11px;color:#8888aa">No reasons available</li>'}
-              </ul>
-            </div>
-          </div>
-        </div>"""
+        </details>"""
         cards_html.append(card)
 
     st.markdown("\n".join(cards_html), unsafe_allow_html=True)
