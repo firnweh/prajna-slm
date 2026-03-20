@@ -60,9 +60,9 @@ PLOT_LAYOUT = dict(
     paper_bgcolor = "#131320",
     font = dict(family="Inter, system-ui, sans-serif", size=12, color="#8888aa"),
     margin  = dict(l=10, r=10, t=36, b=10),
-    legend  = dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#8888aa", size=11)),
     hoverlabel = dict(bgcolor="#1e1e30", font_color="#e2e8f0", font_size=12),
 )
+_LEGEND = dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#8888aa", size=11))
 _GRID = dict(
     gridcolor     = "rgba(255,255,255,0.05)",
     zerolinecolor = "rgba(255,255,255,0.08)",
@@ -598,7 +598,7 @@ with tab_main:
             height=max(380, len(bar_data) * 32),
             yaxis=dict(autorange="reversed", title=""),
             xaxis=dict(title="Appearance Probability", tickformat=".0%", range=[0, 1.12]),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            legend=dict(**_LEGEND, orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -634,7 +634,7 @@ with tab_main:
                           labels={"value": "% of Paper", "variable": "Subject"},
                           color_discrete_sequence=SUBJ_COLORS)
             fig.update_layout(**PLOT_LAYOUT, height=360, yaxis_title="% of Paper",
-                              legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                              legend=dict(**_LEGEND, orientation="h", yanchor="bottom", y=1.02))
             st.plotly_chart(fig, use_container_width=True)
 
         # Interactive topic/micro trend
@@ -662,7 +662,7 @@ with tab_main:
                          color_discrete_sequence=SUBJ_COLORS,
                          labels={"count": "Questions", "question_type": "Type"})
             fig.update_layout(**PLOT_LAYOUT, height=360,
-                              legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                              legend=dict(**_LEGEND, orientation="h", yanchor="bottom", y=1.02))
             st.plotly_chart(fig, use_container_width=True)
 
         # Predicted format donut
@@ -731,7 +731,7 @@ with tab_main:
                        stripmode="overlay")
         fig.update_traces(marker=dict(size=8, opacity=0.7))
         fig.update_layout(**PLOT_LAYOUT, height=260, xaxis=dict(tickformat=".0%"),
-                          legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                          legend=dict(**_LEGEND, orientation="h", yanchor="bottom", y=1.02))
         st.plotly_chart(fig, use_container_width=True)
 
     # ── SECTION 6: WHY THIS PREDICTION? ──
@@ -909,7 +909,7 @@ with tab_main:
                              color_discrete_sequence=["#6366f1", "#10b981", "#f59e0b", "#a855f7"],
                              labels={"value": "Score", "variable": "Metric"})
                 fig.update_layout(**PLOT_LAYOUT, height=340,
-                                  legend=dict(orientation="h", yanchor="bottom", y=1.02))
+                                  legend=dict(**_LEGEND, orientation="h", yanchor="bottom", y=1.02))
                 st.plotly_chart(fig, use_container_width=True)
 
                 bm1, bm2, bm3, bm4 = st.columns(4)
