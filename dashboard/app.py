@@ -319,6 +319,21 @@ st.markdown("""
   footer { visibility:hidden; }
   [data-testid="stToolbar"]     { display:none !important; }
   [data-testid="stDeployButton"]{ display:none !important; }
+
+  /* ── Loading overlay ── */
+  [data-testid="stStatusWidget"] { display:none !important; }
+  .stProgress > div > div > div > div {
+    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4) !important;
+    border-radius: 4px !important;
+  }
+  .stProgress > div > div {
+    background: rgba(255,255,255,0.06) !important;
+    border-radius: 4px !important;
+    height: 6px !important;
+  }
+  /* Suppress the grey "running" overlay on rerun */
+  .stApp[data-teststate="running"] .main { opacity: 1 !important; }
+  .stApp[data-teststate="running"] .block-container { opacity: 1 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -434,18 +449,27 @@ def get_slm_predictions(db, year, exam, k, level):
         return []
 
 # --- Load predictions for selected K (separate reranking per K) ---
+# ── Loading indicator ─────────────────────────────────────────────────────────
+_load_bar = st.empty()
+_load_status = st.empty()
+_prog = _load_bar.progress(0, text="")
+_load_status.caption("⚡ PRAJNA loading predictions...")
+
+_prog.progress(15, text="Loading micro-topic predictions...")
 preds_micro = get_predictions_micro_v3(DB_PATH, target_year, exam_filter, top_n)
 active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_micro = [p for p in active_micro if p["subject"] == selected_subject]
 
+_prog.progress(40, text="Loading chapter predictions...")
 preds_v3 = get_predictions_v3(DB_PATH, target_year, exam_filter, top_n)
 active_v3 = [p for p in preds_v3 if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_v3 = [p for p in active_v3 if p["subject"] == selected_subject]
 
-# SLM predictions (if available)
+# Prajna model predictions (if available)
 if SLM_AVAILABLE:
+    _prog.progress(60, text="Loading Prajna model predictions...")
     slm_preds_raw = get_slm_predictions(DB_PATH, target_year, exam_filter, top_n, "chapter")
     active_slm = [p for p in slm_preds_raw if p["syllabus_status"] != "REMOVED"]
     if selected_subject != "All":
@@ -453,13 +477,20 @@ if SLM_AVAILABLE:
 else:
     active_slm = []
 
+_prog.progress(80, text="Computing revision schedule...")
 # Active list depends on selected level
 pred_list = active_micro if pred_level == "Micro-Topic" else active_v3
 pred_list = pred_list[:top_n]
 
 # v2: micro-topic level (for deep analysis / lesson plan)
+_prog.progress(95, text="Finalising...")
 predictions_v2 = get_predictions_v2(DB_PATH, target_year, exam_filter)
 active_preds_v2 = [p for p in predictions_v2 if p["syllabus_status"] != "REMOVED"]
+
+_prog.progress(100, text="Done!")
+import time as _time; _time.sleep(0.25)
+_load_bar.empty()
+_load_status.empty()
 
 
 # --- Tabs ---
