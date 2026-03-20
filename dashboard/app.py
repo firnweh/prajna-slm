@@ -549,108 +549,110 @@ with tab_main:
     st.caption(f"Subject-balanced reranking for K={top_n}. {'Micro-topic + parent chapter.' if is_micro else 'Chapter-level aggregation.'}")
 
     # ── Detailed Prediction Cards ─────────────────────────────────────────────
-    SUBJ_HEX = {"Biology": "#22c55e", "Chemistry": "#06b6d4", "Physics": "#f59e0b", "Mathematics": "#a855f7"}
-    CONF_HEX  = {"HIGH": "#10b981", "MEDIUM": "#f59e0b", "LOW": "#ef4444", "SPECULATIVE": "#94a3b8"}
+    SUBJ_HEX    = {"Biology": "#22c55e", "Chemistry": "#06b6d4", "Physics": "#f59e0b", "Mathematics": "#a855f7"}
+    CONF_HEX    = {"HIGH": "#10b981", "MEDIUM": "#f59e0b", "LOW": "#ef4444", "SPECULATIVE": "#94a3b8"}
     TREND_ARROW = {"RISING": "↑", "STABLE": "→", "DECLINING": "↓", "NEW": "★", "REMOVED": "✗"}
 
     cards_html = []
     for i, p in enumerate(pred_list, 1):
-        sc   = SUBJ_HEX.get(p["subject"], "#6366f1")
-        cc   = CONF_HEX.get(p["confidence"], "#6366f1")
-        prob = p["appearance_probability"]
+        sc       = SUBJ_HEX.get(p["subject"], "#6366f1")
+        cc       = CONF_HEX.get(p["confidence"], "#6366f1")
+        prob     = p["appearance_probability"]
         prob_pct = f"{prob:.0%}"
-        trend = TREND_ARROW.get(p["trend_direction"], "→")
-        conf  = p["confidence"]
-        name  = p.get("micro_topic", p["chapter"]) if is_micro else p["chapter"]
-        exp_q = p["expected_questions"]
-        q_min = p["expected_qs_min"]
-        q_max = p["expected_qs_max"]
-        fmts  = ", ".join(p["likely_formats"][:2])
-        diff  = round(p["likely_difficulty"], 1)
-        last  = p["last_appeared"]
-        subj  = p["subject"]
+        trend    = TREND_ARROW.get(p["trend_direction"], "→")
+        conf     = p["confidence"]
+        name     = p.get("micro_topic", p["chapter"]) if is_micro else p["chapter"]
+        exp_q    = p["expected_questions"]
+        q_min    = p["expected_qs_min"]
+        q_max    = p["expected_qs_max"]
+        fmts     = ", ".join(p["likely_formats"][:2])
+        diff     = round(p["likely_difficulty"], 1)
+        last     = p["last_appeared"]
+        subj     = p["subject"]
+        syllabus = p.get("syllabus_status", "RETAINED")
+        training = p.get("training_years", "")
 
-        # Signal bars (top 4 from signal_breakdown dict, skip 0/non-numeric values)
+        # Reason pills (first 2 shown inline in summary)
+        reasons = p.get("reasons", [])
+        reason_pills = "".join(
+            f'<span style="background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.25);'
+            f'border-radius:6px;padding:2px 9px;font-size:11px;margin-right:6px;white-space:nowrap">{r}</span>'
+            for r in reasons[:2]
+        )
+        all_reasons_html = "".join(
+            f'<li style="font-size:12px;color:#94a3b8;margin:3px 0;line-height:1.4">{r}</li>'
+            for r in reasons
+        )
+
+        # Full-width signal bars — all non-zero signals sorted by value
         sig = p.get("signal_breakdown", {})
-        sig_flat = {k: (v if isinstance(v, (int, float)) else 0) for k, v in sig.items()}
+        sig_flat  = {k: (v if isinstance(v, (int, float)) else 0) for k, v in sig.items()}
         sig_items = sorted(sig_flat.items(), key=lambda x: x[1], reverse=True)
-        sig_bars = ""
-        for sname, sval in sig_items[:4]:
+        sig_bars  = ""
+        for sname, sval in sig_items:
             if sval <= 0:
                 continue
             pct = min(int(sval * 100), 100)
+            # Green for high signal, purple for lower (matches screenshot gradient)
+            bar_color = f"linear-gradient(90deg,#22c55e,#10b981)" if sval >= 0.5 else "linear-gradient(90deg,#6366f1,#a855f7)"
             sig_bars += f"""
-            <div style="margin:3px 0">
-              <div style="display:flex;justify-content:space-between;font-size:10px;color:#8888aa;margin-bottom:2px">
-                <span>{sname.replace('_',' ').title()}</span><span>{sval:.2f}</span>
+            <div style="display:flex;align-items:center;gap:10px;margin:5px 0">
+              <span style="font-size:11px;color:#8888aa;min-width:110px;flex-shrink:0">{sname.replace('_',' ')}</span>
+              <div style="flex:1;background:rgba(255,255,255,0.06);border-radius:3px;height:7px">
+                <div style="width:{pct}%;background:{bar_color};height:7px;border-radius:3px"></div>
               </div>
-              <div style="background:rgba(255,255,255,0.06);border-radius:3px;height:4px">
-                <div style="width:{pct}%;background:linear-gradient(90deg,#6366f1,#a855f7);height:4px;border-radius:3px"></div>
-              </div>
+              <span style="font-size:11px;color:#8888aa;min-width:32px;text-align:right;flex-shrink:0">{sval:.2f}</span>
             </div>"""
 
-        # Reasons list (first 3)
-        reasons = p.get("reasons", [])
-        reasons_html = "".join(f'<li style="font-size:11px;color:#94a3b8;margin:2px 0">{r}</li>' for r in reasons[:3])
+        # Probability bar width for summary row
+        prob_bar_pct = min(int(prob * 100), 100)
+        training_str = f"Training: {training}" if training else ""
 
         card = f"""
-        <details style="background:#131320;border:1px solid rgba(255,255,255,0.07);border-radius:14px;
-                         margin:6px 0;border-left:3px solid {sc};overflow:hidden">
-          <summary style="display:flex;align-items:center;gap:10px;padding:13px 18px;
+        <details style="background:#131320;border:1px solid rgba(255,255,255,0.07);border-radius:12px;
+                         margin:5px 0;overflow:hidden">
+          <!-- ── Collapsed summary row ── -->
+          <summary style="display:flex;align-items:center;gap:0;padding:12px 16px;
                            cursor:pointer;list-style:none;user-select:none;
                            transition:background .15s"
-                   onmouseover="this.style.background='rgba(255,255,255,0.03)'"
+                   onmouseover="this.style.background='rgba(255,255,255,0.025)'"
                    onmouseout="this.style.background='transparent'">
-            <!-- Chevron -->
-            <span class="pred-chevron" style="font-size:11px;color:#8888aa;transition:transform .2s;flex-shrink:0">▶</span>
             <!-- Rank -->
-            <span style="background:rgba(99,102,241,.15);color:#a5b4fc;border:1px solid rgba(99,102,241,.3);
-                          border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0">#{i}</span>
-            <!-- Name -->
-            <span style="font-size:14px;font-weight:700;color:#f1f5f9;flex:1;min-width:0;
-                          overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{name}</span>
-            <!-- Compact stats -->
-            <span style="font-size:16px;font-weight:800;color:{cc};flex-shrink:0">{prob_pct}</span>
-            <span style="font-size:12px;color:#8888aa;flex-shrink:0">{trend} ~{exp_q:.0f}q</span>
-            <!-- Badges -->
-            <span style="background:{sc}22;color:{sc};border:1px solid {sc}55;
-                          border-radius:20px;padding:2px 9px;font-size:10px;font-weight:600;flex-shrink:0">{subj}</span>
-            <span style="background:{cc}22;color:{cc};border:1px solid {cc}55;
-                          border-radius:20px;padding:2px 9px;font-size:10px;font-weight:700;flex-shrink:0">{conf}</span>
-          </summary>
-          <!-- Expanded body -->
-          <div style="padding:0 18px 16px 18px;border-top:1px solid rgba(255,255,255,0.05)">
-            <!-- Stats row -->
-            <div style="display:flex;flex-wrap:wrap;gap:20px;margin:14px 0 12px 0">
-              <div>
-                <div style="font-size:26px;font-weight:800;color:{cc};line-height:1">{prob_pct}</div>
-                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px">P(Appear) {trend}</div>
-              </div>
-              <div>
-                <div style="font-size:18px;font-weight:700;color:#e2e8f0">~{exp_q:.0f} Qs</div>
-                <div style="font-size:10px;color:#8888aa">Range {q_min}–{q_max}</div>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:#e2e8f0">{fmts}</div>
-                <div style="font-size:10px;color:#8888aa">Format · Diff {diff}</div>
-              </div>
-              <div>
-                <div style="font-size:13px;font-weight:600;color:#e2e8f0">{last}</div>
-                <div style="font-size:10px;color:#8888aa">Last Seen</div>
-              </div>
+            <span style="font-size:11px;color:#8888aa;min-width:28px;flex-shrink:0">#{i}</span>
+            <!-- Name + subject + pills -->
+            <div style="flex:1;min-width:0;padding-right:16px">
+              <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:2px">{name}</div>
+              <div style="font-size:11px;color:#8888aa;margin-bottom:6px">{subj}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px">{reason_pills}</div>
+              <div style="font-size:11px;color:#6b7280">{fmts} · diff: {diff} · last: {last}</div>
             </div>
-            <!-- Signals + Reasons -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-              <div>
-                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Model Signals</div>
-                {sig_bars if sig_bars else '<div style="font-size:11px;color:#8888aa">No signal data</div>'}
+            <!-- Right stats -->
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <span style="font-size:13px;color:#8888aa">{trend}</span>
+              <span style="background:{cc}22;color:{cc};border:1px solid {cc}44;
+                            border-radius:6px;padding:3px 10px;font-size:11px;font-weight:800">{conf}</span>
+              <span style="font-size:12px;color:#e2e8f0;font-weight:600;white-space:nowrap">~{exp_q:.1f}Q ({q_min}–{q_max})</span>
+              <div style="width:80px;background:rgba(255,255,255,0.06);border-radius:3px;height:6px;flex-shrink:0">
+                <div style="width:{prob_bar_pct}%;background:linear-gradient(90deg,#22c55e,#10b981);height:6px;border-radius:3px"></div>
               </div>
-              <div>
-                <div style="font-size:10px;color:#8888aa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Why Predicted</div>
-                <ul style="margin:0;padding-left:14px">
-                  {reasons_html if reasons_html else '<li style="font-size:11px;color:#8888aa">No reasons available</li>'}
-                </ul>
-              </div>
+              <span style="font-size:14px;font-weight:800;color:{cc};min-width:36px;text-align:right">{prob_pct}</span>
+            </div>
+          </summary>
+
+          <!-- ── Expanded body ── -->
+          <div style="background:rgba(99,102,241,0.04);border-top:1px solid rgba(99,102,241,0.15);
+                       padding:14px 18px 14px 44px">
+            <!-- PRAJNA Model Signals header -->
+            <div style="font-size:12px;font-weight:700;color:#6366f1;margin-bottom:10px">PRAJNA Model Signals:</div>
+            <!-- All reasons as bullets -->
+            <ul style="margin:0 0 14px 0;padding-left:18px">
+              {all_reasons_html if all_reasons_html else '<li style="font-size:12px;color:#8888aa">No reasons available</li>'}
+            </ul>
+            <!-- Signal breakdown bars -->
+            {f'<div style="font-size:11px;color:#8888aa;margin-bottom:8px">Signal Breakdown:</div>{sig_bars}' if sig_bars else ''}
+            <!-- Footer -->
+            <div style="font-size:11px;color:#8888aa;margin-top:12px">
+              Syllabus: <b style="color:#94a3b8">{syllabus}</b>{(" · " + training_str) if training_str else ""}
             </div>
           </div>
         </details>"""
