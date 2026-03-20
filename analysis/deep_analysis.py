@@ -8,11 +8,13 @@ from utils.db import get_questions_df
 from data.syllabus import NEET_SYLLABUS, JEE_SYLLABUS
 
 
-def get_topic_deep_dive(db_path, topic_name, exam=None):
+def get_topic_deep_dive(db_path, topic_name, exam=None, subject=None):
     """Get comprehensive analysis for a single topic."""
     df = get_questions_df(db_path)
     if exam:
         df = df[df["exam"] == exam]
+    if subject:
+        df = df[df["subject"] == subject]
 
     mask = (df["topic"] == topic_name) | (df["micro_topic"] == topic_name)
     topic_df = df[mask]

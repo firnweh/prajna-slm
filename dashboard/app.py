@@ -1279,6 +1279,11 @@ with tab_deep:
     st.caption("Select a topic to see its complete history, questions, and patterns.")
 
     all_topics = sorted(filtered["topic"].unique().tolist())
+
+    # Reset stale topic selection when filters change (subject/exam changed the topic list)
+    if st.session_state.get("dt_topic", "") not in ([""] + all_topics):
+        st.session_state["dt_topic"] = ""
+
     ca, cb = st.columns(2)
     with ca:
         sel_topic = st.selectbox("Chapter / Topic", [""] + all_topics, key="dt_topic")
@@ -1289,8 +1294,9 @@ with tab_deep:
             mopts = sorted(filtered["micro_topic"].unique().tolist())
         sel_micro = st.selectbox("Micro-topic (optional)", ["All"] + mopts, key="dt_micro")
 
+    subject_filter_deep = selected_subject if selected_subject != "All" else None
     if sel_topic:
-        dive = get_topic_deep_dive(DB_PATH, sel_topic, exam=exam_filter)
+        dive = get_topic_deep_dive(DB_PATH, sel_topic, exam=exam_filter, subject=subject_filter_deep)
         if dive:
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Total Questions", dive["total_questions"])
