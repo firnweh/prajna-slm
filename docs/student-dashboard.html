@@ -128,7 +128,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 <body>
 <nav class="nav">
   <div class="nav-logo">PRAJNA · Student Intelligence</div>
-  <span class="nav-badge">SLM-POWERED</span>
+  <span class="nav-badge">PRAJNA-POWERED</span>
   <a href="intelligence-dashboard.html" style="margin-left:auto;font-size:.78rem;background:#06b6d415;color:#06b6d4;border:1px solid #06b6d440;padding:5px 13px;border-radius:8px;text-decoration:none;font-weight:600">Intelligence API ↗</a>
   <a href="index.html" class="nav-back" style="margin-left:0">← Back to PRAJNA</a>
 </nav>
@@ -401,9 +401,9 @@ function buildTrajectory(s){
 
 /* ── SLM Focus ── */
 function buildSLMFocus(s){
-  const c=mkCard('🧠 SLM-Powered Priority Focus Areas');
+  const c=mkCard('🧠 Prajna-Powered Priority Focus Areas');
   const note=el('div','note');
-  note.appendChild(txt('Chapters where you are weak AND the PRAJNA SLM predicts high exam appearance probability.'));
+  note.appendChild(txt('Chapters where you are weak AND Prajna predicts high exam appearance probability.'));
   c.appendChild(note);
 
   const list=el('div','focus-list');
@@ -442,7 +442,7 @@ function buildSLMFocus(s){
     const l2=el('div','fi-bar-lbl');
     const l2s=el('strong'); l2s.style.color='#a855f7';
     l2s.appendChild(txt((item.slm_importance||0)+'%'));
-    l2.appendChild(txt('SLM Importance: ')); l2.appendChild(l2s);
+    l2.appendChild(txt('Prajna Importance: ')); l2.appendChild(l2s);
     const t2=el('div','fi-bar-track');
     const f2=el('div','fi-bar-fill');
     f2.style.width=(item.slm_importance||0)+'%'; f2.style.background='#a855f7';
@@ -505,7 +505,7 @@ function buildZones(s){
 
   // Weak zones
   const wcol=el('div');
-  const wh=el('div','zone-h'); wh.style.color='#ef4444'; wh.appendChild(txt('⚠ SLM-Ranked Weak Zones')); wcol.appendChild(wh);
+  const wh=el('div','zone-h'); wh.style.color='#ef4444'; wh.appendChild(txt('⚠ Prajna-Ranked Weak Zones')); wcol.appendChild(wh);
   const wl=el('div','zone-list');
   (s.slm_focus||[]).slice(0,6).forEach(item=>{
     const lv=item.level;
@@ -514,7 +514,7 @@ function buildZones(s){
     const zt=el('div','zi-text');
     const zc=el('div','zi-ch'); zc.appendChild(txt(item.chapter)); zc.title=item.chapter;
     const za=el('div','zi-acc');
-    za.appendChild(txt((item.accuracy||0).toFixed(0)+'% · SLM: '+(item.slm_importance||0)+'%'));
+    za.appendChild(txt((item.accuracy||0).toFixed(0)+'% · Prajna: '+(item.slm_importance||0)+'%'));
     zt.appendChild(zc); zt.appendChild(za); zi.appendChild(zt);
     const zb=el('span','zi-badge');
     setStyle(zb,{background:lColor(lv)+'20',color:lColor(lv)});
@@ -623,13 +623,13 @@ function buildInsights(s){
       ],
     },
     {
-      label:'SLM Recommendation',
+      label:'Prajna Recommendation',
       parts: topFocus
         ?[['Study now: ',''],
           [topFocus.chapter,'#a855f7',true],
-          ['. You are at '+topFocus.accuracy.toFixed(0)+'% but SLM rates it '+topFocus.slm_importance+'% likely to appear. Fixing this chapter could add significant marks.',''],
+          ['. You are at '+topFocus.accuracy.toFixed(0)+'% but Prajna rates it '+topFocus.slm_importance+'% likely to appear. Fixing this chapter could add significant marks.',''],
         ]
-        :[['Excellent! ','#22c55e',true],['Strong coverage across all high-SLM-priority chapters. Focus on revision and mock practice.','']],
+        :[['Excellent! ','#22c55e',true],['Strong coverage across all high-Prajna-priority chapters. Focus on revision and mock practice.','']],
     },
   ];
 
@@ -786,7 +786,7 @@ function buildCopilot(s){
   header.appendChild(titleEl);
   const powered=el('span');
   powered.style.cssText='font-size:.7rem;color:var(--mt);padding:2px 8px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff10';
-  powered.appendChild(txt('SLM · NL Query'));
+  powered.appendChild(txt('Prajna · NL Query'));
   header.appendChild(powered);
   wrap.appendChild(header);
 

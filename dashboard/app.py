@@ -14,12 +14,12 @@ from analysis.predictor_v2 import predict_topics_v2, backtest, HOLDOUT_YEARS
 from analysis.predictor_v3 import predict_chapters_v3, predict_microtopics_v3, backtest_v3, backtest_single_year
 from analysis.predictor import predict_topics
 
-# SLM model (optional — falls back to v3 if not trained)
+# Prajna model (optional — falls back to v3 if not trained)
 SLM_AVAILABLE = False
 try:
     from analysis.slm_model import predict_with_slm, backtest_slm
     import os as _os
-    # Check if any SLM model exists
+    # Check if any Prajna model exists
     if _os.path.exists("models") and any(f.endswith(".pt") for f in _os.listdir("models")):
         SLM_AVAILABLE = True
 except ImportError:
@@ -1594,7 +1594,7 @@ with tab_chat:
         st.markdown("""
         <div style="display:inline-flex;gap:8px;margin-bottom:16px;">
             <span style="background:rgba(16,185,129,0.15);color:#10b981;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;">
-                ✓ SLM Model Loaded (22M params)
+                ✓ Prajna Model Loaded (22M params)
             </span>
             <span style="background:rgba(99,102,241,0.15);color:#a5b4fc;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:700;">
                 Chatbot Active
@@ -1733,7 +1733,7 @@ st.markdown("""
     </a>
   </div>
   <div style="text-align:center; font-size:11px; color:rgba(255,255,255,0.2);">
-    PRAJNA v1.0 · 23,119 questions · 292 papers · 1978–2026 · Model: 3-Stage SLM with subject-balanced reranking
+    PRAJNA v1.0 · 23,119 questions · 292 papers · 1978–2026 · Model: 3-Stage Prajna with subject-balanced reranking
   </div>
 </div>
 """, unsafe_allow_html=True)
