@@ -45,9 +45,12 @@ def _format_ranked_items(items: List[Dict]) -> str:
         imp  = item.get("importance_probability", item.get("composite_importance", 0))
         conf = item.get("confidence_score", item.get("composite_confidence", 0))
         trend = item.get("trend_direction", item.get("topic_trend_score", "unknown"))
+        chapter = item.get("chapter", "")
+        subject = item.get("subject", "")
+        meta = f", chapter={chapter}, subject={subject}" if (chapter or subject) else ""
         lines.append(
             f"  {i}. {name}\n"
-            f"     importance={imp:.3f}, confidence={conf:.3f}, trend={trend}"
+            f"     importance={imp:.3f}, confidence={conf:.3f}, trend={trend}{meta}"
         )
     return "\n".join(lines)
 

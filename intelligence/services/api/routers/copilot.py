@@ -43,10 +43,14 @@ async def ask_copilot(
     batch = aggregator.build_batch(micro_preds)
     insight = await generator.answer_copilot_question(request, batch)
 
+    # Build context-aware follow-up questions from the top predicted topics
+    top_names = [t.micro_topic_name for t in micro_preds[:3]] if micro_preds else []
+    exam_label = str(request.exam_type).split(".")[-1].upper()
     follow_ups = [
-        f"What are the top micro-topics in {insight.parent_chain[0] if insight.parent_chain else 'Physics'}?",
-        f"How many hours should I spend on {insight.scope_name}?",
-        f"What topic clusters should I study together?",
+        f"Which {top_names[0]} sub-topics are most likely for {exam_label} {request.target_year}?"
+        if top_names else f"What are the top chapters for {exam_label} {request.target_year}?",
+        f"How many hours should I allocate to {top_names[1] if len(top_names) > 1 else 'each subject'}?",
+        "Which weak chapters overlap with high-probability predictions?",
     ]
 
     return CopilotResponse(

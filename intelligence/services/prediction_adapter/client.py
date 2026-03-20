@@ -74,9 +74,12 @@ class PredictionAdapter:
         except ImportError as e:
             logger.warning(f"Could not load PRAJNA SLM: {e}. Falling back to v3 predictor.")
             try:
-                from analysis.predictor_v3 import predict_topics
-                self._local_engine = {"predict_v3": predict_topics}
-                logger.info("Using predictor_v3 as fallback")
+                from analysis.predictor_v3 import predict_chapters_v3, predict_microtopics_v3
+                self._local_engine = {
+                    "predict_v3_chapters":   predict_chapters_v3,
+                    "predict_v3_microtopics": predict_microtopics_v3,
+                }
+                logger.info("Using predictor_v3 (predict_chapters_v3) as fallback")
             except ImportError:
                 logger.error("No PRAJNA predictor available. Using mock data.")
                 self._local_engine = {"mock": True}
@@ -153,7 +156,7 @@ class PredictionAdapter:
         try:
             if "predictor_class" in self._local_engine:
                 return self._run_slm_prediction(exam_type, target_year, subject)
-            elif "predict_v3" in self._local_engine:
+            elif "predict_v3_chapters" in self._local_engine:
                 return self._run_v3_prediction(exam_type, target_year, subject)
         except Exception as e:
             logger.error(f"Local prediction failed: {e}", exc_info=True)
@@ -180,11 +183,24 @@ class PredictionAdapter:
                 for r in raw_preds if subject is None or r.get("subject","").lower() == subject.lower()]
 
     def _run_v3_prediction(self, exam_type, target_year, subject):
-        """Calls predictor_v3.predict_topics."""
-        predict_topics = self._local_engine["predict_v3"]
-        raw = predict_topics(exam_type=str(exam_type), target_year=target_year, K=50)
-        return [self._normalize_v3_output(r, exam_type, target_year, subject)
-                for r in raw if subject is None or r.get("subject","").lower() == (subject or "").lower()]
+        """Calls predictor_v3.predict_chapters_v3 with the real SQLite database."""
+        predict_chapters = self._local_engine["predict_v3_chapters"]
+        db_path = str(PRAJNA_ROOT / "data" / "exam.db")
+
+        # Map ExamType enum → exam string the v3 engine understands
+        exam_map = {
+            ExamType.NEET:         "NEET",
+            ExamType.JEE_MAIN:     "JEE Main",
+            ExamType.JEE_ADVANCED: "JEE Advanced",
+        }
+        exam_str = exam_map.get(exam_type, "NEET")
+
+        raw = predict_chapters(db_path=db_path, target_year=target_year, exam=exam_str, top_k=50)
+        return [
+            self._normalize_v3_output(r, exam_type, target_year, subject)
+            for r in raw
+            if subject is None or r.get("subject", "").lower() == (subject or "").lower()
+        ]
 
     # ── Normalization ─────────────────────────────────────────────────────────
 
@@ -233,8 +249,49 @@ class PredictionAdapter:
         )
 
     def _normalize_v3_output(self, raw, exam_type, target_year, subject_filter):
-        """Normalize predictor_v3 output."""
-        return self._normalize_slm_output(raw, exam_type, target_year, subject_filter)
+        """
+        Normalize predict_chapters_v3 output → MicroTopicPrediction.
+        v3 uses string confidence ("HIGH"/"MEDIUM"/"LOW") and string trend
+        ("STABLE"/"RISING"/"DECLINING") rather than floats.
+        """
+        conf_map   = {"HIGH": 0.85, "MEDIUM": 0.55, "LOW": 0.30, "SPECULATIVE": 0.15}
+        trend_map  = {"RISING": 0.6, "STABLE": 0.3, "DECLINING": 0.1,
+                      "REMOVED": 0.0, "NEW": 0.7}
+
+        chapter   = raw.get("chapter", "Unknown")
+        subject   = raw.get("subject", "Unknown")
+        appear_p  = float(raw.get("appearance_probability", 0.5))
+        trend_str = str(raw.get("trend_direction", "STABLE")).upper()
+        trend_s   = trend_map.get(trend_str, 0.3)
+        conf_str  = str(raw.get("confidence", "MEDIUM")).upper()
+        conf_s    = conf_map.get(conf_str, 0.55)
+        freq      = float(raw.get("historical_frequency", appear_p * 0.8))
+
+        # v3 doesn't separate micro-topic from chapter — use chapter as both
+        micro_name = raw.get("micro_topic", raw.get("top_micro_topic", chapter))
+
+        return MicroTopicPrediction(
+            prediction_id     = str(uuid4()),
+            micro_topic_id    = hashlib.md5(
+                f"{exam_type}:{subject}:{chapter}:{target_year}".encode()
+            ).hexdigest()[:12],
+            micro_topic_name  = micro_name,
+            topic             = chapter,
+            chapter           = chapter,
+            subject           = subject,
+            exam_type         = exam_type,
+            target_year       = target_year,
+            importance_probability   = appear_p,
+            importance_rank          = int(raw.get("rank", 999)),
+            expected_weightage_band  = score_to_band(appear_p),
+            recurrence_score         = float(raw.get("recurrence_score", 0.6)),
+            recent_appearance_pattern = AppearancePattern.APPEARED_LAST_YEAR,
+            historical_frequency     = freq,
+            topic_trend_score        = trend_s,
+            syllabus_coverage_signal = 1.0 if raw.get("syllabus_status") == "RETAINED" else 0.5,
+            confidence_score         = conf_s,
+            related_topic_clusters   = [],
+        )
 
     @staticmethod
     def _infer_appearance_pattern(gap_years: int) -> AppearancePattern:
@@ -280,20 +337,16 @@ class PredictionAdapter:
             "Mathematics":["Calculus", "Coordinate Geometry", "Algebra", "Probability", "Vectors"],
         }
         subjects = [subject] if subject else list(MOCK_TOPICS.keys())
-        mock_micros = [
-            "Newton's Laws", "Wave Optics", "Photoelectric Effect",
-            "Mendel's Laws", "Mole Concept", "Limit and Continuity",
-        ]
-
         predictions = []
         rank = 1
         for subj in subjects:
             for chapter in MOCK_TOPICS.get(subj, []):
                 ip = rng.uniform(0.3, 0.95)
+                # Use the actual chapter name as micro-topic so subject filtering works
                 predictions.append(MicroTopicPrediction(
                     prediction_id    = str(uuid4()),
                     micro_topic_id   = f"mock-{subj[:3]}-{chapter[:5]}-{rank}",
-                    micro_topic_name = rng.choice(mock_micros),
+                    micro_topic_name = chapter,
                     topic            = chapter,
                     chapter          = chapter,
                     subject          = subj,

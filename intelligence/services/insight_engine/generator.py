@@ -211,7 +211,14 @@ class InsightGenerator:
     ) -> InsightObject:
         """Answer a natural language question grounded in prediction data."""
         from packages.utils.hierarchy import get_top_n_micro_topics
-        top_micros = get_top_n_micro_topics(batch, n=10)
+        # Fetch more topics then deduplicate by name, keeping the highest-probability entry
+        top_micros_raw = get_top_n_micro_topics(batch, n=40)
+        seen: dict = {}
+        for m in top_micros_raw:
+            key = m.micro_topic_name.lower().strip()
+            if key not in seen or m.importance_probability > seen[key].importance_probability:
+                seen[key] = m
+        top_micros = sorted(seen.values(), key=lambda x: x.importance_probability, reverse=True)[:15]
 
         prediction_signals = {
             "avg_importance": sum(m.importance_probability for m in top_micros) / max(len(top_micros), 1),
