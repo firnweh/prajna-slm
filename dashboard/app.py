@@ -564,9 +564,10 @@ with tab_main:
         last  = p["last_appeared"]
         subj  = p["subject"]
 
-        # Signal bars (top 4 from signal_breakdown dict, skip 0 values)
+        # Signal bars (top 4 from signal_breakdown dict, skip 0/non-numeric values)
         sig = p.get("signal_breakdown", {})
-        sig_items = sorted(sig.items(), key=lambda x: x[1], reverse=True)
+        sig_flat = {k: (v if isinstance(v, (int, float)) else 0) for k, v in sig.items()}
+        sig_items = sorted(sig_flat.items(), key=lambda x: x[1], reverse=True)
         sig_bars = ""
         for sname, sval in sig_items[:4]:
             if sval <= 0:
