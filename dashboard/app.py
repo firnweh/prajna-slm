@@ -56,12 +56,19 @@ SUBJ_COLORS = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b", "#a855f7"]
 SYL_COLORS = {"RETAINED": C_HIGH, "MODIFIED": C_MED, "NEW": C_BLUE, "REMOVED": C_LOW}
 
 PLOT_LAYOUT = dict(
-    plot_bgcolor="rgba(0,0,0,0)",
-    paper_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, system-ui, sans-serif", size=12, color="#cbd5e1"),
-    margin=dict(l=10, r=10, t=40, b=10),
+    plot_bgcolor  = "#0f0f1a",
+    paper_bgcolor = "#131320",
+    font = dict(family="Inter, system-ui, sans-serif", size=12, color="#8888aa"),
+    margin  = dict(l=10, r=10, t=36, b=10),
+    legend  = dict(bgcolor="rgba(0,0,0,0)", font=dict(color="#8888aa", size=11)),
+    hoverlabel = dict(bgcolor="#1e1e30", font_color="#e2e8f0", font_size=12),
 )
-_GRID = dict(gridcolor="rgba(255,255,255,0.06)", zerolinecolor="rgba(255,255,255,0.08)")
+_GRID = dict(
+    gridcolor     = "rgba(255,255,255,0.05)",
+    zerolinecolor = "rgba(255,255,255,0.08)",
+    linecolor     = "rgba(255,255,255,0.06)",
+    tickfont      = dict(color="#8888aa", size=11),
+)
 
 def _style_fig(fig):
     """Apply subtle grid styling to any plotly figure."""
