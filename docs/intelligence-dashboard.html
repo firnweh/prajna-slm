@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>PRAJNA Intelligence Layer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#080810;--sf:rgba(14,14,28,.92);--card:rgba(18,18,36,.9);
+      --bd:rgba(255,255,255,.07);--tx:#f0f0f8;--mt:#8888aa;
+      --acc:#6366f1;--green:#22c55e;--amber:#f59e0b;
+      --red:#ef4444;--purple:#a855f7;--cyan:#06b6d4;--rose:#f43f5e;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 20% 5%,rgba(99,102,241,.09) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%,rgba(168,85,247,.05) 0%,transparent 60%)}
+
+    /* ── Nav ── */
+    nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;
+      justify-content:space-between;padding:.75rem 1.75rem;
+      background:rgba(8,8,16,.88);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--bd)}
+    .nlogo{display:flex;align-items:center;gap:.6rem;text-decoration:none}
+    .npw{width:32px;height:32px;border-radius:50%;
+      background:linear-gradient(135deg,#6366f1,#a855f7);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.75rem;color:#fff}
+    .nbrand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;color:var(--tx)}
+    .nlinks{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+    .nlinks a{color:var(--mt);text-decoration:none;font-size:.82rem;transition:color .2s}
+    .nlinks a:hover{color:var(--tx)}
+    .npill{padding:3px 11px;border-radius:20px;font-size:.76rem;font-weight:600;text-decoration:none}
+    .np-purple{background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.35);color:#c084fc}
+    .np-green{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);color:#86efac}
+    .np-cyan{background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.35);color:#67e8f9}
+    .np-orange{background:rgba(251,146,60,.12);border:1px solid rgba(251,146,60,.35);color:#fdba74}
+
+    /* ── Status bar ── */
+    #sb{display:flex;align-items:center;gap:.6rem;padding:.45rem 1.75rem;
+      font-size:.78rem;color:var(--mt);border-bottom:1px solid rgba(34,197,94,.1)}
+    .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);
+      box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+    .sdot.off{background:var(--red);box-shadow:0 0 6px var(--red);animation:none}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+    /* ── Controls bar ── */
+    .ctrl-bar{display:flex;align-items:center;gap:1rem;padding:.75rem 1.75rem;
+      background:rgba(255,255,255,.02);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+    .ctrl-bar label{font-size:.78rem;color:var(--mt)}
+    .ctrl-bar select,.ctrl-bar input[type=number]{
+      background:var(--card);border:1px solid var(--bd);color:var(--tx);
+      padding:.38rem .75rem;border-radius:7px;font-size:.82rem;font-family:inherit;
+      outline:none;cursor:pointer}
+    .ctrl-bar select:focus,.ctrl-bar input:focus{border-color:var(--acc)}
+    .btn{padding:.38rem 1rem;border-radius:7px;border:none;font-family:inherit;
+      font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .btn-p{background:var(--acc);color:#fff}.btn-p:hover{background:#4f52d4}
+    .btn-o{background:transparent;border:1px solid var(--bd);color:var(--mt)}
+    .btn-o:hover{border-color:var(--acc);color:var(--tx)}
+    .btn-red{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.35);color:#f87171}
+    .btn-red:hover{background:rgba(239,68,68,.25)}
+
+    /* ── Tabs ── */
+    .tab-bar{display:flex;gap:0;border-bottom:1px solid var(--bd);
+      padding:0 1.75rem;background:rgba(8,8,16,.5);overflow-x:auto}
+    .tab-btn{padding:.7rem 1.1rem;font-size:.82rem;font-weight:500;color:var(--mt);
+      background:transparent;border:none;border-bottom:2px solid transparent;
+      cursor:pointer;white-space:nowrap;transition:all .2s;font-family:inherit}
+    .tab-btn:hover{color:var(--tx)}
+    .tab-btn.active{color:var(--tx);border-bottom-color:var(--acc)}
+
+    /* ── Page shell ── */
+    .page{padding:1.5rem 1.75rem;max-width:1500px;margin:0 auto}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+
+    /* ── Cards / Panels ── */
+    .panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:1.3rem 1.5rem}
+    .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .ph h2{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:600;margin:0}
+    .badge{font-size:.68rem;padding:2px 8px;border-radius:12px;font-weight:600}
+    .bg{background:rgba(34,197,94,.15);color:var(--green)}
+    .bam{background:rgba(245,158,11,.15);color:var(--amber)}
+    .bp{background:rgba(168,85,247,.15);color:var(--purple)}
+    .bc{background:rgba(6,182,212,.15);color:var(--cyan)}
+    .br{background:rgba(244,63,94,.15);color:var(--rose)}
+    .bgr{background:rgba(255,255,255,.08);color:var(--mt)}
+
+    /* ── Stats strip ── */
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.9rem;margin-bottom:1.4rem}
+    .sc{background:var(--card);border:1px solid var(--bd);border-radius:11px;padding:1rem 1.2rem;
+      transition:border-color .2s,transform .2s}
+    .sc:hover{border-color:rgba(99,102,241,.4);transform:translateY(-2px)}
+    .sl{font-size:.68rem;color:var(--mt);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem}
+    .sv{font-family:'Space Grotesk',sans-serif;font-size:1.85rem;font-weight:700;line-height:1}
+    .ss{font-size:.68rem;color:var(--mt);margin-top:.3rem}
+    .ca{color:var(--acc)}.cg{color:var(--green)}.cc{color:var(--cyan)}
+    .cp{color:var(--purple)}.cam{color:var(--amber)}.cr{color:var(--rose)}
+
+    /* ── Grid helpers ── */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+    .g2l{display:grid;grid-template-columns:2fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+    @media(max-width:900px){.g2,.g3,.g2l{grid-template-columns:1fr}}
+
+    /* ── Table / rows ── */
+    .trow{display:flex;align-items:center;gap:.7rem;padding:.6rem 0;border-bottom:1px solid var(--bd)}
+    .trow:last-child{border-bottom:none}
+    .rn{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mt);min-width:22px;text-align:right}
+    .tn{flex:1;font-size:.84rem;font-weight:500;min-width:0}
+    .tm{font-size:.71rem;color:var(--mt);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mt)}
+    .ibw{width:70px;background:rgba(255,255,255,.06);border-radius:4px;height:5px;flex-shrink:0}
+    .ib{height:5px;border-radius:4px;transition:width .6s}
+
+    /* ── Urgency pills ── */
+    .up{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:10px;
+      text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;flex-shrink:0}
+    .u-critical{background:rgba(239,68,68,.2);color:#f87171}
+    .u-high{background:rgba(245,158,11,.2);color:#fbbf24}
+    .u-medium{background:rgba(99,102,241,.2);color:#818cf8}
+    .u-low{background:rgba(255,255,255,.08);color:var(--mt)}
+
+    /* ── Subject bars ── */
+    .sbar{margin-bottom:.9rem}
+    .sbarlbl{display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.82rem}
+    .sbartr{height:9px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+    .sbarfill{height:100%;border-radius:5px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+
+    /* ── Chart canvas ── */
+    .chart-wrap{position:relative;height:240px}
+    .chart-wrap-lg{position:relative;height:340px}
+
+    /* ── Hot/cold ── */
+    .hc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem}
+    @media(max-width:900px){.hc-grid{grid-template-columns:1fr}}
+    .hc-item{display:flex;align-items:flex-start;gap:.6rem;padding:.6rem .8rem;
+      background:rgba(255,255,255,.03);border:1px solid var(--bd);border-radius:8px}
+    .hc-num{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--mt);min-width:22px}
+    .hc-body{flex:1;min-width:0}
+    .hc-name{font-size:.82rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .hc-sub{font-size:.7rem;color:var(--mt);margin-top:1px}
+    .hc-val{font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:8px;flex-shrink:0}
+    .hot-val{background:rgba(34,197,94,.15);color:var(--green)}
+    .cold-val{background:rgba(99,102,241,.15);color:#818cf8}
+    .cycle-val{background:rgba(6,182,212,.15);color:var(--cyan)}
+
+    /* ── Lesson plan priority bands ── */
+    .band-a{background:rgba(239,68,68,.12);color:#f87171;font-size:.65rem;font-weight:700;
+      padding:2px 7px;border-radius:10px}
+    .band-b{background:rgba(245,158,11,.12);color:#fbbf24;font-size:.65rem;font-weight:700;
+      padding:2px 7px;border-radius:10px}
+    .band-c{background:rgba(255,255,255,.07);color:var(--mt);font-size:.65rem;font-weight:700;
+      padding:2px 7px;border-radius:10px}
+
+    /* ── Backtest ── */
+    .bt-metric{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:10px;
+      padding:1rem;text-align:center}
+    .bt-val{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700}
+    .bt-lbl{font-size:.68rem;color:var(--mt);text-transform:uppercase;letter-spacing:.06em;margin-top:.3rem}
+
+    /* ── Revision plan ── */
+    .rev-block{padding:.8rem 1rem;background:rgba(255,255,255,.03);border-radius:9px;
+      border-left:3px solid var(--acc);margin-bottom:.9rem}
+
+    /* ── Copilot ── */
+    .cp-row{display:flex;gap:.7rem;margin-bottom:.8rem}
+    .cp-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--tx);
+      padding:.6rem 1rem;border-radius:9px;font-size:.84rem;font-family:inherit;outline:none;
+      transition:border-color .2s}
+    .cp-inp:focus{border-color:var(--acc)}
+    .cp-ans{padding:1rem 1.2rem;background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);
+      border-radius:9px;font-size:.84rem;line-height:1.7;white-space:pre-wrap;display:none}
+    .cp-meta{font-size:.72rem;color:var(--mt);margin-top:.5rem;display:none}
+    .suggestions{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem}
+    .sugg{font-size:.72rem;padding:4px 10px;border-radius:14px;background:rgba(255,255,255,.06);
+      border:1px solid var(--bd);color:var(--mt);cursor:pointer;transition:.15s}
+    .sugg:hover{border-color:var(--acc);color:var(--tx)}
+
+    /* ── Skeleton ── */
+    .skel{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);
+      background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ── Reason pills ── */
+    .reason{font-size:.71rem;padding:2px 8px;border-radius:12px;background:rgba(99,102,241,.12);
+      color:#a5b4fc;margin-right:4px;margin-top:3px;display:inline-block}
+
+    /* ── topic detail drawer ── */
+    .detail-panel{background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);
+      border-radius:10px;padding:1rem 1.2rem;margin-top:.5rem;display:none}
+    .detail-panel.open{display:block}
+
+    /* ── Timeline ── */
+    .tl-row{display:flex;align-items:baseline;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--bd)}
+    .tl-year{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--mt);min-width:44px}
+    .tl-bar-wrap{flex:1;height:16px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden}
+    .tl-bar{height:100%;border-radius:4px;background:var(--acc);display:flex;align-items:center;
+      padding-left:6px;font-size:.65rem;font-weight:700;transition:width .8s}
+    .tl-count{font-size:.72rem;color:var(--mt);min-width:30px;text-align:right}
+
+    /* ── Topic search ── */
+    .topic-sel{width:100%;background:var(--card);border:1px solid var(--bd);color:var(--tx);
+      padding:.5rem .9rem;border-radius:9px;font-size:.84rem;font-family:inherit;outline:none;
+      margin-bottom:1rem}
+    .topic-sel:focus{border-color:var(--acc)}
+
+    footer{margin-top:2.5rem;padding:1.2rem 1.75rem;border-top:1px solid var(--bd);
+      display:flex;justify-content:space-between;font-size:.75rem;color:var(--mt)}
+    footer a{color:var(--acc);text-decoration:none}
+    footer a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav>
+  <a href="index.html" class="nlogo">
+    <div class="npw">PW</div>
+    <span class="nbrand">PRAJNA Intelligence</span>
+  </a>
+  <div class="nlinks">
+    <a href="index.html">Home</a>
+    <a href="student-dashboard.html" class="npill np-purple">Student IQ ↗</a>
+    <a href="http://localhost:8501" target="_blank" class="npill np-orange">Streamlit ↗</a>
+    <a href="http://localhost:8001/docs" target="_blank" class="npill np-green">API Docs ↗</a>
+  </div>
+</nav>
+
+<!-- ── Status bar ── -->
+<div id="sb">
+  <div class="sdot" id="sdot"></div>
+  <span id="stxt">Connecting…</span>
+  <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.74rem">localhost:8001</span>
+</div>
+
+<!-- ── Global controls ── -->
+<div class="ctrl-bar">
+  <label>Exam</label>
+  <select id="g-exam">
+    <option value="neet">NEET</option>
+    <option value="jee_main">JEE Main</option>
+    <option value="jee_advanced">JEE Advanced</option>
+  </select>
+  <label>Year</label>
+  <input type="number" id="g-year" value="2026" min="2010" max="2035"
+    style="background:var(--card);border:1px solid var(--bd);color:var(--tx);
+    padding:.45rem .7rem;border-radius:8px;font-size:.86rem;font-family:inherit;
+    outline:none;width:72px;-moz-appearance:textfield"
+    title="Type any year from 2010–2035">
+  <label>Top N</label>
+  <select id="g-topn">
+    <option value="20">20</option>
+    <option value="40" selected>40</option>
+    <option value="60">60</option>
+    <option value="80">80</option>
+  </select>
+  <label>Subject</label>
+  <select id="g-subj">
+    <option value="">All Subjects</option>
+    <option value="Biology">Biology</option>
+    <option value="Chemistry">Chemistry</option>
+    <option value="Physics">Physics</option>
+    <option value="Mathematics">Mathematics</option>
+  </select>
+  <label>Level</label>
+  <select id="g-level">
+    <option value="chapter" selected>Chapter</option>
+    <option value="micro">Micro-Topic</option>
+  </select>
+  <label>Confidence</label>
+  <select id="g-urgency">
+    <option value="">All</option>
+    <option value="HIGH">High</option>
+    <option value="MEDIUM">Medium</option>
+    <option value="LOW">Low</option>
+    <option value="SPECULATIVE">Speculative</option>
+  </select>
+  <button class="btn btn-p" onclick="applyFilters()">Apply</button>
+  <button class="btn btn-o" onclick="resetFilters()">Reset</button>
+</div>
+
+<!-- ── Tabs ── -->
+<div class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('overview',this)">📊 Overview</button>
+  <button class="tab-btn" onclick="switchTab('predictions',this)">⚡ Predictions</button>
+  <button class="tab-btn" onclick="switchTab('deepdive',this)">🔬 Deep Dive</button>
+  <button class="tab-btn" onclick="switchTab('backtest',this)">🎯 Backtest</button>
+  <button class="tab-btn" onclick="switchTab('lessons',this)">📚 Lesson Plan</button>
+  <button class="tab-btn" onclick="switchTab('revision',this)">📅 Revision Plan</button>
+  <button class="tab-btn" onclick="switchTab('trend',this)">📈 Trend</button>
+  <button class="tab-btn" onclick="switchTab('copilot',this)">🤖 Copilot</button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 1 — OVERVIEW
+════════════════════════════════════════════ -->
+<div class="tab-panel active" id="tab-overview">
+<div class="page">
+  <div class="stats" id="ov-stats">
+    <div class="sc"><div class="sl">Subjects</div><div class="sv ca" id="ov-s0">—</div><div class="ss">prediction batch</div></div>
+    <div class="sc"><div class="sl">Chapters</div><div class="sv cg" id="ov-s1">—</div><div class="ss">aggregated</div></div>
+    <div class="sc"><div class="sl">Topics</div><div class="sv cc" id="ov-s2">—</div><div class="ss">unique</div></div>
+    <div class="sc"><div class="sl">Micro-Topics</div><div class="sv cp" id="ov-s3">—</div><div class="ss">atomic predictions</div></div>
+    <div class="sc"><div class="sl">High-Prob (≥70%)</div><div class="sv cam" id="ov-s4">—</div><div class="ss">topics</div></div>
+    <div class="sc"><div class="sl">Critical Topics</div><div class="sv cr" id="ov-s5">—</div><div class="ss">urgency: critical</div></div>
+  </div>
+  <div class="g2">
+    <div class="panel"><div class="ph"><h2>📊 Subject Importance</h2><span class="badge bg">PRAJNA SLM</span></div><div id="ov-bars"></div></div>
+    <div class="panel"><div class="ph"><h2>🎯 Signal Radar</h2><span class="badge bp" id="ov-rlbl">Top Topic</span></div><div class="chart-wrap"><canvas id="ov-radar"></canvas></div></div>
+  </div>
+  <div class="panel" style="margin-bottom:1.2rem">
+    <div class="ph"><h2>📈 Subject Weightage Timeline (All Years)</h2><span class="badge bc">48-Year DB</span></div>
+    <div class="chart-wrap-lg"><canvas id="ov-timeline"></canvas></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 2 — PREDICTIONS
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-predictions">
+<div class="page">
+  <div class="stats">
+    <div class="sc"><div class="sl">High-Prob</div><div class="sv cam" id="pr-hp">—</div><div class="ss">≥70% appear prob</div></div>
+    <div class="sc"><div class="sl">Expected Qs</div><div class="sv ca" id="pr-eq">—</div><div class="ss">from top-N</div></div>
+    <div class="sc"><div class="sl">Rising Topics</div><div class="sv cg" id="pr-ri">—</div><div class="ss">RISING trend</div></div>
+    <div class="sc"><div class="sl">Avg Confidence</div><div class="sv cp" id="pr-cf">—</div><div class="ss">model certainty</div></div>
+    <div class="sc"><div class="sl">Critical</div><div class="sv cr" id="pr-cr">—</div><div class="ss">must-do topics</div></div>
+  </div>
+  <div class="panel">
+    <div class="ph"><h2>⚡ Ranked Predictions</h2>
+      <div style="display:flex;gap:.5rem">
+        <span class="badge bc" id="pr-count">—</span>
+        <a href="#" id="pr-json-link" target="_blank" style="font-size:.74rem;color:var(--acc);text-decoration:none">JSON ↗</a>
+      </div>
+    </div>
+    <div id="pr-list"></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 3 — DEEP DIVE
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-deepdive">
+<div class="page">
+  <div class="g2" style="margin-bottom:1.4rem">
+    <div>
+      <label style="font-size:.78rem;color:var(--mt);display:block;margin-bottom:.5rem">Topic / Chapter</label>
+      <select class="topic-sel" id="dd-topic-sel" onchange="loadTopicDeepDive()">
+        <option value="">— Select a topic —</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:flex-end;gap:.8rem">
+      <div class="sc" style="flex:1"><div class="sl">Total Qs</div><div class="sv ca" id="dd-qs">—</div></div>
+      <div class="sc" style="flex:1"><div class="sl">First Year</div><div class="sv cg" id="dd-fy">—</div></div>
+      <div class="sc" style="flex:1"><div class="sl">Last Year</div><div class="sv cc" id="dd-ly">—</div></div>
+      <div class="sc" style="flex:1"><div class="sl">Span</div><div class="sv cp" id="dd-sp">—</div></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-bottom:1.2rem">
+    <div class="ph"><h2>📅 Questions per Year</h2><span class="badge bc">Full history</span></div>
+    <div class="chart-wrap-lg"><canvas id="dd-timeline"></canvas></div>
+  </div>
+  <div class="g2">
+    <div class="panel"><div class="ph"><h2>📉 Difficulty Trend</h2></div><div class="chart-wrap"><canvas id="dd-diff"></canvas></div></div>
+    <div class="panel"><div class="ph"><h2>📋 Question Types</h2></div><div class="chart-wrap"><canvas id="dd-types"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="panel">
+      <div class="ph"><h2>🔥 Hot Topics (recent 3 yr)</h2><span class="badge bg">Real DB</span></div>
+      <div id="dd-hot"></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>❄️ Cold Topics (dormant)</h2><span class="badge bc">Due for return</span></div>
+      <div id="dd-cold"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="ph"><h2>🔄 Cyclical Topics</h2><span class="badge bp">Repeating patterns</span></div>
+    <div id="dd-cycles" class="hc-grid"></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 4 — BACKTEST
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-backtest">
+<div class="page">
+  <div class="panel" style="margin-bottom:1.2rem">
+    <div class="ph"><h2>🎯 Interactive Backtest</h2><span class="badge bam">Train on past, predict one year</span></div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:1rem">
+      <div>
+        <label style="font-size:.76rem;color:var(--mt);display:block;margin-bottom:.3rem">Test Year</label>
+        <select id="bt-year" style="background:var(--card);border:1px solid var(--bd);color:var(--tx);padding:.4rem .8rem;border-radius:7px;font-size:.82rem;font-family:inherit;outline:none">
+          <option value="2024">2024</option>
+          <option value="2023" selected>2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.76rem;color:var(--mt);display:block;margin-bottom:.3rem">Level</label>
+        <select id="bt-level" style="background:var(--card);border:1px solid var(--bd);color:var(--tx);padding:.4rem .8rem;border-radius:7px;font-size:.82rem;font-family:inherit;outline:none">
+          <option value="chapter">Chapter</option>
+          <option value="micro">Micro-Topic</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:.76rem;color:var(--mt);display:block;margin-bottom:.3rem">K (Predictions)</label>
+        <select id="bt-k" style="background:var(--card);border:1px solid var(--bd);color:var(--tx);padding:.4rem .8rem;border-radius:7px;font-size:.82rem;font-family:inherit;outline:none">
+          <option value="30">30</option>
+          <option value="60" selected>60</option>
+          <option value="80">80</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="runBacktest()">▶ Run Backtest</button>
+    </div>
+    <div id="bt-result"></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 5 — LESSON PLAN
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-lessons">
+<div class="page">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.8rem">
+    <div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.3rem">📚 Syllabus-Based Lesson Plan</div>
+      <div style="font-size:.8rem;color:var(--mt)">Chapters ranked by PRAJNA prediction priority. Band A = must-do, B = important, C = optional.</div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <span class="band-a">A = must-do ≥70%</span>
+      <span class="band-b">B = important 45-70%</span>
+      <span class="band-c">C = optional &lt;45%</span>
+    </div>
+  </div>
+  <div class="panel"><div id="lp-list"></div></div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 6 — REVISION PLAN
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-revision">
+<div class="page">
+  <div class="panel" style="margin-bottom:1.2rem">
+    <div class="ph"><h2>📅 SLM Revision Plan</h2><span class="badge bp">Generated</span></div>
+    <div id="rv-content"></div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 7 — TREND
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-trend">
+<div class="page">
+  <div style="display:flex;gap:1rem;align-items:flex-end;margin-bottom:1.2rem;flex-wrap:wrap">
+    <div>
+      <label style="font-size:.76rem;color:var(--mt);display:block;margin-bottom:.3rem">Compare Year</label>
+      <select id="tr-year" style="background:var(--card);border:1px solid var(--bd);color:var(--tx);padding:.4rem .8rem;border-radius:7px;font-size:.82rem;font-family:inherit;outline:none">
+        <option value="2024">2024 vs 2023</option>
+        <option value="2023">2023 vs 2022</option>
+        <option value="2022">2022 vs 2021</option>
+      </select>
+    </div>
+    <button class="btn btn-p" onclick="loadTrend()">Load Trend</button>
+  </div>
+  <div class="panel"><div class="ph"><h2>📈 Year-over-Year Trend</h2><span class="badge cam">Rising / Declining / New / Dropped</span></div>
+    <div id="tr-content" style="color:var(--mt);font-size:.84rem">Select a year pair and click Load Trend.</div>
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     TAB 8 — COPILOT
+════════════════════════════════════════════ -->
+<div class="tab-panel" id="tab-copilot">
+<div class="page">
+  <div class="panel">
+    <div class="ph"><h2>🤖 PRAJNA Copilot — Ask Anything</h2><span class="badge bc">SLM NL Query</span></div>
+    <div class="cp-row">
+      <input class="cp-inp" id="cp-in" type="text" placeholder="e.g. Which Physics chapter should I study first for NEET 2025?"/>
+      <button class="btn btn-p" onclick="askCopilot()">Ask →</button>
+    </div>
+    <div class="cp-ans" id="cp-ans"></div>
+    <div class="cp-meta" id="cp-meta"></div>
+    <div style="margin-top:.8rem;font-size:.76rem;color:var(--mt)">Suggestions:</div>
+    <div class="suggestions" id="cp-suggs"></div>
+  </div>
+</div>
+</div>
+
+<footer>
+  <span>PRAJNA Intelligence Layer v1.0 · 23,119 questions · 48-year DB · Mock SLM</span>
+  <span>
+    <a href="http://localhost:8001/docs" target="_blank">Swagger</a> ·
+    <a href="http://localhost:8001/redoc" target="_blank">ReDoc</a> ·
+    <a href="http://localhost:8001/health" target="_blank">Health</a> ·
+    <a href="http://localhost:8501" target="_blank">Streamlit</a>
+  </span>
+</footer>
+
+<script>
+const API = 'http://localhost:8001';
+const COLORS = {Biology:'#22c55e',Chemistry:'#06b6d4',Physics:'#f59e0b',Mathematics:'#a855f7'};
+const CHART_DEFAULTS = { animation:{duration:700},
+  scales:{y:{grid:{color:'rgba(255,255,255,.07)'},ticks:{color:'#8888aa',font:{size:10}}},
+          x:{grid:{display:false},ticks:{color:'#8888aa',font:{size:10}}}},
+  plugins:{legend:{display:false}} };
+
+// State
+const DATA = {};      // tab cache
+const CHARTS = {};    // chart instances
+let ALL_PREDS = [];   // unfiltered predictions
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function setTxt(id,v){ const e=$(id); if(e) e.textContent=v; }
+function el(tag,cls){ const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+function clr(id){ const e=$(id); if(e) e.textContent=''; return e; }
+function skel(n,h='14px'){
+  const f=document.createDocumentFragment();
+  for(let i=0;i<n;i++){
+    const d=el('div','skel'); d.style.cssText='height:'+h+';margin-bottom:.6rem';
+    f.appendChild(d);
+  }
+  return f;
+}
+function exam(){ return $('g-exam').value; }
+function yr(){ return $('g-year').value; }
+function topN(){ return parseInt($('g-topn').value)||40; }
+function subj(){ return $('g-subj').value; }
+function level(){ return $('g-level').value; }
+function confFilt(){ return $('g-urgency').value; }
+function urgFilt(){ return $('g-urgency').value; } // legacy alias
+
+// Central real-predict fetcher — calls PRAJNA engine, not the mock adapter
+async function fetchRealPredict(){
+  const url = API+'/api/v1/data/predict?exam_type='+exam()+'&year='+yr()+'&top_n='+topN()+'&level='+level()+'&subject='+encodeURIComponent(subj());
+  const r = await fetch(url);
+  if(!r.ok) throw new Error('predict API '+r.status);
+  return r.json();
+}
+function mkChart(id,cfg){ if(CHARTS[id]) CHARTS[id].destroy(); CHARTS[id]=new Chart($(id).getContext('2d'),cfg); return CHARTS[id]; }
+
+function destroyTab(name){ Object.keys(CHARTS).filter(k=>k.startsWith(name)).forEach(k=>{ try{CHARTS[k].destroy();}catch(e){} delete CHARTS[k]; }); }
+
+// ── status ───────────────────────────────────────────────────────────────────
+async function checkStatus(){
+  try{
+    const r=await fetch(API+'/health',{signal:AbortSignal.timeout(3000)});
+    if(r.ok){ const d=await r.json();
+      $('sdot').className='sdot';
+      setTxt('stxt','API online · '+d.service+' '+d.version+' · '+new Date().toLocaleTimeString());
+      return true;
+    }
+  }catch(_){}
+  $('sdot').className='sdot off';
+  setTxt('stxt','API offline — run: python3 intelligence/run_api.py');
+  return false;
+}
+
+// ── tab switching ─────────────────────────────────────────────────────────────
+const TAB_LOADERS = {
+  overview:    loadOverview,
+  predictions: loadPredictions,
+  deepdive:    loadDeepDive,
+  backtest:    ()=>{},
+  lessons:     loadLessons,
+  revision:    loadRevision,
+  trend:       ()=>{},
+  copilot:     loadCopilotSuggestions,
+};
+
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  $('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(!DATA[name]){ DATA[name]=true; (TAB_LOADERS[name]||function(){})(); }
+}
+
+// ── filters ───────────────────────────────────────────────────────────────────
+function applyFilters(){
+  // Reset caches so all tabs reload with the new year/exam
+  DATA.predictions=false; DATA.overview=false;
+  DATA.deepdive=false; DATA.lessonplan=false; DATA.revision=false;
+  _hotColdCache=null; // force hot/cold re-fetch on next Deep Dive open
+  loadOverview(); loadPredictions();
+  // If Deep Dive is currently open, reload it too
+  if($('tab-deepdive').classList.contains('active')) loadDeepDive();
+  if($('tab-lessons').classList.contains('active')) loadLessons();
+}
+function resetFilters(){
+  $('g-year').value='2026';
+  $('g-topn').value='40';
+  $('g-exam').value='neet';
+  $('g-level').value='chapter';
+  $('g-subj').value=''; $('g-urgency').value='';
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 1 — OVERVIEW
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadOverview(){
+  DATA.overview=true;
+  await Promise.all([loadOverviewBatch(), loadOverviewTimeline()]);
+}
+
+async function loadOverviewBatch(){
+  try{
+    const d = await fetchRealPredict();
+    if(!d.success) return;
+    ALL_PREDS = d.predictions || [];
+    const s = d.summary || {};
+
+    // Count distinct subjects / chapters
+    const subjects = [...new Set(ALL_PREDS.map(p=>p.subject).filter(Boolean))];
+    const chapters  = [...new Set(ALL_PREDS.map(p=>p.chapter||p.micro_topic).filter(Boolean))];
+    setTxt('ov-s0', subjects.length);
+    setTxt('ov-s1', chapters.length);
+    setTxt('ov-s2', d.total);
+    setTxt('ov-s3', d.total);
+    setTxt('ov-s4', s.high_prob_count || 0);
+    setTxt('ov-s5', s.critical_count  || 0);
+
+    // Subject importance bars — avg appearance_probability per subject
+    const subjMap = {};
+    ALL_PREDS.forEach(p=>{ const sv=p.subject||'Unknown';
+      if(!subjMap[sv]) subjMap[sv]={sum:0,n:0};
+      subjMap[sv].sum += p.appearance_probability||0; subjMap[sv].n++;
+    });
+    const vec = {};
+    Object.entries(subjMap).forEach(([s,v])=>{ vec[s]=v.sum/v.n; });
+    renderSubjBars('ov-bars', vec);
+
+    // Radar on top prediction
+    buildRadarReal('ov-radar','ov-rlbl', ALL_PREDS[0]);
+  }catch(e){ console.error('loadOverviewBatch', e); }
+}
+
+async function loadOverviewTimeline(){
+  try{
+    const r=await fetch(API+'/api/v1/data/subject-timeline?exam_type='+exam());
+    const d=await r.json();
+    if(!d.success||!d.rows||!d.rows.length) return;
+    const rows=d.rows;
+    const years=[...new Set(rows.map(r=>r.year))].sort();
+    const subjects=[...new Set(rows.map(r=>r.subject))];
+    const datasets=subjects.map(s=>({
+      label:s, data:years.map(y=>{const row=rows.find(r=>r.year===y&&r.subject===s); return row?row.count:0;}),
+      backgroundColor:(COLORS[s]||'#6366f1')+'aa', borderColor:COLORS[s]||'#6366f1', borderWidth:1,
+    }));
+    mkChart('ov-timeline',{type:'bar',data:{labels:years,datasets},
+      options:{...CHART_DEFAULTS,responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{color:'#8888aa',font:{size:10},boxWidth:12}}},
+        scales:{x:{stacked:true,...CHART_DEFAULTS.scales.x},y:{stacked:true,...CHART_DEFAULTS.scales.y}}}});
+  }catch(_){}
+}
+
+function renderSubjBars(elId, vec){
+  const el2=clr(elId);
+  const entries=Object.entries(vec).sort((a,b)=>b[1]-a[1]);
+  entries.forEach(([s,imp])=>{
+    const pct=Math.round(imp*100); const col=COLORS[s]||'#6366f1';
+    const wrap=document.createElement('div'); wrap.className='sbar';
+    const lbl=document.createElement('div'); lbl.className='sbarlbl';
+    const n=document.createElement('span'); n.textContent=s;
+    const v=document.createElement('span'); v.textContent=pct+'%';
+    v.style.cssText='color:'+col+';font-family:monospace;font-size:.78rem';
+    lbl.appendChild(n); lbl.appendChild(v);
+    const tr=document.createElement('div'); tr.className='sbartr';
+    const fill=document.createElement('div'); fill.className='sbarfill';
+    fill.style.background=col; fill.style.width='0';
+    tr.appendChild(fill); wrap.appendChild(lbl); wrap.appendChild(tr);
+    el2.appendChild(wrap);
+    requestAnimationFrame(()=>{ fill.style.width=pct+'%'; });
+  });
+}
+
+function buildRadar(canvasId, lblId, p){
+  if(!p) return;
+  setTxt(lblId, p.scope_name||'Top Topic');
+  mkChart(canvasId,{type:'radar',
+    data:{labels:['Importance','Confidence','Priority','Recurrence','Trend'],
+      datasets:[{label:p.scope_name,
+        data:[Math.round((p.importance_probability||0)*100),Math.round((p.confidence||0)*100),
+              Math.round(p.priority_score||0),60+Math.round(Math.random()*30),50+Math.round(Math.random()*40)],
+        backgroundColor:'rgba(99,102,241,.15)',borderColor:'#6366f1',borderWidth:2,
+        pointBackgroundColor:'#6366f1',pointRadius:4}]},
+    options:{animation:{duration:700},
+      scales:{r:{min:0,max:100,ticks:{display:false},
+        grid:{color:'rgba(255,255,255,.07)'},angleLines:{color:'rgba(255,255,255,.07)'},
+        pointLabels:{color:'#8888aa',font:{size:10}}}},
+      plugins:{legend:{display:false}}}});
+}
+
+// Radar built from real predictor fields (no mock fields)
+function buildRadarReal(canvasId, lblId, p){
+  if(!p) return;
+  const name = p.chapter || p.micro_topic || 'Top Topic';
+  setTxt(lblId, name);
+  const sb = p.signal_breakdown || {};
+  const recurrence = Math.round(((sb.recency_score||{}).value || (sb.recent_ratio||{}).value || 0)*100);
+  const trend = p.trend_direction==='RISING' ? 90 : p.trend_direction==='DECLINING' ? 20 : 55;
+  mkChart(canvasId,{type:'radar',
+    data:{labels:['Appear. Prob.','Confidence','Final Score','Recurrence','Trend'],
+      datasets:[{label:name,
+        data:[
+          Math.round((p.appearance_probability||0)*100),
+          Math.round((p.confidence_score||0)*100),
+          Math.round((p.final_score||0)*100),
+          recurrence||55,
+          trend,
+        ],
+        backgroundColor:'rgba(99,102,241,.15)',borderColor:'#6366f1',borderWidth:2,
+        pointBackgroundColor:'#6366f1',pointRadius:4}]},
+    options:{animation:{duration:700},
+      scales:{r:{min:0,max:100,ticks:{display:false},
+        grid:{color:'rgba(255,255,255,.07)'},angleLines:{color:'rgba(255,255,255,.07)'},
+        pointLabels:{color:'#8888aa',font:{size:10}}}},
+      plugins:{legend:{display:false}}}});
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 2 — PREDICTIONS
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadPredictions(){
+  DATA.predictions=true;
+  const el2=clr('pr-list'); el2.appendChild(skel(8,'50px'));
+  const dataUrl=API+'/api/v1/data/predict?exam_type='+exam()+'&year='+yr()+'&top_n='+topN()+'&level='+level()+'&subject='+encodeURIComponent(subj());
+  $('pr-json-link').href=dataUrl;
+  try{
+    const d = await fetchRealPredict();
+    if(!d.success) return;
+    ALL_PREDS = d.predictions || [];
+
+    // Client-side confidence filter (subject already filtered server-side)
+    const cf = confFilt();
+    let preds = cf ? ALL_PREDS.filter(p=>(p.confidence||'').toUpperCase()===cf.toUpperCase()) : ALL_PREDS;
+
+    const s = d.summary || {};
+    setTxt('pr-count', preds.length+' '+(level()==='micro'?'micro-topics':'chapters'));
+    setTxt('pr-hp',  s.high_prob_count  || 0);
+    setTxt('pr-eq',  '~'+(s.expected_total_qs||0).toFixed(0));
+    setTxt('pr-ri',  s.rising_count     || 0);
+    setTxt('pr-cf',  Math.round((s.avg_confidence||0)*100)+'%');
+    setTxt('pr-cr',  s.critical_count   || 0);
+
+    el2.textContent='';
+    if(!preds.length){
+      const em=document.createElement('div');
+      em.style.cssText='color:var(--mt);padding:2rem;text-align:center;font-size:.84rem';
+      em.textContent='No predictions match current filters.'; el2.appendChild(em); return;
+    }
+
+    preds.forEach((p,i)=>{
+      const row=el('div','trow');
+      const topicName = p.chapter || p.micro_topic || '—';
+      const chapName  = p.chapter || '—';
+      const subjName  = p.subject || '';
+      const appProb   = p.appearance_probability || 0;
+      const conf      = (p.confidence || 'LOW').toUpperCase();
+      const tdir      = (p.trend_direction || 'STABLE').toUpperCase();
+      const expQ      = p.expected_questions || 0;
+      const expMin    = p.expected_qs_min || 0;
+      const expMax    = p.expected_qs_max || 0;
+      const lastSeen  = p.last_appeared || '—';
+      const finalSc   = p.final_score || 0;
+
+      // Rank number
+      const num=el('span','rn'); num.textContent='#'+(i+1); row.appendChild(num);
+
+      // Info block
+      const info=el('div'); info.style.cssText='flex:1;min-width:0;overflow:hidden';
+      const nm=el('div','tn'); nm.textContent=topicName; info.appendChild(nm);
+      const mt=el('div','tm');
+      mt.textContent=subjName+(level()==='micro'?' › '+chapName:'');
+      mt.style.cssText='font-size:.73rem;color:var(--mt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+      info.appendChild(mt);
+
+      // Reasons from real model
+      const reasons = p.reasons || [];
+      if(reasons.length){
+        const rw=el('div'); rw.style.cssText='margin-top:3px;display:flex;flex-wrap:wrap;gap:3px';
+        reasons.slice(0,2).forEach(r=>{
+          const rp=el('span','reason'); rp.textContent=r; rw.appendChild(rp);
+        });
+        info.appendChild(rw);
+      }
+
+      // Formats & difficulty inline
+      const meta=el('div'); meta.style.cssText='font-size:.7rem;color:var(--mt);margin-top:2px';
+      const fmts=(p.likely_formats||[]).slice(0,2).join(', ');
+      const diff=p.likely_difficulty ? ' · diff: '+(+p.likely_difficulty).toFixed(1) : '';
+      meta.textContent=(fmts||'')+diff+(lastSeen?' · last: '+lastSeen:'');
+      info.appendChild(meta);
+      row.appendChild(info);
+
+      // Trend arrow
+      const tr=el('span'); tr.style.cssText='font-size:.9rem;margin:0 6px;flex-shrink:0';
+      tr.textContent=tdir==='RISING'?'↑':tdir==='DECLINING'?'↓':tdir==='NEW'?'★':'→';
+      tr.title=tdir;
+      tr.style.color=tdir==='RISING'?'var(--green)':tdir==='DECLINING'?'var(--red)':tdir==='NEW'?'var(--amber)':'var(--mt)';
+      row.appendChild(tr);
+
+      // Confidence badge (maps Streamlit HIGH/MEDIUM/LOW/SPECULATIVE)
+      const confColors={'HIGH':'var(--green)','MEDIUM':'var(--amber)','LOW':'var(--red)','SPECULATIVE':'#94a3b8'};
+      const cbadge=el('span'); cbadge.style.cssText='font-size:.68rem;padding:1px 6px;border-radius:4px;background:rgba(255,255,255,.07);color:'+(confColors[conf]||'var(--mt)')+';white-space:nowrap;flex-shrink:0';
+      cbadge.textContent=conf; row.appendChild(cbadge);
+
+      // Expected Qs
+      const eqEl=el('span'); eqEl.style.cssText='font-family:monospace;font-size:.75rem;color:var(--acc);margin:0 6px;white-space:nowrap;flex-shrink:0';
+      eqEl.textContent='~'+expQ.toFixed(1)+'Q ('+(expMin||0)+'-'+(expMax||0)+')';
+      eqEl.title='Expected questions range'; row.appendChild(eqEl);
+
+      // P(appear) bar
+      const ipc=Math.round(appProb*100);
+      const bw=el('div','ibw'); const bf=el('div','ib');
+      bf.style.width='0';
+      bf.style.background=conf==='HIGH'?'var(--green)':conf==='MEDIUM'?'var(--amber)':conf==='SPECULATIVE'?'#94a3b8':'var(--red)';
+      bw.appendChild(bf); row.appendChild(bw);
+
+      // Score
+      const sc=el('span','mono'); sc.style.cssText='min-width:42px;text-align:right;font-size:.75rem;flex-shrink:0';
+      sc.textContent=Math.round(appProb*100)+'%'; sc.title='Appearance probability'; row.appendChild(sc);
+
+      // Click → expand signal breakdown + reasons
+      row.style.cursor='pointer';
+      const det=el('div','detail-panel');
+
+      // All reasons
+      if(reasons.length){
+        const rh=el('div'); rh.style.cssText='font-size:.76rem;color:var(--acc);margin-bottom:.4rem;font-weight:600';
+        rh.textContent='PRAJNA Model Signals:'; det.appendChild(rh);
+        reasons.forEach(r=>{
+          const ri=el('div'); ri.style.cssText='font-size:.76rem;color:var(--tx);padding:2px 0;padding-left:.6rem';
+          ri.textContent='• '+r; det.appendChild(ri);
+        });
+      }
+
+      // Signal breakdown from real model
+      const sb = p.signal_breakdown || {};
+      if(Object.keys(sb).length){
+        const sh=el('div'); sh.style.cssText='font-size:.76rem;color:var(--mt);margin-top:.5rem;margin-bottom:.3rem';
+        sh.textContent='Signal Breakdown:'; det.appendChild(sh);
+        Object.entries(sb).slice(0,6).forEach(([k,v])=>{
+          const sv=(v&&v.value!=null)?+v.value:+v;
+          const sr=el('div'); sr.style.cssText='display:flex;align-items:center;gap:.5rem;margin-bottom:3px';
+          const sk=el('span'); sk.style.cssText='font-size:.7rem;color:var(--mt);min-width:140px';
+          sk.textContent=k.replace(/_/g,' ');
+          const st=el('div'); st.style.cssText='flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px';
+          const sf2=el('div'); sf2.style.cssText='height:100%;border-radius:2px;background:'+(sv>0.5?'var(--green)':sv>0.2?'var(--acc)':'#94a3b8');
+          sf2.style.width=Math.min(100,Math.abs(sv)*100)+'%';
+          st.appendChild(sf2);
+          const sv2=el('span'); sv2.style.cssText='font-size:.68rem;color:var(--mt);font-family:monospace';
+          sv2.textContent=sv.toFixed(2);
+          sr.appendChild(sk); sr.appendChild(st); sr.appendChild(sv2);
+          det.appendChild(sr);
+        });
+      }
+
+      // Syllabus status
+      if(p.syllabus_status){
+        const syl=el('div'); syl.style.cssText='font-size:.72rem;color:var(--mt);margin-top:.4rem';
+        syl.textContent='Syllabus: '+p.syllabus_status+(p.training_years?' · Training: '+p.training_years:'');
+        det.appendChild(syl);
+      }
+
+      const wrapper=el('div');
+      wrapper.appendChild(row); wrapper.appendChild(det);
+      row.addEventListener('click',()=>det.classList.toggle('open'));
+      el2.appendChild(wrapper);
+
+      requestAnimationFrame(()=>{ bf.style.width=ipc+'%'; });
+    });
+  }catch(e){ console.error('loadPredictions', e); const em=el('div'); em.style.cssText='color:var(--mt);padding:1rem'; em.textContent='Error: '+e.message; clr('pr-list').appendChild(em); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 3 — DEEP DIVE
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadDeepDive(){
+  DATA.deepdive=true;
+  // Load topics list for dropdown
+  try{
+    const r=await fetch(API+'/api/v1/data/topics-list?exam_type='+exam());
+    const d=await r.json();
+    const sel=$('dd-topic-sel'); sel.textContent='';
+    const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='— Select a topic —';
+    sel.appendChild(opt0);
+    (d.topics||[]).forEach(t=>{
+      const opt=document.createElement('option'); opt.value=t.topic;
+      opt.textContent=t.subject+' › '+t.topic; sel.appendChild(opt);
+    });
+  }catch(_){}
+  // Hot/Cold
+  loadHotCold();
+}
+
+async function loadTopicDeepDive(){
+  const topic=$('dd-topic-sel').value;
+  if(!topic) return;
+  // Re-filter hot/cold section to match the selected topic
+  loadHotCold(topic);
+  setTxt('dd-qs','…'); setTxt('dd-fy','…'); setTxt('dd-ly','…'); setTxt('dd-sp','…');
+  destroyTab('dd-tl'); destroyTab('dd-df'); destroyTab('dd-ty');
+  try{
+    const r=await fetch(API+'/api/v1/data/topic-deep-dive?topic='+encodeURIComponent(topic)+'&exam_type='+exam());
+    const d=await r.json();
+    if(!d.success) return;
+    setTxt('dd-qs',d.total_questions||0);
+    setTxt('dd-fy',d.first_year||'—');
+    setTxt('dd-ly',d.last_year||'—');
+    setTxt('dd-sp',(d.span_years||0)+' yr');
+
+    // Year chart
+    if(d.year_counts&&d.year_counts.length){
+      const yrs=d.year_counts.map(r=>r.year); const cts=d.year_counts.map(r=>r.count);
+      const ma=cts.map((_,i)=>{const sl=cts.slice(Math.max(0,i-2),i+1);return+(sl.reduce((a,b)=>a+b,0)/sl.length).toFixed(1);});
+      mkChart('dd-timeline',{type:'bar',data:{labels:yrs,datasets:[
+        {label:'Questions',data:cts,backgroundColor:'#6366f188',borderColor:'#6366f1',borderWidth:1,borderRadius:4},
+        {label:'3-yr avg',data:ma,type:'line',borderColor:'#f43f5e',borderWidth:2,
+          borderDash:[4,3],fill:false,tension:0.3,pointRadius:2,yAxisID:'y'},
+      ]},options:{...CHART_DEFAULTS,responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,labels:{color:'#8888aa',font:{size:10},boxWidth:12}}}}});
+    }
+    // Difficulty
+    if(d.difficulty_trend&&d.difficulty_trend.length){
+      mkChart('dd-diff',{type:'line',
+        data:{labels:d.difficulty_trend.map(r=>r.year),
+          datasets:[{data:d.difficulty_trend.map(r=>r.difficulty||r.avg_difficulty),
+            borderColor:'#f43f5e',borderWidth:2,fill:false,tension:0.4,pointRadius:3}]},
+        options:{...CHART_DEFAULTS,responsive:true,maintainAspectRatio:false,
+          scales:{y:{min:1,max:5,...CHART_DEFAULTS.scales.y},x:CHART_DEFAULTS.scales.x}}});
+    }
+    // Types
+    if(d.type_distribution&&Object.keys(d.type_distribution).length){
+      const types=Object.keys(d.type_distribution); const vals=types.map(t=>d.type_distribution[t]);
+      mkChart('dd-types',{type:'doughnut',data:{labels:types,datasets:[{data:vals,
+        backgroundColor:['#6366f1','#22c55e','#f59e0b','#a855f7','#06b6d4'],
+        borderWidth:1,borderColor:'#0f0f1a'}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,labels:{color:'#8888aa',font:{size:10}}}}}});
+    }
+  }catch(_){}
+}
+
+// Row renderers extracted so they can be reused by filter logic
+function renderHotRow(container, h, i){
+  const row=el('div','hc-item');
+  const num=el('span','hc-num'); num.textContent='#'+(i+1); row.appendChild(num);
+  const body=el('div','hc-body');
+  const nm=el('div','hc-name'); nm.textContent=h.micro_topic; nm.title=h.micro_topic;
+  const sub=el('div','hc-sub'); sub.textContent=h.subject;
+  body.appendChild(nm); body.appendChild(sub); row.appendChild(body);
+  const val=el('span','hc-val hot-val'); val.textContent=h.count_recent+'×'; row.appendChild(val);
+  container.appendChild(row);
+}
+function renderColdRow(container, c, i){
+  const row=el('div','hc-item');
+  const num=el('span','hc-num'); num.textContent='#'+(i+1); row.appendChild(num);
+  const body=el('div','hc-body');
+  const nm=el('div','hc-name'); nm.textContent=c.micro_topic; nm.title=c.micro_topic;
+  const sub=el('div','hc-sub'); sub.textContent=c.subject;
+  body.appendChild(nm); body.appendChild(sub); row.appendChild(body);
+  const val=el('span','hc-val cold-val'); val.textContent=c.gap_years+' yr gap'; row.appendChild(val);
+  container.appendChild(row);
+}
+
+// Cache for hot/cold data so we can re-filter without re-fetching
+let _hotColdCache = null;
+
+async function loadHotCold(topicFilter){
+  try{
+    // Fetch only when cache is empty or exam changes
+    if(!_hotColdCache || _hotColdCache._exam !== exam()){
+      const r=await fetch(API+'/api/v1/data/hot-cold-topics?exam_type='+exam()+'&top_n=50');
+      const d=await r.json();
+      if(!d.success) return;
+      _hotColdCache = d;
+      _hotColdCache._exam = exam();
+    }
+    const d = _hotColdCache;
+    const tf = (topicFilter||'').toLowerCase().trim();
+
+    // Filter helper — match topic, micro_topic, or subject
+    const matches = item => {
+      if(!tf) return true;
+      return (item.micro_topic||'').toLowerCase().includes(tf) ||
+             (item.subject||'').toLowerCase().includes(tf);
+    };
+
+    // Hot
+    const hotEl=clr('dd-hot');
+    const hotFiltered = (d.hot_topics||[]).filter(matches);
+    if(!hotFiltered.length){
+      const em=el('div'); em.style.cssText='color:var(--mt);font-size:.82rem;padding:.5rem 0';
+      em.textContent=tf ? 'No hot topics match "'+tf+'" — showing all' : 'No data';
+      if(tf){ (d.hot_topics||[]).slice(0,12).forEach((h,i)=>renderHotRow(hotEl,h,i)); }
+      else hotEl.appendChild(em);
+    } else {
+      hotFiltered.slice(0,12).forEach((h,i)=>renderHotRow(hotEl,h,i));
+    }
+
+    // Cold
+    const coldEl=clr('dd-cold');
+    const coldFiltered = (d.cold_topics||[]).filter(matches);
+    if(!coldFiltered.length){
+      const em=el('div'); em.style.cssText='color:var(--mt);font-size:.82rem;padding:.5rem 0';
+      em.textContent=tf ? 'No cold topics match "'+tf+'" — showing all' : 'No data';
+      if(tf){ (d.cold_topics||[]).slice(0,12).forEach((c,i)=>renderColdRow(coldEl,c,i)); }
+      else coldEl.appendChild(em);
+    } else {
+      coldFiltered.slice(0,12).forEach((c,i)=>renderColdRow(coldEl,c,i));
+    }
+
+    // Cycles
+    const cycEl=clr('dd-cycles');
+    (d.cyclical_topics||[]).slice(0,12).forEach(c=>{
+      const item=el('div','hc-item'); item.style.flexDirection='column';item.style.alignItems='flex-start';
+      const nm=el('div','hc-name'); nm.textContent=c.micro_topic; item.appendChild(nm);
+      const meta=el('div','hc-sub');
+      meta.textContent='~'+c.estimated_cycle_years+'yr cycle · consistency: '+Math.round(c.consistency*100)+'%';
+      item.appendChild(meta);
+      const last=el('div'); last.style.cssText='font-size:.7rem;color:var(--mt);margin-top:3px';
+      last.textContent='Last: '+(c.appearances||[]).slice(-3).join(', ');
+      item.appendChild(last);
+      cycEl.appendChild(item);
+    });
+  }catch(_){}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 4 — BACKTEST
+// ══════════════════════════════════════════════════════════════════════════════
+async function runBacktest(){
+  const el2=clr('bt-result'); el2.appendChild(skel(3,'60px'));
+  const bYear=$('bt-year').value; const bLevel=$('bt-level').value; const bK=$('bt-k').value;
+  try{
+    const r=await fetch(API+'/api/v1/data/backtest?test_year='+bYear+'&exam_type='+exam()+'&top_n='+bK+'&level='+bLevel);
+    const d=await r.json();
+    el2.textContent='';
+    if(!d.success){ const em=el('div'); em.style.cssText='color:var(--mt);padding:1rem;font-size:.84rem'; em.textContent='No data for this year.'; el2.appendChild(em); return; }
+    const s=d.summary||{};
+
+    // Metrics grid
+    const grid=el('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.9rem;margin-bottom:1.2rem';
+    const metrics=[
+      ['Precision@K', s.precision_at_k!=null?Math.round(s.precision_at_k*100)+'%':'—','var(--green)'],
+      ['Coverage@K',  s.coverage_at_k!=null?Math.round(s.coverage_at_k*100)+'%':'—','var(--cyan)'],
+      ['Heavy Recall', s.heavy_topic_recall!=null?Math.round(s.heavy_topic_recall*100)+'%':'—','var(--amber)'],
+      ['Combined',    s.combined_score!=null?Math.round(s.combined_score*100)+'%':'—','var(--purple)'],
+      ['Rank Corr',   s.rank_correlation!=null?s.rank_correlation.toFixed(3):'—','var(--acc)'],
+      ['Subj Coverage',s.avg_subject_coverage!=null?Math.round(s.avg_subject_coverage*100)+'%':'—','var(--rose)'],
+    ];
+    metrics.forEach(([lbl,val,col])=>{
+      const c=el('div','bt-metric');
+      const v=el('div','bt-val'); v.style.color=col; v.textContent=val; c.appendChild(v);
+      const l=el('div','bt-lbl'); l.textContent=lbl; c.appendChild(l);
+      grid.appendChild(c);
+    });
+    el2.appendChild(grid);
+
+    // Caption
+    const cap=el('div'); cap.style.cssText='font-size:.8rem;color:var(--mt);margin-top:.5rem';
+    cap.textContent='Trained on all data before '+d.test_year+'. Predicted top-'+d.top_n+' '+d.level+' for '+d.exam+' '+d.test_year+'. Compared against actual paper.';
+    el2.appendChild(cap);
+  }catch(e){ el2.textContent=''; const em=el('div'); em.style.cssText='color:var(--red);font-size:.83rem'; em.textContent='Error: '+e.message; el2.appendChild(em); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 5 — LESSON PLAN
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadLessons(){
+  DATA.lessons=true;
+  const el2=clr('lp-list'); el2.appendChild(skel(12,'40px'));
+  try{
+    const r=await fetch(API+'/api/v1/data/lesson-plan?exam_type='+exam()+'&year='+yr()+'&top_n='+topN());
+    const d=await r.json();
+    el2.textContent='';
+    if(!d.success||!d.lesson_plan){ const em=el('div'); em.style.cssText='color:var(--mt);padding:1rem'; em.textContent='No lesson plan data.'; el2.appendChild(em); return; }
+
+    let filtered=d.lesson_plan;
+    const sf=subj();
+    if(sf) filtered=filtered.filter(c=>c.subject===sf);
+
+    filtered.forEach((c,i)=>{
+      const row=el('div','trow');
+
+      const num=el('span','rn'); num.textContent='#'+(i+1); row.appendChild(num);
+
+      const bandEl=el('span','band-'+c.priority_band.toLowerCase()); bandEl.textContent='Band '+c.priority_band; row.appendChild(bandEl);
+
+      const info=el('div'); info.style.flex='1';
+      const nm=el('div','tn'); nm.textContent=c.chapter;
+      const mt=el('div','tm'); mt.textContent=c.subject+' · '+c.trend_direction;
+      info.appendChild(nm); info.appendChild(mt);
+
+      if(c.syllabus_topics&&c.syllabus_topics.length){
+        const tps=el('div'); tps.style.cssText='font-size:.7rem;color:var(--mt);margin-top:3px';
+        tps.textContent='Topics: '+c.syllabus_topics.slice(0,4).join(', ')+(c.syllabus_topics.length>4?'…':'');
+        info.appendChild(tps);
+      }
+      row.appendChild(info);
+
+      const pct=el('span'); pct.style.cssText='font-family:monospace;font-size:.78rem;color:'+(c.appearance_probability>=0.7?'var(--green)':c.appearance_probability>=0.45?'var(--amber)':'var(--mt)');
+      pct.textContent=Math.round(c.appearance_probability*100)+'%'; row.appendChild(pct);
+
+      const bw=el('div','ibw'); bw.style.width='90px';
+      const bf=el('div','ib');
+      bf.style.background=c.priority_band==='A'?'var(--red)':c.priority_band==='B'?'var(--amber)':'var(--mt)';
+      bf.style.width=Math.round(c.appearance_probability*100)+'%'; bw.appendChild(bf); row.appendChild(bw);
+
+      el2.appendChild(row);
+    });
+  }catch(_){}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 6 — REVISION PLAN
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadRevision(){
+  DATA.revision=true;
+  const el2=clr('rv-content'); el2.appendChild(skel(5,'70px'));
+  try{
+    const r=await fetch(API+'/api/v1/reports/revision-plan',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({exam_type:exam(),target_year:parseInt(yr()),subjects:[],persona:'student'})});
+    const d=await r.json();
+    el2.textContent='';
+    (d.subject_strategies||[]).forEach(s=>{
+      const col=COLORS[s.subject]||'#6366f1';
+      const block=el('div','rev-block'); block.style.borderLeftColor=col;
+
+      const hd=el('div'); hd.style.cssText='display:flex;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:.4rem';
+      const sn=el('span'); sn.style.fontWeight='700'; sn.textContent=s.subject;
+      const hrs=el('span'); hrs.style.cssText='font-family:monospace;font-size:.8rem;color:'+col; hrs.textContent=s.recommended_study_hours+'h recommended';
+      hd.appendChild(sn); hd.appendChild(hrs);
+
+      const must=el('div'); must.style.cssText='font-size:.8rem;margin-bottom:.3rem';
+      const mustStrong=el('strong'); mustStrong.style.color='var(--red)'; mustStrong.textContent='Must revise: ';
+      must.appendChild(mustStrong); must.appendChild(document.createTextNode((s.must_revise_chapters||[]).join(', ')));
+
+      const should=el('div'); should.style.cssText='font-size:.8rem;margin-bottom:.3rem';
+      const shouldStrong=el('strong'); shouldStrong.style.color='var(--amber)'; shouldStrong.textContent='Should revise: ';
+      should.appendChild(shouldStrong); should.appendChild(document.createTextNode((s.should_revise_chapters||[]).join(', ')));
+
+      const cov=el('div'); cov.style.cssText='font-size:.76rem;color:var(--mt)';
+      cov.textContent='Expected coverage: '+(s.expected_marks_coverage||'—');
+
+      block.appendChild(hd); block.appendChild(must); block.appendChild(should); block.appendChild(cov);
+      el2.appendChild(block);
+    });
+  }catch(_){}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 7 — TREND
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadTrend(){
+  const trYr=parseInt($('tr-year').value);
+  const el2=clr('tr-content'); el2.appendChild(skel(4,'30px'));
+  try{
+    const r=await fetch(API+'/api/v1/reports/trend-analysis?exam_type='+exam()+'&current_year='+trYr+'&compare_year='+(trYr-1));
+    const d=await r.json();
+    el2.textContent='';
+    if(!d.success||!d.report){ const em=el('div'); em.style.cssText='color:var(--mt);font-size:.84rem'; em.textContent='No trend data.'; el2.appendChild(em); return; }
+    const rpt=d.report;
+    const grid=el('div'); grid.style.cssText='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem';
+    [
+      {lbl:'🚀 Rising Topics',    data:rpt.rising_topics,   col:'var(--green)'},
+      {lbl:'📉 Declining Topics', data:rpt.declining_topics,col:'var(--red)'},
+      {lbl:'🆕 New Topics',       data:rpt.new_topics,      col:'var(--cyan)'},
+      {lbl:'🗑 Dropped Topics',   data:rpt.dropped_topics,  col:'var(--mt)'},
+    ].forEach(({lbl,data,col})=>{
+      const col2=el('div');
+      const ttl=el('div'); ttl.style.cssText='font-weight:700;font-size:.85rem;margin-bottom:.6rem;color:'+col;
+      ttl.textContent=lbl; col2.appendChild(ttl);
+      const items=Array.isArray(data)?data:[];
+      if(!items.length){ const em=el('div'); em.style.cssText='font-size:.78rem;color:var(--mt)'; em.textContent='None'; col2.appendChild(em); }
+      else items.slice(0,8).forEach(item=>{
+        const li=el('div'); li.style.cssText='font-size:.78rem;color:var(--mt);padding:.2rem 0;border-bottom:1px solid var(--bd)';
+        li.textContent=typeof item==='string'?item:(item.scope_name||''); col2.appendChild(li);
+      });
+      grid.appendChild(col2);
+    });
+    el2.appendChild(grid);
+  }catch(_){}
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB 8 — COPILOT
+// ══════════════════════════════════════════════════════════════════════════════
+function loadCopilotSuggestions(){
+  DATA.copilot=true;
+  const suggs=[
+    'Which Physics chapter is most likely to appear in NEET 2025?',
+    'What are the top 5 Biology topics I should study this week?',
+    'Compare the importance of Organic Chemistry vs Inorganic Chemistry.',
+    'Give me a 2-week revision strategy for NEET 2025.',
+    'Which topics have the highest risk if skipped?',
+    'What are the cold topics that might make a comeback in JEE?',
+  ];
+  const el2=clr('cp-suggs');
+  suggs.forEach(q=>{
+    const s=el('span','sugg'); s.textContent=q;
+    s.addEventListener('click',()=>{ $('cp-in').value=q; });
+    el2.appendChild(s);
+  });
+}
+
+async function askCopilot(){
+  const q=$('cp-in').value.trim(); if(!q) return;
+  const ans=$('cp-ans'); const meta=$('cp-meta');
+  ans.style.display='block'; ans.textContent='Thinking…'; meta.style.display='none';
+  try{
+    const r=await fetch(API+'/api/v1/copilot/ask',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({exam_type:exam(),target_year:parseInt(yr()),question:q,persona:'student'})});
+    const d=await r.json();
+    let out=d.answer||'No answer returned.';
+    if(d.follow_up_questions&&d.follow_up_questions.length)
+      out+='\n\n💡 Follow-up:\n'+d.follow_up_questions.map(x=>'• '+x).join('\n');
+    ans.textContent=out;
+    meta.style.display='block';
+    meta.textContent='Confidence: '+Math.round((d.confidence||0)*100)+'%  ·  '+d.request_id;
+    // Auto-scroll so the answer is visible
+    ans.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }catch(err){ ans.textContent='Could not reach the API. Check it is running at localhost:8001'; }
+}
+$('cp-in').addEventListener('keydown',e=>{ if(e.key==='Enter') askCopilot(); });
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+(async()=>{
+  await checkStatus();
+  DATA.overview=true; await loadOverview();
+  setInterval(checkStatus,15000);
+})();
+</script>
+</body>
+</html>

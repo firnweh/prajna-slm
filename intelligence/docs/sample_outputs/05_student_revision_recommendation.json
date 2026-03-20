@@ -1,0 +1,58 @@
+{
+  "_description": "Sample: Student-Friendly Copilot Answer — Personalized revision recommendation, NEET 2025",
+  "_endpoint": "POST /api/v1/copilot/ask",
+
+  "request": {
+    "exam_type": "neet",
+    "target_year": 2025,
+    "question": "I have 30 days left for NEET. I'm weak in Genetics and average in Human Physiology. What should I do first?",
+    "persona": "student",
+    "subject_filter": "Biology"
+  },
+
+  "response": {
+    "success": true,
+    "request_id": "e5f6a7b8-c9d0-1234-efab-345678901234",
+    "generated_at": "2025-03-19T10:49:00Z",
+    "latency_ms": 418.2,
+    "question": "I have 30 days left for NEET. I'm weak in Genetics and average in Human Physiology. What should I do first?",
+    "answer": "Great question — and the good news is: you're focusing on exactly the right chapters.\n\n🔬 WHY GENETICS MUST COME FIRST:\nGenetics and Evolution is the #1 predicted chapter for NEET 2025. The PRAJNA engine gives it a 92% appearance probability — that's basically guaranteed. Here's your 30-day Genetics emergency plan:\n\n📅 DAYS 1–7: Mendelian Genetics (12h total)\n• Day 1–2: Mendel's Laws — Monohybrid and Dihybrid crosses (with actual ratio tables)\n• Day 3–4: Chromosomal Theory of Inheritance + sex-linked traits\n• Day 5–6: Molecular Basis of Inheritance — DNA replication, transcription\n• Day 7: Solve 50 NEET PYQs on Genetics (2015–2024)\n\n📅 DAYS 8–14: Human Physiology (10h)\nSince you're already average here, you need a boost not a restart:\n• Day 8–9: Digestion — enzyme table, site of absorption (direct MCQ fodder)\n• Day 10–11: Neural Control — resting potential, synaptic transmission\n• Day 12: Excretion — nephron structure, counter-current mechanism\n• Day 13–14: Solve 40 PYQs on Human Physiology\n\n📅 DAYS 15–21: Remaining Biology + Chemistry revision\n📅 DAYS 22–28: Full-length mock tests (3 complete NEET papers)\n📅 DAYS 29–30: Only micro-topic drilling on YOUR weakest points from mocks\n\n⚠️ DO NOT SKIP:\n• Mutations (Genetics) — appearing more frequently in recent years\n• Hardy-Weinberg formula problems — 1–2 questions, easily learnable\n• Photosynthesis Light Reactions — 3rd highest Biology priority\n\n💡 MARKS IMPACT: If you improve Genetics from weak → strong, you can recover 10–14 marks. Human Physiology from average → strong = 6–8 marks. That's potentially 16–22 extra marks in 30 days.",
+    "confidence": 0.82,
+    "insights": [
+      {
+        "insight_id": "ins-cop-001",
+        "insight_type": "revision_priority",
+        "persona": "student",
+        "title": "Genetics is your #1 priority — 92% appearance probability",
+        "scope": "chapter",
+        "scope_name": "Genetics and Evolution",
+        "parent_chain": ["Biology"],
+        "claim": "Genetics and Evolution is the highest-importance NEET chapter. With 30 days remaining, it should receive your first 7 days.",
+        "narrative": "See full revision plan above.",
+        "recommended_action": "Start with Mendelian crosses today. Solve PYQs from 2015–2024 after each sub-topic.",
+        "confidence": 0.88,
+        "is_grounded": true,
+        "urgency": "critical",
+        "tags": ["genetics", "30-day-plan", "student", "neet-2025"]
+      }
+    ],
+    "sources": [
+      {
+        "source": "PRAJNA SLM v3",
+        "type": "prediction_signal",
+        "detail": "Genetics: importance=0.92, confidence=0.88. Human Physiology: importance=0.85, confidence=0.87"
+      },
+      {
+        "source": "NEET PYQ Analysis 2015–2024",
+        "type": "historical_exam",
+        "detail": "Genetics appeared 9/10 years. Human Physiology appeared 10/10 years."
+      }
+    ],
+    "follow_up_questions": [
+      "Which specific Genetics micro-topic should I study today first?",
+      "How much time should I spend on Chemistry vs Biology in the last 30 days?",
+      "What are the most common NEET question traps in Chromosomal Theory?",
+      "Which Human Physiology sub-topics give the most marks per hour of study?"
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "_description": "Sample: Subject Revision Strategy — Biology, NEET 2025, Academic Planner persona",
+  "_endpoint": "POST /api/v1/insights/subject-strategy",
+
+  "request": {
+    "exam_type": "neet",
+    "target_year": 2025,
+    "subject": "Biology",
+    "persona": "academic_planner",
+    "include_micro_topics": true
+  },
+
+  "response": {
+    "success": true,
+    "request_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "generated_at": "2025-03-19T10:45:00Z",
+    "latency_ms": 312.4,
+    "strategy": {
+      "subject": "Biology",
+      "exam_type": "neet",
+      "target_year": 2025,
+      "subject_rank": 1,
+      "overall_importance": 0.87,
+      "recommended_study_hours": 180.0,
+      "expected_marks_coverage": "90 marks of 180",
+      "must_revise_chapters": [
+        "Genetics and Evolution",
+        "Human Physiology",
+        "Plant Physiology",
+        "Cell Structure and Function",
+        "Reproduction"
+      ],
+      "should_revise_chapters": [
+        "Ecology and Environment",
+        "Structural Organisation in Animals and Plants",
+        "Biological Classification",
+        "Biotechnology and Its Applications"
+      ],
+      "optional_chapters": [
+        "The Living World",
+        "Animal Kingdom"
+      ],
+      "top_5_micro_topics": [
+        "Mendelian Genetics — Law of Independent Assortment",
+        "Human Physiology — Digestion and Absorption",
+        "Cell Biology — Mitosis and Meiosis",
+        "Plant Physiology — Photosynthesis Light Reactions",
+        "Reproduction — Gametogenesis"
+      ],
+      "high_risk_clusters": [
+        {
+          "cluster_id": "clust-bio-001",
+          "cluster_name": "Genetics Core",
+          "anchor_topic": "Mendelian Genetics",
+          "member_topics": [
+            "Mendelian Genetics",
+            "Chromosomal Theory of Inheritance",
+            "Molecular Basis of Inheritance",
+            "Mutations"
+          ],
+          "member_chapters": ["Genetics and Evolution"],
+          "subject": "Biology",
+          "avg_importance": 0.83,
+          "cluster_importance": 0.91,
+          "trend_direction": "rising",
+          "co_occurrence_score": 0.78,
+          "strategic_note": "Questions from this cluster frequently appear together in a single NEET paper — mastering Mendelian genetics anchors 4–6 marks"
+        }
+      ],
+      "executive_summary": "Biology commands ~50% of the NEET paper (90 of 180 marks). For 2025, the PRAJNA prediction engine signals a rising trend in Genetics and a stable, high-weight signal for Human Physiology. Tier-A allocation: Genetics + Human Physiology = 60% of Biology study time. The Genetics Core cluster (Mendelian → Chromosomal Theory → Molecular Basis) has an 78% historical co-occurrence rate — treat them as a unit.",
+      "strategy_narrative": "ALLOCATION RECOMMENDATION (Academic Planner View):\n\nTier A — Critical (must cover in full):\n• Genetics and Evolution [cluster importance: 0.91] — 40h\n• Human Physiology [importance: 0.85] — 35h\n• Plant Physiology [importance: 0.79] — 25h\n\nTier B — High ROI:\n• Cell Structure and Function [importance: 0.75] — 20h\n• Reproduction [importance: 0.72] — 20h\n• Ecology and Environment [importance: 0.68] — 15h\n\nTier C — Optional / Low-signal:\n• The Living World, Animal Kingdom — 10h combined\n\nRisk flags:\n• Biotechnology is a rising trend (+0.14 YoY signal) — consider upgrading from Tier B to Tier A for risk-averse students\n• Ecology questions increased from 8% to 11% in last 2 years — do not neglect\n• Confidence for Human Physiology cluster is 0.88 — highest in the subject\n\nEstimated marks at risk if Tier A is skipped: 38–42 marks",
+      "confidence": 0.84,
+      "generated_at": "2025-03-19T10:45:00Z"
+    }
+  }
+}

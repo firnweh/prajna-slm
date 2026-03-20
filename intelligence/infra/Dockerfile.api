@@ -1,0 +1,77 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# PRAJNA Intelligence API — Dockerfile
+#
+# Multi-stage build:
+#   1. builder  — installs Python deps in a venv
+#   2. runtime  — lean image with only the venv + app code
+#
+# Build:
+#   docker build -f infra/Dockerfile.api -t prajna-intelligence:latest .
+# Run:
+#   docker run -p 8001:8001 --env-file .env prajna-intelligence:latest
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Stage 1: builder ──────────────────────────────────────────────────────────
+FROM python:3.11-slim AS builder
+
+WORKDIR /build
+
+# System deps for sentence-transformers / chromadb
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create isolated venv
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install Python dependencies
+COPY intelligence/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# ── Stage 2: runtime ──────────────────────────────────────────────────────────
+FROM python:3.11-slim AS runtime
+
+# Minimal system deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy venv from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash prajna
+WORKDIR /app
+
+# Copy intelligence layer source
+COPY intelligence/ ./intelligence/
+
+# Copy PRAJNA project root (for local prediction engine access)
+# In Docker Compose, this is mounted as a volume; this COPY is for standalone builds
+COPY data/ ./data/
+COPY analysis/ ./analysis/
+
+# Set Python path so internal imports work
+ENV PYTHONPATH="/app/intelligence:/app"
+ENV PYTHONUNBUFFERED=1
+
+# Switch to non-root user
+USER prajna
+
+WORKDIR /app/intelligence
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+CMD ["uvicorn", "services.api.main:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8001", \
+     "--workers", "1", \
+     "--log-level", "info"]

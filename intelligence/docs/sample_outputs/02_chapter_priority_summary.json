@@ -1,0 +1,105 @@
+{
+  "_description": "Sample: Chapter Priority Summary — Genetics and Evolution, NEET 2025, Teacher persona",
+  "_endpoint": "POST /api/v1/insights/chapter",
+
+  "request": {
+    "exam_type": "neet",
+    "target_year": 2025,
+    "subject": "Biology",
+    "chapter": "Genetics and Evolution",
+    "persona": "teacher"
+  },
+
+  "response": {
+    "success": true,
+    "request_id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "generated_at": "2025-03-19T10:46:00Z",
+    "latency_ms": 287.1,
+    "summary": {
+      "chapter": "Genetics and Evolution",
+      "subject": "Biology",
+      "exam_type": "neet",
+      "target_year": 2025,
+      "importance_tier": "A",
+      "composite_importance": 0.89,
+      "expected_questions": "12–14 questions",
+      "revision_priority": "critical",
+      "trend_direction": "rising",
+      "top_priority_topics": [
+        {
+          "scope": "micro_topic",
+          "scope_name": "Law of Independent Assortment",
+          "parent_chain": ["Biology", "Genetics and Evolution", "Mendelian Genetics"],
+          "exam_type": "neet",
+          "target_year": 2025,
+          "urgency": "critical",
+          "priority_score": 88.4,
+          "importance_probability": 0.92,
+          "confidence": 0.88,
+          "expected_weightage_band": "high",
+          "trend_direction": "rising",
+          "key_reasons": [
+            "Appeared in 9 of last 10 NEET papers",
+            "Rising trend: +0.18 signal in 2024 vs 2023",
+            "High syllabus coverage alignment (0.95)"
+          ],
+          "risk_if_skipped": "3–4 direct marks + loss of 6–8 derived MCQ marks",
+          "estimated_study_hours": 4.0
+        },
+        {
+          "scope": "micro_topic",
+          "scope_name": "Chromosomal Theory of Inheritance",
+          "parent_chain": ["Biology", "Genetics and Evolution", "Mendelian Genetics"],
+          "exam_type": "neet",
+          "target_year": 2025,
+          "urgency": "critical",
+          "priority_score": 84.7,
+          "importance_probability": 0.88,
+          "confidence": 0.85,
+          "expected_weightage_band": "high",
+          "trend_direction": "stable",
+          "key_reasons": [
+            "Recurrence score 0.87 — one of most consistent NEET topics",
+            "Core prerequisite for understanding linkage and crossing over",
+            "Cluster anchor for Genetics Core cluster"
+          ],
+          "risk_if_skipped": "2–3 direct marks + indirect marks in Molecular Genetics",
+          "estimated_study_hours": 3.5
+        }
+      ],
+      "key_micro_topics": [
+        "Law of Independent Assortment",
+        "Chromosomal Theory of Inheritance",
+        "Molecular Basis of Inheritance — DNA Replication",
+        "Mutations — Point Mutations and Chromosomal Aberrations",
+        "Hardy-Weinberg Principle",
+        "Origin of Life",
+        "Mechanisms of Evolution — Natural Selection"
+      ],
+      "topic_clusters": [
+        {
+          "cluster_id": "clust-bio-001",
+          "cluster_name": "Genetics Core",
+          "anchor_topic": "Mendelian Genetics",
+          "member_topics": [
+            "Mendelian Genetics",
+            "Chromosomal Theory of Inheritance",
+            "Molecular Basis of Inheritance",
+            "Mutations"
+          ],
+          "member_chapters": ["Genetics and Evolution"],
+          "subject": "Biology",
+          "avg_importance": 0.83,
+          "cluster_importance": 0.91,
+          "trend_direction": "rising",
+          "co_occurrence_score": 0.78,
+          "strategic_note": "Teach Mendelian first, then Chromosomal Theory as an extension — students who connect these topics score 40% better on Evolution questions"
+        }
+      ],
+      "chapter_brief": "Genetics and Evolution is the highest-weighted chapter in NEET Biology for 2025. The PRAJNA engine assigns it an importance score of 0.89 — the highest of all 59 NEET chapters — supported by a recurrence rate of 0.87 across the last 10 years. The chapter is predicted to contribute 12–14 questions across Botany and Zoology combined. The rising trend (signal: +0.12 YoY) indicates NEET setters are increasing Genetics weightage, with Molecular Basis of Inheritance being the fastest-growing sub-topic.\n\nKey teaching priorities: Mendelian Laws → Chromosomal Theory → Molecular Basis → Mutations → Hardy-Weinberg. Evolution (Origin of Life + Mechanisms) consistently contributes 4–5 questions and must not be neglected.",
+      "teacher_notes": "TEACHING PRIORITIES for NEET 2025:\n\n1. Teach Mendelian Genetics with dihybrid cross tables — MCQs frequently test ratios and exceptions (incomplete dominance, co-dominance)\n2. Chromosomal Theory: emphasize Morgan's experiments and sex-linked inheritance (3–4 questions annually)\n3. Molecular Basis: DNA replication and transcription mechanism steps are direct MCQ fodder\n4. Mutations: focus on frameshift vs. point mutation consequences — appearing more frequently\n5. Hardy-Weinberg: formula application problems — expect 1–2 questions\n6. Evolution: Cover all theories (Lamarck, Darwin, Modern Synthesis) but focus on natural selection mechanisms and evidences (fossils, comparative anatomy)\n\nHigh-risk if skipped: Chromosomal Theory + Molecular Basis combined = 6–8 marks minimum",
+      "student_summary": "",
+      "confidence": 0.87
+    }
+  }
+}

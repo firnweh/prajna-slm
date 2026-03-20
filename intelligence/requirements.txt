@@ -1,0 +1,53 @@
+# ── Core Framework ────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+
+# ── HTTP & Async ──────────────────────────────────────────────────────────────
+httpx>=0.27.0
+aiofiles>=23.0.0
+
+# ── SLM Providers ─────────────────────────────────────────────────────────────
+# Ollama (local SLM server) — no extra package needed; uses httpx
+
+# HuggingFace (local inference)
+# Uncomment if using HuggingFace provider:
+# transformers>=4.40.0
+# torch>=2.2.0
+# accelerate>=0.29.0
+# bitsandbytes>=0.43.0   # for 4-bit quantization
+# peft>=0.10.0           # for LoRA adapters
+# sentence-transformers>=2.7.0
+
+# OpenAI-compatible (OpenAI, Together.ai, Groq, vLLM, LM Studio)
+# Uncomment if using OpenAI provider:
+# openai>=1.26.0
+
+# ── RAG / Vector Store ────────────────────────────────────────────────────────
+chromadb>=0.5.0
+sentence-transformers>=2.7.0
+
+# ── Data & ML ─────────────────────────────────────────────────────────────────
+numpy>=1.26.0
+pandas>=2.2.0
+
+# ── Database ──────────────────────────────────────────────────────────────────
+aiosqlite>=0.20.0          # async SQLite (for PRAJNA exam.db access)
+# asyncpg>=0.29.0          # Uncomment for PostgreSQL
+# sqlalchemy>=2.0.0        # Uncomment for ORM
+
+# ── Cache (optional) ─────────────────────────────────────────────────────────
+# redis>=5.0.0             # Uncomment to enable Redis caching
+# hiredis>=2.3.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0
+python-multipart>=0.0.9    # for FastAPI form data
+orjson>=3.10.0             # faster JSON serialization
+structlog>=24.1.0          # structured logging
+
+# ── Dev / Testing ─────────────────────────────────────────────────────────────
+pytest>=8.1.0
+pytest-asyncio>=0.23.0
+httpx>=0.27.0              # also used as AsyncClient in tests

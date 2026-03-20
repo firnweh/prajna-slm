@@ -1,0 +1,68 @@
+{
+  "_description": "Sample: Micro-Topic Importance Explanation — Law of Independent Assortment, NEET 2025, Student persona",
+  "_endpoint": "POST /api/v1/insights/micro-topic",
+
+  "request": {
+    "exam_type": "neet",
+    "target_year": 2025,
+    "subject": "Biology",
+    "chapter": "Genetics and Evolution",
+    "topic": "Mendelian Genetics",
+    "micro_topic": "Law of Independent Assortment",
+    "persona": "student"
+  },
+
+  "response": {
+    "success": true,
+    "request_id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+    "generated_at": "2025-03-19T10:47:00Z",
+    "latency_ms": 341.8,
+    "insights": [
+      {
+        "insight_id": "ins-mt-001",
+        "insight_type": "topic_importance",
+        "persona": "student",
+        "title": "🔴 CRITICAL: Law of Independent Assortment — 3–4 direct marks in NEET 2025",
+        "scope": "micro_topic",
+        "scope_name": "Law of Independent Assortment",
+        "parent_chain": ["Biology", "Genetics and Evolution", "Mendelian Genetics"],
+        "claim": "Law of Independent Assortment is a near-certain NEET 2025 topic with 92% predicted probability of appearance, supported by 9/10 years of historical exam data. You must revise this before any other Genetics topic.",
+        "narrative": "Here's why this topic is your #1 priority in Genetics:\n\n📊 PREDICTION SIGNAL: The PRAJNA engine gives this a 92% importance probability — that means out of 100 simulated NEET 2025 papers, 92 include at least one question from this micro-topic. The confidence in this prediction is 88%, which is high.\n\n📅 HISTORY: This topic appeared in 9 out of the last 10 NEET papers. The one year it didn't appear directly (2019), it was tested indirectly through a dihybrid cross problem.\n\n📈 TREND: The signal is RISING (+0.18 increase in 2024 vs 2023). NEET is asking more Genetics questions, not fewer.\n\n🎯 WHAT TO EXPECT: Questions typically test:\n• Predicting phenotype ratios in dihybrid crosses (most common)\n• Identifying when Independent Assortment does NOT apply (linked genes — this is a trap!)\n• Applying the law to explain genetic diversity in offspring\n\n⏱️ STUDY EFFORT: Allocate 4 focused hours. After 2 hours of theory, spend 2 hours solving past NEET questions from 2015–2024 on this topic.\n\n⚠️ RISK IF SKIPPED: Missing this topic risks 3–4 direct marks plus another 4–6 marks on related Chromosomal Theory questions that build on this concept.",
+        "recommended_action": "Spend 4 hours on Law of Independent Assortment this week: 2h theory (Mendel's dihybrid cross + ratio derivation) + 2h solving NEET PYQs from 2015–2024. Focus on linked gene exceptions — that's where NEET traps students.",
+        "evidence": [
+          {
+            "evidence_id": "ev-prajna-001",
+            "evidence_type": "prediction_signal",
+            "source_name": "PRAJNA SLM v3",
+            "excerpt": "importance_probability=0.92, recurrence_score=0.90, historical_frequency=0.90 (9/10 years), trend_score=+0.18, confidence=0.88",
+            "relevance_score": 1.0,
+            "metadata": {"model": "prajna-slm-v3", "feature_dim": 399}
+          },
+          {
+            "evidence_id": "ev-hist-001",
+            "evidence_type": "historical_exam",
+            "source_name": "NEET Question Papers 2015–2024",
+            "excerpt": "Appeared in: 2015, 2016, 2017, 2018, 2020, 2021, 2022, 2023, 2024 (9/10 years). Typical question count: 2–3 per paper. Format: dihybrid cross ratios, exception identification.",
+            "relevance_score": 0.95,
+            "metadata": {"years_covered": 10, "appearances": 9}
+          }
+        ],
+        "confidence": 0.88,
+        "is_grounded": true,
+        "supporting_metrics": {
+          "importance_probability": 0.92,
+          "recurrence_score": 0.90,
+          "trend_score": 0.18,
+          "priority_score": 88.4,
+          "historical_frequency": 0.90
+        },
+        "urgency": "critical",
+        "tags": ["genetics", "mendelian", "high-priority", "rising-trend", "neet-2025"],
+        "generated_at": "2025-03-19T10:47:00Z",
+        "slm_model_id": "mock-slm-v1",
+        "prompt_version": "v1"
+      }
+    ],
+    "total_count": 1
+  }
+}

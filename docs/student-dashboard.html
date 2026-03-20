@@ -86,13 +86,51 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 @keyframes spin{to{transform:rotate(360deg)}}
 .empty-msg{padding:20px;color:var(--mt);text-align:center;font-size:.84rem}
 .note{font-size:.73rem;color:var(--mt);margin-bottom:10px}
+/* ── Intelligence panel ── */
+.intel-card{background:linear-gradient(135deg,#0f0f28,#12122a);border:1px solid #4f46e540;border-radius:12px;padding:18px}
+.intel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.intel-status{display:flex;align-items:center;gap:6px;font-size:.73rem}
+.idot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse 2s infinite;flex-shrink:0}
+.idot.off{background:#ef4444;box-shadow:0 0 6px #ef4444;animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.intel-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:900px){.intel-grid{grid-template-columns:1fr}}
+.intel-topic{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#ffffff06;border:1px solid #ffffff0a;border-radius:8px;transition:.15s}
+.intel-topic:hover{border-color:#4f46e540;background:#4f46e510}
+.it-rank{font-size:.7rem;font-family:monospace;color:var(--mt);min-width:22px;text-align:right}
+.it-info{flex:1;min-width:0}
+.it-name{font-size:.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it-sub{font-size:.7rem;color:var(--mt);margin-top:1px}
+.it-urgency{font-size:.64rem;font-weight:700;padding:2px 7px;border-radius:10px;text-transform:uppercase;white-space:nowrap}
+.u-critical{background:#ef444430;color:#f87171}
+.u-high{background:#f59e0b30;color:#fbbf24}
+.u-medium{background:#6366f130;color:#818cf8}
+.u-low{background:#ffffff12;color:var(--mt)}
+.it-score{font-size:.72rem;font-family:monospace;color:var(--mt)}
+.match-badge{font-size:.65rem;font-weight:700;padding:2px 6px;border-radius:8px;background:#a855f730;color:#c084fc;margin-left:4px}
+/* ── Progress bar ── */
+.prog-wrap{height:6px;background:#ffffff12;border-radius:4px;overflow:hidden;margin-top:6px}
+.prog-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+/* ── Copilot ── */
+.cp-card{background:linear-gradient(135deg,#0f1a1a,#0d1a24);border:1px solid #06b6d430;border-radius:12px;padding:18px}
+.cp-row{display:flex;gap:8px}
+.cp-input{flex:1;background:#ffffff08;border:1px solid #ffffff12;color:var(--tx);padding:9px 14px;border-radius:8px;font-size:.84rem;font-family:inherit;outline:none;transition:.2s}
+.cp-input:focus{border-color:#06b6d4}
+.cp-btn{background:#06b6d4;color:#000;font-weight:700;font-size:.82rem;padding:9px 18px;border:none;border-radius:8px;cursor:pointer;transition:.2s;white-space:nowrap;font-family:inherit}
+.cp-btn:hover{background:#0891b2}
+.cp-answer{margin-top:12px;padding:12px 14px;background:#06b6d415;border:1px solid #06b6d430;border-radius:8px;font-size:.83rem;line-height:1.7;white-space:pre-wrap;display:none}
+.cp-meta{margin-top:6px;font-size:.72rem;color:var(--mt);display:none}
+.cp-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cp-pill{font-size:.73rem;padding:4px 10px;border-radius:16px;background:#ffffff08;border:1px solid #ffffff10;color:var(--mt);cursor:pointer;transition:.15s}
+.cp-pill:hover{border-color:#06b6d440;color:var(--tx)}
 </style>
 </head>
 <body>
 <nav class="nav">
   <div class="nav-logo">PRAJNA · Student Intelligence</div>
   <span class="nav-badge">SLM-POWERED</span>
-  <a href="index.html" class="nav-back">← Back to PRAJNA</a>
+  <a href="intelligence-dashboard.html" style="margin-left:auto;font-size:.78rem;background:#06b6d415;color:#06b6d4;border:1px solid #06b6d440;padding:5px 13px;border-radius:8px;text-decoration:none;font-weight:600">Intelligence API ↗</a>
+  <a href="index.html" class="nav-back" style="margin-left:0">← Back to PRAJNA</a>
 </nav>
 
 <div class="shell">
@@ -252,6 +290,8 @@ function render(s){
   dash.appendChild(buildZones(s));
   dash.appendChild(buildHeatmap(s));
   dash.appendChild(buildInsights(s));
+  dash.appendChild(buildIntelligencePanel(s));
+  dash.appendChild(buildCopilot(s));
 }
 
 /* ── Hero ── */
@@ -612,6 +652,217 @@ function buildInsights(s){
   });
   c.appendChild(row);
   return c;
+}
+
+/* ── Intelligence Panel ── */
+function buildIntelligencePanel(s){
+  const wrap=el('div','intel-card');
+
+  // Header
+  const header=el('div','intel-header');
+  const titleEl=el('div');
+  titleEl.style.cssText='display:flex;align-items:center;gap:8px';
+  const titleTxt=el('span');
+  titleTxt.style.cssText='font-size:.95rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent';
+  titleTxt.appendChild(txt('⚡ Live Exam Intelligence — Top Predictions'));
+  titleEl.appendChild(titleTxt);
+  header.appendChild(titleEl);
+
+  const statusWrap=el('div','intel-status');
+  const dot=el('div','idot'); dot.id='intel-dot-'+s.id; statusWrap.appendChild(dot);
+  const statusTxt=el('span'); statusTxt.id='intel-status-'+s.id; statusTxt.appendChild(txt('Fetching…'));
+  statusWrap.appendChild(statusTxt);
+  header.appendChild(statusWrap);
+  wrap.appendChild(header);
+
+  const noteEl=el('div','note');
+  noteEl.appendChild(txt('PRAJNA Intelligence API predictions for ' + (G.exam==='neet'?'NEET':'JEE') + ' 2025. ★ = matches your weak areas.'));
+  wrap.appendChild(noteEl);
+
+  const grid=el('div','intel-grid');
+  grid.id='intel-grid-'+s.id;
+
+  // Placeholder skeletons
+  for(let i=0;i<6;i++){
+    const sk=el('div','intel-topic');
+    sk.style.cssText='background:linear-gradient(90deg,#ffffff04 25%,#ffffff08 50%,#ffffff04 75%);background-size:200% 100%;animation:pulse 1.5s infinite;height:54px';
+    grid.appendChild(sk);
+  }
+  wrap.appendChild(grid);
+  wrap.appendChild(el('div'));
+
+  // Async-fetch predictions and render
+  const weakSet=new Set((s.slm_focus||[]).map(f=>(f.chapter||'').toLowerCase()));
+  const exam=G.exam==='neet'?'neet':'jee_main';
+  fetch('http://localhost:8001/api/v1/predictions/rank-all?exam_type='+exam+'&target_year=2025&top_n=18')
+    .then(r=>r.json())
+    .then(d=>{
+      const dotEl=document.getElementById('intel-dot-'+s.id);
+      const stEl=document.getElementById('intel-status-'+s.id);
+      const gEl=document.getElementById('intel-grid-'+s.id);
+      if(!d.success||!d.priorities){
+        if(dotEl) dotEl.className='idot off';
+        if(stEl){ stEl.textContent=''; stEl.appendChild(txt('API offline')); }
+        if(gEl){
+          gEl.textContent='';
+          const em=el('div'); em.style.cssText='color:var(--mt);font-size:.82rem;padding:12px;grid-column:1/-1';
+          em.appendChild(txt('Start the API: python3 intelligence/run_api.py'));
+          gEl.appendChild(em);
+        }
+        return;
+      }
+      if(dotEl) dotEl.className='idot';
+      if(stEl){ stEl.textContent=''; stEl.appendChild(txt('Live · '+d.count+' topics ranked')); }
+      if(gEl){
+        gEl.textContent='';
+        d.priorities.slice(0,15).forEach((p,i)=>{
+          const isMatch=weakSet.has((p.scope_name||'').toLowerCase()) ||
+            (p.parent_chain||[]).some(c=>weakSet.has((c||'').toLowerCase()));
+          const row=el('div','intel-topic');
+          if(isMatch) row.style.borderColor='#a855f760';
+
+          const rank=el('span','it-rank'); rank.appendChild(txt('#'+(i+1))); row.appendChild(rank);
+
+          const info=el('div','it-info');
+          const nameEl=el('div','it-name');
+          nameEl.appendChild(txt(p.scope_name));
+          if(isMatch){
+            const mb=el('span','match-badge'); mb.appendChild(txt('★ your weak zone')); nameEl.appendChild(mb);
+          }
+          info.appendChild(nameEl);
+          const sub=el('div','it-sub');
+          sub.appendChild(txt((p.parent_chain||[]).slice(0,2).join(' › ')));
+          info.appendChild(sub);
+          row.appendChild(info);
+
+          const right=el('div'); right.style.cssText='display:flex;flex-direction:column;align-items:flex-end;gap:4px';
+          const upill=el('span','it-urgency u-'+(p.urgency||'low').charAt(0)==='c'?'u-critical':p.urgency==='high'?'u-high':p.urgency==='medium'?'u-medium':'u-low');
+          upill.className='it-urgency u-'+(p.urgency==='critical'?'critical':p.urgency==='high'?'high':p.urgency==='medium'?'medium':'low');
+          upill.appendChild(txt(p.urgency||''));
+          right.appendChild(upill);
+          const sc=el('span','it-score'); sc.appendChild(txt((p.priority_score||0).toFixed(1))); right.appendChild(sc);
+          row.appendChild(right);
+
+          // Priority bar
+          const prog=el('div','prog-wrap');
+          const fill=el('div','prog-fill');
+          fill.style.background=p.urgency==='critical'?'#ef4444':p.urgency==='high'?'#f59e0b':p.urgency==='medium'?'#6366f1':'#475569';
+          fill.style.width='0';
+          prog.appendChild(fill);
+          const wrapper=el('div'); wrapper.style.cssText='grid-column:1/-1';
+          row.appendChild(prog);
+
+          gEl.appendChild(row);
+          requestAnimationFrame(()=>{ fill.style.width=Math.round((p.priority_score||0))+'%'; });
+        });
+      }
+    })
+    .catch(()=>{
+      const dotEl=document.getElementById('intel-dot-'+s.id);
+      const stEl=document.getElementById('intel-status-'+s.id);
+      const gEl=document.getElementById('intel-grid-'+s.id);
+      if(dotEl) dotEl.className='idot off';
+      if(stEl){ stEl.textContent=''; stEl.appendChild(txt('API offline')); }
+      if(gEl){
+        gEl.textContent='';
+        const em=el('div'); em.style.cssText='color:var(--mt);font-size:.82rem;padding:12px;grid-column:1/-1';
+        em.appendChild(txt('Could not reach Intelligence API on localhost:8001. Run: python3 intelligence/run_api.py'));
+        gEl.appendChild(em);
+      }
+    });
+
+  return wrap;
+}
+
+/* ── Copilot ── */
+function buildCopilot(s){
+  const wrap=el('div','cp-card');
+
+  const header=el('div');
+  header.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px';
+  const titleEl=el('div');
+  titleEl.style.cssText='font-size:.95rem;font-weight:700;color:#06b6d4';
+  titleEl.appendChild(txt('🤖 Ask PRAJNA — Student Copilot'));
+  header.appendChild(titleEl);
+  const powered=el('span');
+  powered.style.cssText='font-size:.7rem;color:var(--mt);padding:2px 8px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff10';
+  powered.appendChild(txt('SLM · NL Query'));
+  header.appendChild(powered);
+  wrap.appendChild(header);
+
+  // Pre-seeded suggestions
+  const topWeak=(s.slm_focus||[])[0];
+  const weakestSubj=Object.entries(s.subjects||{}).sort((a,b)=>((a[1]||{}).acc||0)-((b[1]||{}).acc||0))[0];
+  const suggestions=[
+    topWeak?'Why is '+topWeak.chapter+' my weakest chapter and how do I fix it?':'What should I study first?',
+    weakestSubj?'Give me a study plan for '+weakestSubj[0]+' in the next 2 weeks.':'How do I improve my score?',
+    'Which topics should I revise first for the upcoming '+s.target+' exam?',
+    'Compare my trajectory to what a top-100 student needs.',
+  ];
+
+  const sugg=el('div','cp-suggestions');
+  suggestions.forEach(q=>{
+    const pill=el('span','cp-pill');
+    pill.appendChild(txt(q));
+    pill.addEventListener('click',()=>{
+      const inp=wrap.querySelector('.cp-input');
+      if(inp) inp.value=q;
+    });
+    sugg.appendChild(pill);
+  });
+  wrap.appendChild(sugg);
+
+  // Input row
+  const row=el('div','cp-row'); row.style.marginTop='10px';
+  const inp=el('input','cp-input');
+  inp.type='text';
+  inp.placeholder='Ask anything about '+s.name+'\'s performance…';
+  row.appendChild(inp);
+  const btn=el('button','cp-btn');
+  btn.appendChild(txt('Ask →'));
+  row.appendChild(btn);
+  wrap.appendChild(row);
+
+  // Answer box
+  const ansEl=el('div','cp-answer'); wrap.appendChild(ansEl);
+  const metaEl=el('div','cp-meta'); wrap.appendChild(metaEl);
+
+  function ask(){
+    const q=inp.value.trim();
+    if(!q) return;
+    // Enrich question with student context
+    const weakChapters=(s.slm_focus||[]).slice(0,3).map(f=>f.chapter).join(', ');
+    const contextQ='Student: '+s.name+' ('+s.id+'), '+s.target+' aspirant, latest score: '+
+      (s.metrics.latest_percentage||0).toFixed(1)+'%, rank: #'+(s.metrics.latest_rank||'—')+
+      ', weakest chapters: '+weakChapters+'. Question: '+q;
+
+    ansEl.style.display='block';
+    metaEl.style.display='none';
+    ansEl.textContent='Thinking…';
+
+    fetch('http://localhost:8001/api/v1/copilot/ask',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({exam_type:G.exam==='neet'?'neet':'jee_main',target_year:2025,question:contextQ,persona:'student'}),
+    })
+    .then(r=>r.json())
+    .then(d=>{
+      let out=d.answer||'No answer returned.';
+      if(d.follow_up_questions&&d.follow_up_questions.length)
+        out+='\n\n💡 You might also ask:\n'+d.follow_up_questions.map(x=>'• '+x).join('\n');
+      ansEl.textContent=out;
+      metaEl.style.display='block';
+      metaEl.textContent='';
+      metaEl.appendChild(txt('Confidence: '+Math.round((d.confidence||0)*100)+'%  ·  '+d.request_id));
+    })
+    .catch(()=>{
+      ansEl.textContent='Could not reach PRAJNA Intelligence API on localhost:8001. Run: python3 intelligence/run_api.py';
+    });
+  }
+
+  btn.addEventListener('click',ask);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') ask(); });
+  return wrap;
 }
 
 /* ── Boot ── */

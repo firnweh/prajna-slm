@@ -1,0 +1,118 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PRAJNA Intelligence Stack
+#
+# Services:
+#   api         — FastAPI intelligence layer  (port 8001)
+#   chromadb    — Vector store for RAG        (port 8002)
+#   ollama      — Local SLM inference server  (port 11434)
+#
+# Usage:
+#   docker compose up -d              # start all
+#   docker compose up api chromadb    # no ollama (use mock/openai)
+#   docker compose logs -f api        # follow API logs
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Intelligence API ────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.api
+    container_name: prajna-intelligence-api
+    ports:
+      - "8001:8001"
+    env_file:
+      - ../.env
+    environment:
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8002
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - PREDICTION_ADAPTER_MODE=local
+    volumes:
+      # Mount project root so local PRAJNA engine is accessible
+      - ../..:/workspace:ro
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── ChromaDB Vector Store ───────────────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:0.5.3
+    container_name: prajna-chromadb
+    ports:
+      - "8002:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # ── Ollama Local SLM Server ─────────────────────────────────────────────────
+  # Optional: only needed if SLM_PROVIDER=ollama
+  # Remove this service if using mock/openai_compatible provider
+  ollama:
+    image: ollama/ollama:latest
+    container_name: prajna-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # GPU support (uncomment for NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Redis Cache (optional) ──────────────────────────────────────────────────
+  # Uncomment to enable Redis-backed insight caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: prajna-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+
+volumes:
+  chroma_data:
+    driver: local
+  ollama_data:
+    driver: local
+  # redis_data:
+  #   driver: local
+
+networks:
+  default:
+    name: prajna-network
