@@ -364,22 +364,22 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-f1, f2, f3, f4, f5, f6 = st.columns([1.2, 1, 0.9, 0.9, 0.7, 0.7])
+# ── Filter Bar ───────────────────────────────────────────────────────────────
+st.markdown('<div class="filter-bar-wrap">', unsafe_allow_html=True)
+f1, f2, f3, f4, f5 = st.columns([1.3, 1.1, 0.8, 0.8, 0.7])
 with f1:
     exams = ["All"] + sorted(df["exam"].unique().tolist())
-    selected_exam = st.selectbox("Exam", exams, key="gx_exam")
+    selected_exam = st.selectbox("Exam", exams, key="gx_exam", label_visibility="visible")
 with f2:
     subjects = ["All"] + sorted(df["subject"].unique().tolist())
-    selected_subject = st.selectbox("Subject", subjects, key="gx_subj")
+    selected_subject = st.selectbox("Subject", subjects, key="gx_subj", label_visibility="visible")
 with f3:
-    target_year = st.number_input("Predict for", value=2026, min_value=2024, max_value=2030, key="gx_yr")
+    target_year = st.number_input("Year", value=2026, min_value=2010, max_value=2035, key="gx_yr")
 with f4:
     top_n = st.selectbox("Top K", [20, 40, 60, 80, 100], index=1, key="gx_topn")
 with f5:
-    pred_level = st.selectbox("Level", ["Micro-Topic", "Chapter"], key="gx_level")
-with f6:
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.caption(f"Excl. {holdout_str}")
+    pred_level = st.selectbox("Level", ["Chapter", "Micro-Topic"], key="gx_level")
+st.markdown('</div>', unsafe_allow_html=True)
 
 exam_filter = selected_exam if selected_exam != "All" else None
 
