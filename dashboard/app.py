@@ -463,8 +463,8 @@ active_preds_v2 = [p for p in predictions_v2 if p["syllabus_status"] != "REMOVED
 
 
 # --- Tabs ---
-tab_main, tab_backtest, tab_deep, tab_lesson, tab_timeline, tab_explorer, tab_paper, tab_chat = st.tabs([
-    "📊 Predictions", "🎯 Backtest", "🔬 Topic Deep Dive", "📚 Lesson Plan",
+tab_main, tab_backtest, tab_deep, tab_lesson, tab_revision, tab_timeline, tab_explorer, tab_paper, tab_chat = st.tabs([
+    "📊 Predictions", "🎯 Backtest", "🔬 Topic Deep Dive", "📚 Lesson Plan", "📅 Revision Plan",
     "📈 Historical Timeline", "❓ Question Explorer", "📄 Paper Generator", "🤖 Ask PRAJNA",
 ])
 
@@ -1411,7 +1411,143 @@ with tab_lesson:
 
 
 # ================================================================
-# TAB 4: HISTORICAL TIMELINE
+# TAB 4: REVISION PLAN
+# ================================================================
+with tab_revision:
+    st.markdown('<div class="section-divider">📅 Prajna Revision Plan <span class="section-badge">AI</span></div>', unsafe_allow_html=True)
+    st.caption(f"Personalised {target_year} revision schedule based on PRAJNA predictions — prioritised by appearance probability & confidence.")
+
+    SUBJ_HEX_LOCAL = {"Biology": "#22c55e", "Chemistry": "#06b6d4", "Physics": "#f59e0b", "Mathematics": "#a855f7"}
+    CONF_HEX_LOCAL = {"HIGH": "#10b981", "MEDIUM": "#f59e0b", "LOW": "#ef4444", "SPECULATIVE": "#94a3b8"}
+
+    # ── Controls ──────────────────────────────────────────────────────────────
+    rc1, rc2, rc3 = st.columns([1, 1, 1])
+    with rc1:
+        days_available = st.number_input("Days until exam", value=60, min_value=7, max_value=365, key="rev_days")
+    with rc2:
+        hours_per_day = st.number_input("Study hours/day", value=6, min_value=1, max_value=16, key="rev_hours")
+    with rc3:
+        focus_subj = st.selectbox("Focus subject", ["All"] + list(SUBJ_HEX_LOCAL.keys()), key="rev_subj")
+
+    total_hours = days_available * hours_per_day
+
+    # ── Filter predictions ─────────────────────────────────────────────────────
+    rev_list = [p for p in pred_list if p["syllabus_status"] != "REMOVED"]
+    if focus_subj != "All":
+        rev_list = [p for p in rev_list if p["subject"] == focus_subj]
+
+    if not rev_list:
+        st.warning("No predictions available for selected filters.")
+    else:
+        # ── Allocate hours proportional to appearance probability ──────────────
+        total_prob = sum(p["appearance_probability"] for p in rev_list) or 1
+        phases = [
+            ("🔴 Phase 1 — Must Revise", lambda p: p["appearance_probability"] >= 0.85, "#ef4444"),
+            ("🟡 Phase 2 — High Priority", lambda p: 0.65 <= p["appearance_probability"] < 0.85, "#f59e0b"),
+            ("🟢 Phase 3 — Good to Cover", lambda p: p["appearance_probability"] < 0.65, "#22c55e"),
+        ]
+
+        # ── Summary stat bar ──────────────────────────────────────────────────
+        p1 = [p for p in rev_list if p["appearance_probability"] >= 0.85]
+        p2 = [p for p in rev_list if 0.65 <= p["appearance_probability"] < 0.85]
+        p3 = [p for p in rev_list if p["appearance_probability"] < 0.65]
+
+        sm1, sm2, sm3, sm4 = st.columns(4)
+        sm1.metric("Total Study Hours", f"{total_hours}h")
+        sm2.metric("Must Revise", f"{len(p1)} topics", f"{len(p1)/len(rev_list):.0%} of plan")
+        sm3.metric("High Priority", f"{len(p2)} topics")
+        sm4.metric("Good to Cover", f"{len(p3)} topics")
+
+        st.markdown("---")
+
+        # ── Render each phase ────────────────────────────────────────────────
+        for phase_label, phase_filter, phase_color in phases:
+            phase_topics = [p for p in rev_list if phase_filter(p)]
+            if not phase_topics:
+                continue
+
+            phase_prob_sum = sum(p["appearance_probability"] for p in phase_topics)
+            phase_hours = round((phase_prob_sum / total_prob) * total_hours)
+
+            st.markdown(f"""
+            <div style="background:#131320;border:1px solid rgba(255,255,255,0.07);border-radius:12px;
+                         padding:14px 18px;margin:12px 0;border-left:4px solid {phase_color}">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <span style="font-size:15px;font-weight:700;color:#f1f5f9">{phase_label}</span>
+                <span style="font-size:12px;color:{phase_color};font-weight:600">~{phase_hours}h allocated · {len(phase_topics)} topics</span>
+              </div>
+            </div>""", unsafe_allow_html=True)
+
+            for p in phase_topics:
+                sc = SUBJ_HEX_LOCAL.get(p["subject"], "#6366f1")
+                cc = CONF_HEX_LOCAL.get(p["confidence"], "#6366f1")
+                topic_prob = p["appearance_probability"]
+                topic_hours = max(1, round((topic_prob / total_prob) * total_hours))
+                chapter = p.get("micro_topic", p["chapter"]) if pred_level == "Micro-Topic" else p["chapter"]
+                formats = ", ".join(p["likely_formats"][:2])
+                reasons = p.get("reasons", [])
+                reason_str = reasons[0] if reasons else ""
+
+                days_needed = max(1, round(topic_hours / hours_per_day))
+
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);
+                             border-radius:10px;padding:12px 16px;margin:4px 0 4px 16px;
+                             border-left:3px solid {sc}">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;flex:1">{chapter}</span>
+                    <span style="background:{sc}22;color:{sc};border:1px solid {sc}44;
+                                  border-radius:20px;padding:1px 8px;font-size:10px;font-weight:600">{p['subject']}</span>
+                    <span style="background:{cc}22;color:{cc};border:1px solid {cc}44;
+                                  border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">{p['confidence']}</span>
+                    <span style="color:#6366f1;font-size:12px;font-weight:700">{topic_prob:.0%}</span>
+                  </div>
+                  <div style="display:flex;gap:20px;margin-bottom:4px">
+                    <span style="font-size:11px;color:#8888aa">⏱ <b style="color:#e2e8f0">{topic_hours}h</b> ({days_needed}d)</span>
+                    <span style="font-size:11px;color:#8888aa">~<b style="color:#e2e8f0">{p['expected_questions']:.0f} Qs</b> expected</span>
+                    <span style="font-size:11px;color:#8888aa">Format: <b style="color:#e2e8f0">{formats}</b></span>
+                    <span style="font-size:11px;color:#8888aa">Last: <b style="color:#e2e8f0">{p['last_appeared']}</b></span>
+                  </div>
+                  {f'<div style="font-size:11px;color:#6366f1;font-style:italic">💡 {reason_str}</div>' if reason_str else ''}
+                </div>""", unsafe_allow_html=True)
+
+        # ── Weekly schedule summary ───────────────────────────────────────────
+        st.markdown("---")
+        st.markdown('<div class="section-divider">📆 Weekly Schedule Overview <span class="section-badge">AI</span></div>', unsafe_allow_html=True)
+
+        weeks = max(1, days_available // 7)
+        phase_names = ["Must Revise (Phase 1)", "High Priority (Phase 2)", "Good to Cover (Phase 3)"]
+        phase_counts = [len(p1), len(p2), len(p3)]
+        phase_hours_list = []
+        for topics_list in [p1, p2, p3]:
+            ph = sum(p["appearance_probability"] for p in topics_list)
+            phase_hours_list.append(round((ph / total_prob) * total_hours))
+
+        week_rows = []
+        week_num = 1
+        for pname, phours, pcount in zip(phase_names, phase_hours_list, phase_counts):
+            if pcount == 0:
+                continue
+            phase_days = max(1, round(phours / hours_per_day))
+            phase_weeks = max(1, round(phase_days / 7))
+            week_rows.append({
+                "Phase": pname,
+                "Weeks": f"Wk {week_num}–{week_num + phase_weeks - 1}",
+                "Topics": pcount,
+                "Hours": f"{phours}h",
+                "Daily Target": f"{hours_per_day}h/day",
+            })
+            week_num += phase_weeks
+
+        if week_rows:
+            wdf = pd.DataFrame(week_rows)
+            st.dataframe(wdf, hide_index=True, use_container_width=True)
+
+        st.caption(f"Total: {days_available} days · {total_hours}h · {len(rev_list)} topics across {weeks} weeks")
+
+
+# ================================================================
+# TAB 5: HISTORICAL TIMELINE
 # ================================================================
 with tab_timeline:
     st.markdown('<div class="section-divider">Historical Timeline — Syllabus, Policy & News <span class="section-badge">2026</span></div>', unsafe_allow_html=True)
