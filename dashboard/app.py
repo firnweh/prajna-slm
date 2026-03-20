@@ -337,9 +337,25 @@ st.markdown("""
     border-radius: 4px !important;
     height: 6px !important;
   }
-  /* Suppress the grey "running" overlay on rerun */
-  .stApp[data-teststate="running"] .main { opacity: 1 !important; }
-  .stApp[data-teststate="running"] .block-container { opacity: 1 !important; }
+  /* ── Suppress the grey "running" overlay on rerun ── */
+  .stApp[data-teststate="running"] .main           { opacity: 1 !important; }
+  .stApp[data-teststate="running"] .block-container{ opacity: 1 !important; }
+  .stApp[data-teststate="running"] section         { opacity: 1 !important; }
+  .stApp[data-teststate="running"] [data-testid]   { opacity: 1 !important; }
+  /* Streamlit ≥ 1.29 uses a stale overlay iframe — hide it */
+  iframe[title="streamlit_loading_overlay"]         { display: none !important; }
+  /* Animated indigo loading bar at the very top */
+  .stApp[data-teststate="running"]::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
+    background-size: 200% 100%;
+    animation: prajna-loading 1.2s linear infinite;
+  }
+  @keyframes prajna-loading {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
 </style>
 """, unsafe_allow_html=True)
 
@@ -401,6 +417,14 @@ with f4:
 with f5:
     pred_level = st.selectbox("Level", ["Chapter", "Micro-Topic"], key="gx_level")
 st.markdown('</div>', unsafe_allow_html=True)
+
+# ── Refresh toast when any filter changes ────────────────────────────────────
+_filter_sig = (selected_exam, selected_subject, target_year, top_n, pred_level)
+if "last_filter_sig" not in st.session_state:
+    st.session_state["last_filter_sig"] = _filter_sig
+elif st.session_state["last_filter_sig"] != _filter_sig:
+    st.toast("⚡ Refreshing predictions…", icon="🔄")
+    st.session_state["last_filter_sig"] = _filter_sig
 
 exam_filter = selected_exam if selected_exam != "All" else None
 
@@ -570,7 +594,10 @@ with tab_main:
         last     = p["last_appeared"]
         subj     = p["subject"]
         syllabus = p.get("syllabus_status", "RETAINED")
-        training = p.get("training_years", "")
+        training = p.get("training_years", "1978–2026")
+        # Normalise legacy "...-2023" range to include 2026 data
+        if training and training.endswith("-2023"):
+            training = training.replace("-2023", "–2026")
 
         # Reason pills (first 2 shown inline in summary)
         reasons = p.get("reasons", [])
