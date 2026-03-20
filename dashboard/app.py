@@ -82,346 +82,236 @@ st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_ico
 # --- Custom CSS ---
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-    /* ── Global ── */
-    .stApp {
-        background: #0a0a0f;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-    [data-testid="stHeader"] { background: transparent; }
-    .block-container { padding-top: 0; max-width: 1480px; }
+  /* ── Global ── */
+  .stApp { background:#0f0f1a !important; font-family:'Inter',system-ui,sans-serif; }
+  .block-container { padding-top:0 !important; max-width:1480px; padding-left:1.5rem; padding-right:1.5rem; }
+  [data-testid="stHeader"] { background:transparent !important; }
+  [data-testid="stSidebar"] { display:none !important; }
+  section[data-testid="stSidebarContent"] { display:none !important; }
 
-    /* ── PW Hero Banner ── */
-    .pw-hero {
-        background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 40%, #0d1f3c 100%);
-        border-bottom: 1px solid rgba(99,102,241,0.3);
-        padding: 32px 40px 28px 40px;
-        margin: -1rem -1rem 0 -1rem;
-        position: relative;
-        overflow: hidden;
-    }
-    .pw-hero::before {
-        content: '';
-        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.15) 0%, transparent 60%),
-                    radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.12) 0%, transparent 50%);
-        pointer-events: none;
-    }
-    .pw-logo-circle {
-        width: 56px; height: 56px; border-radius: 50%;
-        background: white;
-        display: inline-flex; align-items: center; justify-content: center;
-        font-size: 20px; font-weight: 900; color: #0a0a0f;
-        font-family: 'Space Grotesk', sans-serif;
-        box-shadow: 0 0 24px rgba(255,255,255,0.15);
-        flex-shrink: 0;
-    }
-    .pw-brand-row {
-        display: flex; align-items: center; gap: 16px; margin-bottom: 8px;
-    }
-    .pw-brand-tag {
-        font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-        color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08);
-        padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .pw-hackathon-badge {
-        font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-        color: #fbbf24; background: rgba(251,191,36,0.15);
-        padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(251,191,36,0.3);
-    }
-    .prajna-title {
-        font-size: 52px; font-weight: 900; letter-spacing: -2px; line-height: 1;
-        font-family: 'Space Grotesk', sans-serif;
-        background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 40%, #a78bfa 70%, #ec4899 100%);
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .prajna-sub {
-        font-size: 16px; color: rgba(255,255,255,0.55); font-weight: 400;
-        margin-top: 4px; letter-spacing: 0.2px;
-    }
-    .prajna-meaning {
-        font-size: 12px; color: rgba(255,255,255,0.3); font-style: italic;
-        margin-top: 2px;
-    }
+  /* ── Compact topbar ── */
+  .prajna-topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    background:#0f0f1a; border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:0 1.5rem; height:56px;
+    position:sticky; top:0; z-index:200;
+    margin:0 -1.5rem 0 -1.5rem;
+  }
+  .prajna-topbar-left { display:flex; align-items:center; gap:12px; }
+  .prajna-logo-circle {
+    width:36px; height:36px; border-radius:50%; background:white;
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:900; color:#0f0f1a;
+    font-family:'Space Grotesk',sans-serif; flex-shrink:0;
+  }
+  .prajna-brand { font-size:17px; font-weight:700; color:#e2e8f0; letter-spacing:-0.3px; }
+  .prajna-topbar-links { display:flex; align-items:center; gap:8px; }
+  .prajna-nav-link {
+    font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px;
+    text-decoration:none; border:1px solid; transition:opacity .2s;
+  }
+  .prajna-nav-link:hover { opacity:.8; }
+  .prajna-nav-student  { color:#a78bfa; background:rgba(167,139,250,.12); border-color:rgba(167,139,250,.4); }
+  .prajna-nav-api      { color:#34d399; background:rgba(52,211,153,.12);  border-color:rgba(52,211,153,.4);  }
 
-    /* ── Stat chips in hero ── */
-    .stat-grid {
-        display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;
-    }
-    .stat-chip {
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 12px; padding: 10px 16px;
-        display: flex; flex-direction: column; align-items: flex-start;
-    }
-    .stat-chip-val {
-        font-size: 22px; font-weight: 800; color: white;
-        font-family: 'Space Grotesk', sans-serif; line-height: 1;
-    }
-    .stat-chip-lbl {
-        font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.4);
-        text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px;
-    }
+  /* ── Filter bar ── */
+  .filter-bar-wrap {
+    background:#131320; border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:10px 1.5rem; margin:0 -1.5rem 1rem -1.5rem;
+  }
+  .filter-bar-label {
+    font-size:11px; font-weight:600; color:rgba(255,255,255,0.4);
+    text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;
+  }
 
-    /* ── Filter bar ── */
-    .filter-bar {
-        background: rgba(255,255,255,0.04);
-        border-bottom: 1px solid rgba(255,255,255,0.07);
-        padding: 12px 40px;
-        margin: 0 -1rem 0 -1rem;
-    }
+  /* ── Stat chips (DB summary bar) ── */
+  .stat-bar {
+    display:flex; flex-wrap:wrap; gap:8px;
+    background:#131320; padding:10px 1.5rem;
+    margin:0 -1.5rem .5rem -1.5rem;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .stat-chip {
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px; padding:7px 14px;
+    display:flex; flex-direction:column; align-items:flex-start;
+  }
+  .stat-chip-val { font-size:18px; font-weight:800; color:white; font-family:'Space Grotesk',sans-serif; line-height:1; }
+  .stat-chip-lbl { font-size:9px; font-weight:600; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
 
-    /* ── Section dividers ── */
-    .section-divider {
-        font-size: 15px; font-weight: 700; color: #e2e8f0;
-        letter-spacing: -0.2px;
-        border-left: 3px solid #6366f1; padding-left: 12px;
-        margin: 28px 0 14px 0;
-    }
+  /* ── Section headings ── */
+  .section-divider {
+    font-size:15px; font-weight:700; color:#e2e8f0; letter-spacing:-0.2px;
+    border-left:3px solid #6366f1; padding-left:12px;
+    margin:28px 0 14px 0; display:flex; align-items:center; gap:8px;
+  }
+  .section-badge {
+    font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
+    background:rgba(99,102,241,.15); color:#a5b4fc;
+    border:1px solid rgba(99,102,241,.3);
+  }
 
-    /* ── Glass metric cards ── */
-    div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 16px; padding: 18px 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        border-color: rgba(99,102,241,0.3);
-        box-shadow: 0 8px 28px rgba(99,102,241,0.12);
-    }
-    div[data-testid="stMetric"] label {
-        font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4);
-        text-transform: uppercase; letter-spacing: 0.5px;
-        white-space: normal !important; line-height: 1.3;
-    }
-    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-        font-size: 26px; font-weight: 800; color: #ffffff;
-    }
-    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
-        font-size: 11px;
-    }
+  /* ── KPI / metric cards ── */
+  div[data-testid="stMetric"] {
+    background:#131320 !important;
+    border:1px solid rgba(255,255,255,0.07) !important;
+    border-radius:14px !important; padding:18px 20px !important;
+    box-shadow:0 4px 20px rgba(0,0,0,0.25);
+    transition:transform .2s,box-shadow .2s;
+  }
+  div[data-testid="stMetric"]:hover {
+    transform:translateY(-2px);
+    border-color:rgba(99,102,241,.35) !important;
+    box-shadow:0 8px 28px rgba(99,102,241,.12);
+  }
+  div[data-testid="stMetric"] label {
+    font-size:10px !important; font-weight:600 !important;
+    color:rgba(255,255,255,0.4) !important;
+    text-transform:uppercase !important; letter-spacing:.5px !important;
+    white-space:normal !important;
+  }
+  div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+    font-size:26px !important; font-weight:800 !important; color:#ffffff !important;
+  }
+  div[data-testid="stMetricDelta"] span { font-size:11px !important; }
 
-    /* ── Body text colors ── */
-    .stApp, p, li, span { color: #cbd5e1; }
-    h1, h2, h3, h4 { color: #f1f5f9 !important; }
+  /* ── Tabs ── */
+  .stTabs [data-baseweb="tab-list"] {
+    gap:2px; background:#131320;
+    border-radius:12px; padding:4px;
+    border:1px solid rgba(255,255,255,0.07);
+  }
+  .stTabs [data-baseweb="tab"] {
+    border-radius:8px; padding:9px 16px;
+    font-weight:600; font-size:13px; color:rgba(255,255,255,0.45);
+    transition:all .2s;
+  }
+  .stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background:rgba(99,102,241,.18) !important;
+    color:#a5b4fc !important;
+    box-shadow:0 2px 8px rgba(99,102,241,.15);
+    border-bottom:2px solid #6366f1 !important;
+  }
+  .stTabs [data-baseweb="tab-highlight"] { background:transparent !important; }
 
-    /* ── Section dividers ── */
-    .section-divider {
-        font-size: 16px; font-weight: 700; color: #1e293b;
-        letter-spacing: -0.3px;
-        border-left: 3px solid; padding-left: 12px;
-        border-image: linear-gradient(to bottom, #6366f1, #a855f7) 1;
-        margin: 32px 0 16px 0;
-    }
+  /* ── Selectboxes / inputs ── */
+  [data-testid="stSelectbox"] > div > div,
+  [data-testid="stNumberInput"] > div > div > input,
+  [data-testid="stTextInput"] > div > div > input {
+    border-radius:8px !important;
+    border-color:rgba(255,255,255,0.1) !important;
+    background:#131320 !important; color:#e2e8f0 !important;
+    font-size:13px !important;
+  }
+  [data-testid="stSelectbox"] label,
+  [data-testid="stNumberInput"] label,
+  [data-testid="stTextInput"] label {
+    font-size:11px !important; color:rgba(255,255,255,0.4) !important;
+    text-transform:uppercase; letter-spacing:.5px;
+  }
 
-    /* ── Glass metric cards ── */
-    div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.8);
-        border-radius: 16px; padding: 18px 20px;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0,0,0,0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12), 0 2px 6px rgba(0,0,0,0.06);
-    }
-    div[data-testid="stMetric"] label {
-        font-size: 11px; font-weight: 600; color: #64748b;
-        text-transform: uppercase; letter-spacing: 0.3px;
-        white-space: normal !important; line-height: 1.3;
-    }
-    div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-        font-size: 26px; font-weight: 800; color: #1e293b;
-    }
-    div[data-testid="stMetric"] [data-testid="stMetricDelta"] {
-        font-size: 11px;
-    }
+  /* ── Buttons ── */
+  .stButton > button {
+    border-radius:8px; font-weight:600; font-size:13px;
+    border:1px solid rgba(255,255,255,0.12) !important;
+    background:#131320 !important; color:#e2e8f0 !important;
+    transition:all .2s;
+  }
+  .stButton > button[kind="primary"] {
+    background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;
+    border:none !important; color:white !important;
+    box-shadow:0 4px 16px rgba(99,102,241,.35);
+  }
+  .stButton > button[kind="primary"]:hover {
+    box-shadow:0 6px 24px rgba(99,102,241,.5); transform:translateY(-1px);
+  }
 
-    /* ── Tabs ── */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 2px;
-        background: rgba(255,255,255,0.04);
-        backdrop-filter: blur(8px);
-        border-radius: 14px; padding: 4px;
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-    .stTabs [data-baseweb="tab"] {
-        border-radius: 10px; padding: 10px 18px;
-        font-weight: 600; font-size: 13px;
-        color: rgba(255,255,255,0.45); transition: all 0.2s ease;
-    }
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        background: rgba(99,102,241,0.2) !important;
-        color: #a5b4fc !important;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.15);
-    }
+  /* ── Expanders ── */
+  .streamlit-expanderHeader { font-weight:600; font-size:13px; color:#cbd5e1; }
+  details {
+    background:#131320 !important;
+    border:1px solid rgba(255,255,255,0.07) !important;
+    border-radius:12px !important;
+  }
 
-    /* ── Selectboxes / inputs ── */
-    [data-testid="stSelectbox"] > div > div,
-    [data-testid="stNumberInput"] > div > div > input,
-    [data-testid="stTextInput"] > div > div > input {
-        border-radius: 10px !important;
-        border-color: rgba(255,255,255,0.1) !important;
-        background: rgba(255,255,255,0.06) !important;
-        color: #e2e8f0 !important;
-    }
+  /* ── DataFrames ── */
+  [data-testid="stDataFrame"] {
+    border-radius:12px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.07);
+  }
+  [data-testid="stDataFrame"] * { color:#e2e8f0 !important; }
+  [data-testid="stDataFrame"] th {
+    background:rgba(99,102,241,.12) !important;
+    color:#a5b4fc !important; font-weight:700 !important;
+  }
+  [data-testid="stDataFrame"] td { background:rgba(255,255,255,0.02) !important; }
+  [data-testid="stDataFrame"] tr:hover td { background:rgba(99,102,241,.06) !important; }
 
-    /* ── Buttons ── */
-    .stButton > button {
-        border-radius: 10px; font-weight: 600; font-size: 13px;
-        border: 1px solid rgba(255,255,255,0.12);
-        background: rgba(255,255,255,0.06) !important;
-        color: #e2e8f0 !important;
-        transition: all 0.2s ease;
-    }
-    .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-        border: none !important; color: white !important;
-        box-shadow: 0 4px 16px rgba(99,102,241,0.35);
-    }
-    .stButton > button[kind="primary"]:hover {
-        box-shadow: 0 6px 24px rgba(99,102,241,0.5);
-        transform: translateY(-1px);
-    }
+  /* ── Plotly containers ── */
+  .stPlotlyChart {
+    background:#131320; border-radius:14px; padding:4px;
+    border:1px solid rgba(255,255,255,0.06);
+  }
 
-    /* ── Expander ── */
-    .streamlit-expanderHeader {
-        font-weight: 600; font-size: 14px; color: #cbd5e1;
-        border-radius: 10px;
-    }
-    details {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08) !important;
-        border-radius: 12px !important;
-    }
+  /* ── Download buttons ── */
+  .stDownloadButton > button {
+    border-radius:8px; font-weight:500;
+    border:1px solid rgba(255,255,255,0.12) !important;
+    background:#131320 !important; color:#cbd5e1 !important;
+  }
+  .stDownloadButton > button:hover {
+    border-color:rgba(99,102,241,.5) !important; color:#a5b4fc !important;
+  }
 
-    /* ── Dataframe ── */
-    [data-testid="stDataFrame"] {
-        border-radius: 12px; overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        border: 1px solid rgba(255,255,255,0.08);
-    }
+  /* ── Badges ── */
+  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.3px; }
+  .badge-high     { background:rgba(16,185,129,.15); color:#6ee7b7; border:1px solid rgba(16,185,129,.3); }
+  .badge-medium   { background:rgba(245,158,11,.15);  color:#fcd34d; border:1px solid rgba(245,158,11,.3);  }
+  .badge-low      { background:rgba(239,68,68,.15);   color:#fca5a5; border:1px solid rgba(239,68,68,.3);   }
+  .badge-spec     { background:rgba(148,163,184,.1);  color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
+  .badge-retained { background:rgba(16,185,129,.15);  color:#6ee7b7; border:1px solid rgba(16,185,129,.3);  }
+  .badge-modified { background:rgba(245,158,11,.15);  color:#fcd34d; border:1px solid rgba(245,158,11,.3);  }
+  .badge-new      { background:rgba(99,102,241,.15);  color:#a5b4fc; border:1px solid rgba(99,102,241,.3);  }
+  .badge-removed  { background:rgba(239,68,68,.15);   color:#fca5a5; border:1px solid rgba(239,68,68,.3);   }
 
-    /* ── Download buttons ── */
-    .stDownloadButton > button {
-        border-radius: 10px; font-weight: 500;
-        border: 1px solid rgba(255,255,255,0.12) !important;
-        background: rgba(255,255,255,0.06) !important;
-        color: #cbd5e1 !important;
-        transition: all 0.2s;
-    }
-    .stDownloadButton > button:hover {
-        border-color: rgba(99,102,241,0.5) !important;
-        color: #a5b4fc !important;
-    }
+  /* ── Slider ── */
+  .stSlider > div > div > div > div { background:linear-gradient(90deg,#6366f1,#a855f7) !important; }
 
-    /* ── Badge styles ── */
-    .badge {
-        display: inline-block; padding: 3px 12px; border-radius: 20px;
-        font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
-    }
-    .badge-high { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-    .badge-medium { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-    .badge-low { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
-    .badge-spec { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
-    .badge-retained { background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
-    .badge-modified { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
-    .badge-new { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
-    .badge-removed { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(99,102,241,.3); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:rgba(99,102,241,.5); }
 
-    /* ── Plotly chart containers ── */
-    .stPlotlyChart {
-        background: rgba(255,255,255,0.03);
-        border-radius: 14px; padding: 4px;
-        border: 1px solid rgba(255,255,255,0.07);
-    }
+  /* ── Misc ── */
+  .stApp, p, li, span { color:#cbd5e1; }
+  h1,h2,h3,h4 { color:#f1f5f9 !important; }
+  .stCaption,[data-testid="stCaptionContainer"] { color:rgba(255,255,255,.35) !important; font-size:12px; }
+  [data-testid="stAlert"] { border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); }
+  .stSpinner > div { border-top-color:#6366f1 !important; }
 
-    /* ── Slider ── */
-    .stSlider > div > div > div > div {
-        background: linear-gradient(90deg, #6366f1, #a855f7) !important;
-    }
+  /* ── Footer ── */
+  .prajna-footer {
+    background:linear-gradient(135deg,#0f0f1a,#131320);
+    border-top:1px solid rgba(99,102,241,.2);
+    padding:28px 1.5rem; margin:48px -1.5rem 0 -1.5rem;
+  }
+  .team-card {
+    background:#131320; border:1px solid rgba(255,255,255,.07);
+    border-radius:12px; padding:14px 18px; text-align:center;
+  }
+  .team-name  { font-size:14px; font-weight:700; color:#e2e8f0; }
+  .team-org   { font-size:10px; color:rgba(255,255,255,.4); margin:2px 0; text-transform:uppercase; letter-spacing:.5px; }
+  .team-code  { font-size:11px; color:#a5b4fc; font-weight:600; }
+  .team-phone { font-size:10px; color:rgba(255,255,255,.3); }
 
-    /* ── Captions ── */
-    .stCaption, [data-testid="stCaptionContainer"] {
-        color: rgba(255,255,255,0.35) !important; font-size: 12px;
-    }
-
-    /* ── Info / Warning boxes ── */
-    [data-testid="stAlert"] {
-        border-radius: 12px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    /* ── Spinner ── */
-    .stSpinner > div { border-top-color: #6366f1 !important; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
-
-    /* ── Footer ── */
-    .prajna-footer {
-        background: linear-gradient(135deg, #0f0f1a, #1a0a2e);
-        border-top: 1px solid rgba(99,102,241,0.2);
-        padding: 32px 40px;
-        margin: 48px -1rem 0 -1rem;
-    }
-    .team-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px; padding: 16px 20px;
-        text-align: center;
-    }
-    .team-name { font-size: 15px; font-weight: 700; color: #e2e8f0; }
-    .team-org { font-size: 11px; color: rgba(255,255,255,0.4); margin: 3px 0; text-transform: uppercase; letter-spacing: 0.5px; }
-    .team-code { font-size: 12px; color: #a5b4fc; font-weight: 600; }
-    .team-phone { font-size: 11px; color: rgba(255,255,255,0.3); }
-
-    /* Hide hamburger, footer & deploy button */
-    #MainMenu { visibility: hidden; }
-    footer { visibility: hidden; }
-    [data-testid="stToolbar"] { display: none !important; }
-    [data-testid="stDeployButton"] { display: none !important; }
-    button[title*="Deploy"] { display: none !important; }
-    .stDeployButton { display: none !important; }
-
-    /* ── Fix dataframe text for dark theme ── */
-    [data-testid="stDataFrame"] * { color: #e2e8f0 !important; }
-    [data-testid="stDataFrame"] th {
-        background: rgba(99,102,241,0.12) !important;
-        color: #a5b4fc !important; font-weight: 700 !important;
-    }
-    [data-testid="stDataFrame"] td { background: rgba(255,255,255,0.03) !important; }
-    [data-testid="stDataFrame"] tr:hover td { background: rgba(99,102,241,0.06) !important; }
-
-    /* ── PW Top-right fixed badge ── */
-    .pw-topbar {
-        position: fixed; top: 10px; right: 68px; z-index: 9999;
-        display: flex; align-items: center; gap: 8px;
-        background: rgba(15,15,26,0.9); backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 24px; padding: 5px 14px 5px 8px;
-    }
-    .pw-topbar-logo {
-        width: 28px; height: 28px; border-radius: 50%;
-        background: white; display: flex; align-items: center; justify-content: center;
-        font-size: 11px; font-weight: 900; color: #0a0a0f;
-        font-family: 'Space Grotesk', sans-serif;
-    }
-    .pw-topbar-name {
-        font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8);
-        letter-spacing: 0.3px;
-    }
+  /* Hide Streamlit chrome ── */
+  #MainMenu { visibility:hidden; }
+  footer { visibility:hidden; }
+  [data-testid="stToolbar"]     { display:none !important; }
+  [data-testid="stDeployButton"]{ display:none !important; }
 </style>
 """, unsafe_allow_html=True)
 
