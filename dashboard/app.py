@@ -408,7 +408,14 @@ with f1:
     exams = ["All"] + sorted(df["exam"].unique().tolist())
     selected_exam = st.selectbox("Exam", exams, key="gx_exam", label_visibility="visible")
 with f2:
-    subjects = ["All"] + sorted(df["subject"].unique().tolist())
+    # Cascade: subject options are restricted to subjects that exist in the
+    # selected exam. Switching from JEE→NEET removes "Mathematics" from the
+    # dropdown; switching back to "All" shows every subject again.
+    _exam_df = df if selected_exam == "All" else df[df["exam"] == selected_exam]
+    subjects = ["All"] + sorted(_exam_df["subject"].unique().tolist())
+    # Auto-reset subject selection if it no longer exists in the new exam
+    if st.session_state.get("gx_subj", "All") not in subjects:
+        st.session_state["gx_subj"] = "All"
     selected_subject = st.selectbox("Subject", subjects, key="gx_subj", label_visibility="visible")
 with f3:
     target_year = st.number_input("Year", value=2026, min_value=2010, max_value=2035, key="gx_yr")
@@ -1277,11 +1284,15 @@ with tab_deep:
     st.markdown('<div class="section-divider">Deep Topic Analysis <span class="section-badge">LIVE</span></div>', unsafe_allow_html=True)
     st.caption("Select a topic to see its complete history, questions, and patterns.")
 
+    # all_topics is derived from `filtered` which already has exam+subject applied,
+    # so Mathematics never appears here when Exam=NEET.
     all_topics = sorted(filtered["topic"].unique().tolist())
 
-    # Reset stale topic selection when filters change (subject/exam changed the topic list)
+    # Reset stale topic/micro selections whenever the available list changes
+    # (e.g. user switches Exam from JEE→NEET; old JEE Maths topic is no longer valid)
     if st.session_state.get("dt_topic", "") not in ([""] + all_topics):
         st.session_state["dt_topic"] = ""
+        st.session_state["dt_micro"] = "All"
 
     ca, cb = st.columns(2)
     with ca:
