@@ -138,6 +138,54 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-ser
 .cp-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .cp-pill{font-size:.73rem;padding:4px 10px;border-radius:16px;background:#ffffff08;border:1px solid #ffffff10;color:var(--mt);cursor:pointer;transition:.15s}
 .cp-pill:hover{border-color:#06b6d440;color:var(--tx)}
+/* ── Full Subject-Wise Guide ── */
+.guide-toggle{width:100%;margin-top:10px;padding:10px 14px;background:#7c3aed18;
+  border:1px dashed #7c3aed55;border-radius:8px;cursor:pointer;color:#a855f7;
+  font-size:.84rem;font-weight:600;font-family:inherit;text-align:left;transition:.2s}
+.guide-toggle:hover{background:#7c3aed28;border-color:#a855f7}
+.guide-section{display:none;flex-direction:column;gap:10px;padding:4px 0 8px}
+.guide-subj{background:var(--sf);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.guide-subj-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  cursor:pointer;user-select:none;border-bottom:1px solid var(--bd)}
+.guide-subj-hdr:hover{background:rgba(255,255,255,.02)}
+.guide-subj-urgency{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.guide-subj-name{font-size:.88rem;font-weight:700;flex:1}
+.guide-subj-meta{font-size:.73rem;color:var(--mt)}
+.guide-subj-chev{font-size:.8rem;color:var(--mt);transition:transform .2s;margin-left:4px}
+.guide-subj-body{display:none;padding:0 14px 12px}
+.guide-subj-body.open{display:block}
+.guide-ch-row{display:flex;align-items:center;gap:10px;padding:8px 4px;
+  border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;border-radius:6px;
+  transition:background .15s}
+.guide-ch-row:hover{background:rgba(255,255,255,.03)}
+.guide-ch-row:last-of-type{border-bottom:none}
+.guide-ch-rank{font-size:.7rem;color:var(--mt);min-width:24px;text-align:right;font-family:monospace}
+.guide-ch-name{flex:1;min-width:0;font-size:.83rem;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.guide-ch-bars{display:flex;flex-direction:column;gap:3px;width:80px;flex-shrink:0}
+.guide-ch-bar-row{display:flex;align-items:center;gap:5px}
+.guide-ch-bar-track{flex:1;height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.guide-ch-bar-fill{height:4px;border-radius:2px;transition:width .4s}
+.guide-ch-badge{font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:8px;
+  flex-shrink:0;white-space:nowrap}
+.guide-ch-chev{font-size:.8rem;color:var(--mt);flex-shrink:0;transition:transform .2s}
+.guide-ch-detail{display:none;margin:4px 0 8px 34px;padding:12px;
+  background:#ffffff05;border:1px solid rgba(255,255,255,.08);border-radius:10px}
+.guide-detail-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.guide-detail-stat{text-align:center;padding:8px;background:rgba(255,255,255,.04);border-radius:8px}
+.guide-detail-stat-val{font-size:.95rem;font-weight:700}
+.guide-detail-stat-lbl{font-size:.68rem;color:var(--mt);margin-top:2px}
+.guide-micros{margin-bottom:8px}
+.guide-micro-label{font-size:.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--mt);margin-bottom:6px}
+.guide-micro-list{display:flex;flex-wrap:wrap;gap:6px}
+.guide-micro-chip{font-size:.76rem;padding:3px 9px;border-radius:12px;
+  background:#6366f115;border:1px solid #6366f130;color:#a5b4fc}
+.guide-strategy{padding:10px 12px;background:#7c3aed10;border:1px solid #7c3aed25;
+  border-radius:8px;font-size:.81rem;line-height:1.6;color:var(--tx)}
+.guide-qlink{display:inline-block;margin-top:8px;font-size:.78rem;color:#06b6d4;
+  cursor:pointer;border-bottom:1px solid transparent;transition:.15s;text-decoration:none}
+.guide-qlink:hover{border-color:#06b6d4}
 </style>
 </head>
 <body>
@@ -189,6 +237,84 @@ function lColor(lvl){ return LC[lCode(lvl)]||'#94a3b8'; }
 function lLabel(lvl){ return LL[lCode(lvl)]||'Developing'; }
 function pctLevel(p){ return p>=80?'M':p>=65?'S':p>=45?'D':p>=25?'W':'C'; }
 function heatColor(v){ return v>=80?'#22c55e':v>=65?'#84cc16':v>=45?'#f59e0b':v>=25?'#f97316':'#ef4444'; }
+
+/* ── Chapter→Subject maps (module scope — shared by heatmap + guide) ── */
+const NEET_MAP = {
+  'Physical World And Measurement':'Physics','Kinematics':'Physics',
+  'Laws Of Motion':'Physics','Work Energy And Power':'Physics',
+  'Rotational Motion':'Physics','Gravitation':'Physics',
+  'Properties Of Solids And Liquids':'Physics','Thermodynamics':'Physics',
+  'Kinetic Theory Of Gases':'Physics','Thermodynamics Laws':'Physics',
+  'Oscillations And Waves':'Physics','Electrostatics':'Physics',
+  'Current Electricity':'Physics','Magnetic Effects Of Current':'Physics',
+  'Electromagnetic Induction':'Physics','Alternating Current':'Physics',
+  'Electromagnetic Waves':'Physics','Optics':'Physics',
+  'Dual Nature Of Matter':'Physics','Atoms And Nuclei':'Physics',
+  'Electronic Devices':'Physics',
+  'Some Basic Concepts Of Chemistry':'Chemistry','Structure Of Atom':'Chemistry',
+  'Classification Of Elements':'Chemistry','Chemical Bonding':'Chemistry',
+  'States Of Matter':'Chemistry','Chemical Thermodynamics':'Chemistry',
+  'Equilibrium':'Chemistry','Redox Reactions':'Chemistry',
+  'Hydrogen':'Chemistry','S Block Elements':'Chemistry',
+  'P Block Elements':'Chemistry','Organic Chemistry Basic Principles':'Chemistry',
+  'Hydrocarbons':'Chemistry','Environmental Chemistry':'Chemistry',
+  'Solid State':'Chemistry','Solutions':'Chemistry',
+  'Electrochemistry':'Chemistry','Chemical Kinetics':'Chemistry',
+  'Surface Chemistry':'Chemistry','D And F Block Elements':'Chemistry',
+  'Coordination Compounds':'Chemistry','Haloalkanes And Haloarenes':'Chemistry',
+  'Alcohols Phenols Ethers':'Chemistry',
+  'Aldehydes Ketones Carboxylic Acids':'Chemistry',
+  'Amines':'Chemistry','Biomolecules':'Chemistry',
+  'Polymers':'Chemistry','Chemistry In Everyday Life':'Chemistry',
+  'Diversity In Living World':'Botany',
+  'Structural Organisation In Plants And Animals':'Botany',
+  'Cell Structure And Function':'Botany','Plant Physiology':'Botany',
+  'Human Physiology':'Zoology','Reproduction':'Zoology',
+  'Genetics And Evolution':'Zoology','Biology And Human Welfare':'Zoology',
+  'Biotechnology':'Zoology','Ecology And Environment':'Zoology',
+};
+const JEE_MAP = {
+  'Kinematics':'Physics',"Newton's Laws":'Physics',
+  'Work Power Energy':'Physics','Centre Of Mass':'Physics',
+  'Rotational Mechanics':'Physics','Gravitation':'Physics',
+  'Simple Harmonic Motion':'Physics','Fluid Mechanics':'Physics',
+  'Wave Motion':'Physics','Sound Waves':'Physics',
+  'Heat And Temperature':'Physics','KTG And Thermodynamics':'Physics',
+  'Electrostatics':'Physics','Capacitance':'Physics',
+  'Current Electricity':'Physics','Magnetic Effect':'Physics',
+  'Electromagnetic Induction':'Physics','Alternating Current':'Physics',
+  'Geometrical Optics':'Physics','Wave Optics':'Physics',
+  'Photoelectric Effect':'Physics','Atomic Models':'Physics',
+  'Nuclear Physics':'Physics','Semiconductors':'Physics',
+  'Mole Concept':'Chemistry','Atomic Structure':'Chemistry',
+  'Chemical Bonding':'Chemistry','Gaseous State':'Chemistry',
+  'Chemical Thermodynamics':'Chemistry','Chemical Equilibrium':'Chemistry',
+  'Ionic Equilibrium':'Chemistry','Chemical Kinetics':'Chemistry',
+  'Electrochemistry':'Chemistry','Solutions':'Chemistry',
+  'Surface Chemistry':'Chemistry','Solid State':'Chemistry',
+  'Periodic Table':'Chemistry','s-Block Elements':'Chemistry',
+  'p-Block Elements':'Chemistry','d-Block Elements':'Chemistry',
+  'Coordination Chemistry':'Chemistry','Metallurgy':'Chemistry',
+  'Qualitative Analysis':'Chemistry','Hydrogen':'Chemistry',
+  'General Organic Chemistry':'Chemistry','Hydrocarbons':'Chemistry',
+  'Halides':'Chemistry','Oxygen Compounds':'Chemistry',
+  'Nitrogen Compounds':'Chemistry','Biomolecules':'Chemistry',
+  'Polymers':'Chemistry','Practical Organic':'Chemistry',
+  'Quadratic Equations':'Mathematics','Complex Numbers':'Mathematics',
+  'Sequences And Series':'Mathematics','Permutation Combination':'Mathematics',
+  'Binomial Theorem':'Mathematics','Matrices Determinants':'Mathematics',
+  'Mathematical Induction':'Mathematics','Trigonometric Functions':'Mathematics',
+  'Trigonometric Equations':'Mathematics','Inverse Trigonometry':'Mathematics',
+  'Properties Of Triangles':'Mathematics','Straight Lines':'Mathematics',
+  'Circles':'Mathematics','Parabola':'Mathematics',
+  'Ellipse':'Mathematics','Hyperbola':'Mathematics',
+  'Limits':'Mathematics','Continuity And Differentiability':'Mathematics',
+  'Differentiation':'Mathematics','Application Of Derivatives':'Mathematics',
+  'Indefinite Integrals':'Mathematics','Definite Integrals':'Mathematics',
+  'Area Under Curves':'Mathematics','Differential Equations':'Mathematics',
+  'Vectors':'Mathematics','3D Geometry':'Mathematics',
+  'Probability':'Mathematics','Distributions':'Mathematics','Statistics':'Mathematics',
+};
 
 /* ── DOM helpers (no innerHTML for dynamic content) ── */
 function el(tag,cls){ const e=document.createElement(tag); if(cls)e.className=cls; return e; }
@@ -355,6 +481,8 @@ function render(s){
   row2.appendChild(buildSubjectBars(s));
   dash.appendChild(row2);
 
+  dash.appendChild(buildFullGuide(s));
+
   dash.appendChild(buildZones(s));
   dash.appendChild(buildHeatmap(s));
   dash.appendChild(buildInsights(s));
@@ -520,6 +648,22 @@ function buildSLMFocus(s){
     list.appendChild(fi);
   });
   c.appendChild(list);
+
+  // Expand button for full guide
+  const total = Object.keys(s.chapters||{}).length;
+  const toggleBtn = el('button','guide-toggle');
+  toggleBtn.appendChild(txt('▼ See Full Subject-Wise Guide ('+total+' chapters)'));
+  toggleBtn.addEventListener('click', ()=>{
+    const guide = document.getElementById('guide-section');
+    if(!guide) return;
+    const open = guide.style.display === 'flex';
+    guide.style.display = open ? 'none' : 'flex';
+    toggleBtn.textContent = '';
+    toggleBtn.appendChild(txt((open ? '▼' : '▲')+' See Full Subject-Wise Guide ('+total+' chapters)'));
+    if(!open) setTimeout(()=>guide.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+  });
+  c.appendChild(toggleBtn);
+
   return c;
 }
 
@@ -605,83 +749,6 @@ function buildHeatmap(s){
   const LV_LABEL = {M:'Mastered',S:'Strong',D:'Developing',W:'Weak',C:'Critical'};
   const LV_COLOR = {M:'#22c55e',S:'#84cc16',D:'#f59e0b',W:'#f97316',C:'#ef4444'};
 
-  // Definitive chapter→subject lookup (NEET splits Biology into Botany + Zoology)
-  const NEET_MAP = {
-    'Physical World And Measurement':'Physics','Kinematics':'Physics',
-    'Laws Of Motion':'Physics','Work Energy And Power':'Physics',
-    'Rotational Motion':'Physics','Gravitation':'Physics',
-    'Properties Of Solids And Liquids':'Physics','Thermodynamics':'Physics',
-    'Kinetic Theory Of Gases':'Physics','Thermodynamics Laws':'Physics',
-    'Oscillations And Waves':'Physics','Electrostatics':'Physics',
-    'Current Electricity':'Physics','Magnetic Effects Of Current':'Physics',
-    'Electromagnetic Induction':'Physics','Alternating Current':'Physics',
-    'Electromagnetic Waves':'Physics','Optics':'Physics',
-    'Dual Nature Of Matter':'Physics','Atoms And Nuclei':'Physics',
-    'Electronic Devices':'Physics',
-    'Some Basic Concepts Of Chemistry':'Chemistry','Structure Of Atom':'Chemistry',
-    'Classification Of Elements':'Chemistry','Chemical Bonding':'Chemistry',
-    'States Of Matter':'Chemistry','Chemical Thermodynamics':'Chemistry',
-    'Equilibrium':'Chemistry','Redox Reactions':'Chemistry',
-    'Hydrogen':'Chemistry','S Block Elements':'Chemistry',
-    'P Block Elements':'Chemistry','Organic Chemistry Basic Principles':'Chemistry',
-    'Hydrocarbons':'Chemistry','Environmental Chemistry':'Chemistry',
-    'Solid State':'Chemistry','Solutions':'Chemistry',
-    'Electrochemistry':'Chemistry','Chemical Kinetics':'Chemistry',
-    'Surface Chemistry':'Chemistry','D And F Block Elements':'Chemistry',
-    'Coordination Compounds':'Chemistry','Haloalkanes And Haloarenes':'Chemistry',
-    'Alcohols Phenols Ethers':'Chemistry',
-    'Aldehydes Ketones Carboxylic Acids':'Chemistry',
-    'Amines':'Chemistry','Biomolecules':'Chemistry',
-    'Polymers':'Chemistry','Chemistry In Everyday Life':'Chemistry',
-    'Diversity In Living World':'Botany',
-    'Structural Organisation In Plants And Animals':'Botany',
-    'Cell Structure And Function':'Botany','Plant Physiology':'Botany',
-    'Human Physiology':'Zoology','Reproduction':'Zoology',
-    'Genetics And Evolution':'Zoology','Biology And Human Welfare':'Zoology',
-    'Biotechnology':'Zoology','Ecology And Environment':'Zoology',
-  };
-  const JEE_MAP = {
-    'Kinematics':'Physics',"Newton's Laws":'Physics',
-    'Work Power Energy':'Physics','Centre Of Mass':'Physics',
-    'Rotational Mechanics':'Physics','Gravitation':'Physics',
-    'Simple Harmonic Motion':'Physics','Fluid Mechanics':'Physics',
-    'Wave Motion':'Physics','Sound Waves':'Physics',
-    'Heat And Temperature':'Physics','KTG And Thermodynamics':'Physics',
-    'Electrostatics':'Physics','Capacitance':'Physics',
-    'Current Electricity':'Physics','Magnetic Effect':'Physics',
-    'Electromagnetic Induction':'Physics','Alternating Current':'Physics',
-    'Geometrical Optics':'Physics','Wave Optics':'Physics',
-    'Photoelectric Effect':'Physics','Atomic Models':'Physics',
-    'Nuclear Physics':'Physics','Semiconductors':'Physics',
-    'Mole Concept':'Chemistry','Atomic Structure':'Chemistry',
-    'Chemical Bonding':'Chemistry','Gaseous State':'Chemistry',
-    'Chemical Thermodynamics':'Chemistry','Chemical Equilibrium':'Chemistry',
-    'Ionic Equilibrium':'Chemistry','Chemical Kinetics':'Chemistry',
-    'Electrochemistry':'Chemistry','Solutions':'Chemistry',
-    'Surface Chemistry':'Chemistry','Solid State':'Chemistry',
-    'Periodic Table':'Chemistry','s-Block Elements':'Chemistry',
-    'p-Block Elements':'Chemistry','d-Block Elements':'Chemistry',
-    'Coordination Chemistry':'Chemistry','Metallurgy':'Chemistry',
-    'Qualitative Analysis':'Chemistry','Hydrogen':'Chemistry',
-    'General Organic Chemistry':'Chemistry','Hydrocarbons':'Chemistry',
-    'Halides':'Chemistry','Oxygen Compounds':'Chemistry',
-    'Nitrogen Compounds':'Chemistry','Biomolecules':'Chemistry',
-    'Polymers':'Chemistry','Practical Organic':'Chemistry',
-    'Quadratic Equations':'Mathematics','Complex Numbers':'Mathematics',
-    'Sequences And Series':'Mathematics','Permutation Combination':'Mathematics',
-    'Binomial Theorem':'Mathematics','Matrices Determinants':'Mathematics',
-    'Mathematical Induction':'Mathematics','Trigonometric Functions':'Mathematics',
-    'Trigonometric Equations':'Mathematics','Inverse Trigonometry':'Mathematics',
-    'Properties Of Triangles':'Mathematics','Straight Lines':'Mathematics',
-    'Circles':'Mathematics','Parabola':'Mathematics',
-    'Ellipse':'Mathematics','Hyperbola':'Mathematics',
-    'Limits':'Mathematics','Continuity And Differentiability':'Mathematics',
-    'Differentiation':'Mathematics','Application Of Derivatives':'Mathematics',
-    'Indefinite Integrals':'Mathematics','Definite Integrals':'Mathematics',
-    'Area Under Curves':'Mathematics','Differential Equations':'Mathematics',
-    'Vectors':'Mathematics','3D Geometry':'Mathematics',
-    'Probability':'Mathematics','Distributions':'Mathematics','Statistics':'Mathematics',
-  };
   const CHAP_MAP = G.exam === 'neet' ? NEET_MAP : JEE_MAP;
 
   const c = mkCard('📊 Chapter Performance');
@@ -1068,6 +1135,269 @@ function buildCopilot(s){
   btn.addEventListener('click',ask);
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter') ask(); });
   return wrap;
+}
+
+/* ── Guide constants ── */
+const STUDY_HOURS = {C:6, W:4, D:2.5, S:1, M:0.5};
+const NEXT_LEVEL  = {C:'Weak', W:'Developing', D:'Strong', S:'Mastered', M:'–'};
+const NEXT_THRESH = {C:25,    W:40,            D:55,       S:70,         M:100};
+const STRATEGY = {
+  C:{
+    rising:   '🚨 Highest priority. Start with NCERT basics, then solve last 5-yr PYQs daily. This topic is gaining importance.',
+    stable:   '🚨 Critical gap. Dedicate first study block daily. Focus on fundamentals before attempting numericals.',
+    declining:'⚠️ Critical but declining. Secure basic marks with NCERT; don\'t over-invest.',
+  },
+  W:{
+    rising:   '🔴 High ROI. Study theory first, then 30+ PYQs. Rising importance makes this a priority pick.',
+    stable:   '🔴 Needs work. Structured 4h block: 1.5h theory → 1h formula drill → 1.5h PYQ practice.',
+    declining:'🟠 Weak but declining. Aim for passing marks; redistribute time if overwhelmed.',
+  },
+  D:{
+    rising:   '🟡 Good potential. Consistent practice will push you to Strong. Focus on high-frequency micro-topics.',
+    stable:   '🟡 Developing. 2–3 timed mock sets per week will consolidate this chapter.',
+    declining:'🟡 Stable enough. Maintain with weekly revision; redirect extra time to weaker chapters.',
+  },
+  S:{any:'🟢 Strong. Weekly maintenance revision and 1 mock test set is sufficient.'},
+  M:{any:'✅ Mastered. Quick 30-min revision before exam. No major investment needed.'},
+};
+const SUBJ_COLOR = {Botany:'#22c55e',Zoology:'#10b981',Chemistry:'#06b6d4',Physics:'#f59e0b',Mathematics:'#a855f7'};
+
+const _microCache = new Map();
+
+function _trendLabel(chap){
+  const seed1  = (chap.length*7 + 1*13)%21 - 10;
+  const seed10 = (chap.length*7 + 10*13)%21 - 10;
+  const diff   = seed10 - seed1;
+  return diff > 3
+    ? {dir:'rising',    label:'↑ Rising',    color:'#22c55e'}
+    : diff < -3
+    ? {dir:'declining', label:'↓ Declining', color:'#ef4444'}
+    : {dir:'stable',    label:'→ Stable',    color:'#94a3b8'};
+}
+
+function _strategyText(level, trendDir){
+  const s = STRATEGY[level] || STRATEGY['D'];
+  return s[trendDir] || s['stable'] || s['any'] || '';
+}
+
+async function _fetchMicros(chap, exam){
+  const key = exam+'|'+chap;
+  if(_microCache.has(key)) return _microCache.get(key);
+  try{
+    const r = await fetch('http://localhost:8001/api/v1/data/topic-deep-dive?topic='+encodeURIComponent(chap)+'&exam_type='+exam);
+    const d = await r.json();
+    const micros = (d.micro_topics||[]).slice(0,3).map(m=>m.topic_name||m.name||String(m));
+    const qcount = d.question_count || d.total || 0;
+    const result = {micros, qcount};
+    _microCache.set(key, result);
+    return result;
+  }catch(e){
+    const result = {micros:[], qcount:0};
+    _microCache.set(key, result);
+    return result;
+  }
+}
+
+/* ── Chapter Detail Card (lazy-loaded inside guide) ── */
+function _buildDetailCard(detail, item, exam, trend){
+  const lvColor = LC[item.lv] || '#94a3b8';
+  const hours   = STUDY_HOURS[item.lv] || 2.5;
+  const nextLv  = NEXT_LEVEL[item.lv]  || '–';
+  const nextThr = NEXT_THRESH[item.lv] || 55;
+  const gap     = Math.max(0, nextThr - item.acc);
+
+  // Top stats row
+  const topRow = el('div','guide-detail-top');
+  [
+    [hours+'h',     '⏱ Study Est.',  lvColor],
+    [trend.label,   '📈 Trend',      trend.color],
+    [gap > 0 ? '+'+gap.toFixed(0)+'% to '+nextLv : '✓ Peak', '🎯 Next Level', '#6366f1'],
+  ].forEach(([val,lbl,color])=>{
+    const stat = el('div','guide-detail-stat');
+    const vEl  = el('div','guide-detail-stat-val'); vEl.style.color=color; vEl.appendChild(txt(val));
+    const lEl  = el('div','guide-detail-stat-lbl'); lEl.appendChild(txt(lbl));
+    stat.appendChild(vEl); stat.appendChild(lEl);
+    topRow.appendChild(stat);
+  });
+  detail.appendChild(topRow);
+
+  // Micro-topics (lazy)
+  const microWrap = el('div','guide-micros');
+  const microLbl  = el('div','guide-micro-label'); microLbl.appendChild(txt('Key Micro-Topics'));
+  const microList = el('div','guide-micro-list');
+  const skeleton  = el('span'); skeleton.style.cssText='color:var(--mt);font-size:.78rem';
+  skeleton.appendChild(txt('Loading…'));
+  microList.appendChild(skeleton);
+  microWrap.appendChild(microLbl); microWrap.appendChild(microList);
+  detail.appendChild(microWrap);
+
+  // Strategy
+  const strategy = el('div','guide-strategy');
+  strategy.appendChild(txt(_strategyText(item.lv, trend.dir)));
+  detail.appendChild(strategy);
+
+  // Questions link
+  const qlink = el('a','guide-qlink');
+  qlink.appendChild(txt('See exam questions →'));
+  qlink.href = 'http://localhost:8501';
+  qlink.target = '_blank';
+  detail.appendChild(qlink);
+
+  // Async: fill micro-topics + update question count
+  _fetchMicros(item.chap, exam).then(({micros, qcount})=>{
+    microList.textContent = '';
+    if(micros.length === 0){
+      const em = el('span'); em.style.cssText='color:var(--mt);font-size:.78rem';
+      em.appendChild(txt('No micro-topic data. Is the API running?'));
+      microList.appendChild(em);
+    } else {
+      micros.forEach(m=>{
+        const chip = el('span','guide-micro-chip'); chip.appendChild(txt(m));
+        microList.appendChild(chip);
+      });
+    }
+    if(qcount > 0){
+      qlink.textContent = '';
+      qlink.appendChild(txt('See '+qcount+' exam questions →'));
+    }
+  });
+}
+
+/* ── Full Subject-Wise Guide ── */
+function buildFullGuide(s){
+  const section  = el('div','guide-section');
+  section.id     = 'guide-section';
+  const CHAP_MAP = G.exam === 'neet' ? NEET_MAP : JEE_MAP;
+  const exam     = G.exam === 'neet' ? 'neet'   : 'jee_main';
+
+  // Build per-subject groups with priority scores
+  const subjGroups = {};
+  Object.entries(s.chapters||{}).forEach(([chap, info])=>{
+    const subj = CHAP_MAP[chap];
+    if(!subj) return;
+    const [acc, lv, slmImp] = info;
+    const priority = (100 - acc) * ((slmImp||0) / 100);
+    if(!subjGroups[subj]) subjGroups[subj]=[];
+    subjGroups[subj].push({chap, acc, lv: (lv||'D')[0], slmImp: slmImp||0, priority});
+  });
+
+  // Sort subjects by avg priority desc; sort chapters within subject by priority desc
+  const subjList = Object.entries(subjGroups).map(([subj, items])=>{
+    items.sort((a,b)=>b.priority-a.priority);
+    const avgPriority = items.reduce((s,x)=>s+x.priority,0) / (items.length||1);
+    const weakCount   = items.filter(x=>x.lv==='C'||x.lv==='W').length;
+    const critCount   = items.filter(x=>x.lv==='C').length;
+    const avgAcc      = items.reduce((s,x)=>s+x.acc,0) / (items.length||1);
+    return {subj, items, avgPriority, weakCount, critCount, avgAcc};
+  }).sort((a,b)=>b.avgPriority-a.avgPriority);
+
+  if(subjList.length === 0){
+    const em = el('div'); em.style.cssText='padding:20px;color:var(--mt);font-size:.83rem;text-align:center';
+    em.appendChild(txt('No chapter data available for this student.'));
+    section.appendChild(em);
+    return section;
+  }
+
+  subjList.forEach(({subj, items, avgPriority, weakCount, critCount, avgAcc}, si)=>{
+    const urgColor  = avgPriority > 35 ? '#ef4444' : avgPriority > 20 ? '#f59e0b' : '#22c55e';
+    const urgLabel  = avgPriority > 35 ? 'Urgent'  : avgPriority > 20 ? 'Moderate' : 'On Track';
+    const subjColor = SUBJ_COLOR[subj] || '#6366f1';
+
+    const panel = el('div','guide-subj');
+    panel.style.borderTop = '3px solid '+subjColor;
+
+    // Subject header
+    const hdr   = el('div','guide-subj-hdr');
+    const urgDot = el('div','guide-subj-urgency');
+    urgDot.style.background = urgColor;
+    urgDot.style.boxShadow  = '0 0 6px '+urgColor+'88';
+
+    const nameEl = el('div','guide-subj-name');
+    nameEl.style.color = subjColor;
+    nameEl.appendChild(txt(subj));
+
+    const metaEl = el('div','guide-subj-meta');
+    metaEl.appendChild(txt(items.length+' chapters · avg '+avgAcc.toFixed(0)+'% · '+weakCount+' weak · '+critCount+' critical · '));
+    const urgSpan = el('span'); urgSpan.style.color=urgColor; urgSpan.style.fontWeight='700';
+    urgSpan.appendChild(txt(urgLabel));
+    metaEl.appendChild(urgSpan);
+
+    const chev = el('span','guide-subj-chev');
+    chev.appendChild(txt('▶'));
+
+    hdr.appendChild(urgDot); hdr.appendChild(nameEl);
+    hdr.appendChild(metaEl); hdr.appendChild(chev);
+
+    // Subject body
+    const body = el('div','guide-subj-body');
+
+    items.forEach((item, idx)=>{
+      const trend   = _trendLabel(item.chap);
+      const lvColor = LC[item.lv] || '#94a3b8';
+
+      // Chapter row
+      const row = el('div','guide-ch-row');
+
+      const rankEl = el('span','guide-ch-rank'); rankEl.appendChild(txt('#'+(idx+1)));
+
+      const nameEl2 = el('div','guide-ch-name');
+      nameEl2.appendChild(txt(item.chap)); nameEl2.title = item.chap;
+
+      // Dual mini-bars: accuracy + Prajna importance
+      const barsWrap = el('div','guide-ch-bars');
+      [[item.acc, lvColor],[(item.slmImp||0)+'','#a855f7']].forEach(([val,color])=>{
+        const br = el('div','guide-ch-bar-row');
+        const t  = el('div','guide-ch-bar-track');
+        const f  = el('div','guide-ch-bar-fill');
+        f.style.width = (parseFloat(val)||0)+'%'; f.style.background = color;
+        t.appendChild(f); br.appendChild(t); barsWrap.appendChild(br);
+      });
+
+      const badge = el('span','guide-ch-badge');
+      badge.style.background = lvColor+'22'; badge.style.color = lvColor;
+      badge.appendChild(txt('['+item.lv+']'));
+
+      const chev2 = el('span','guide-ch-chev'); chev2.appendChild(txt('▶'));
+
+      row.appendChild(rankEl); row.appendChild(nameEl2);
+      row.appendChild(barsWrap); row.appendChild(badge); row.appendChild(chev2);
+
+      // Detail card
+      const detail = el('div','guide-ch-detail');
+      let detailBuilt = false;
+
+      row.addEventListener('click', ()=>{
+        const open = detail.style.display !== 'none';
+        detail.style.display = open ? 'none' : 'block';
+        chev2.textContent = open ? '▶' : '▼';
+        if(!open && !detailBuilt){
+          detailBuilt = true;
+          _buildDetailCard(detail, item, exam, trend);
+        }
+      });
+
+      body.appendChild(row);
+      body.appendChild(detail);
+    });
+
+    // Toggle subject panel open/close
+    hdr.addEventListener('click', ()=>{
+      const open = body.classList.contains('open');
+      body.classList.toggle('open', !open);
+      chev.textContent = open ? '▶' : '▼';
+    });
+
+    // Auto-open most urgent subject
+    if(si === 0){
+      body.classList.add('open');
+      chev.textContent = '▼';
+    }
+
+    panel.appendChild(hdr); panel.appendChild(body);
+    section.appendChild(panel);
+  });
+
+  return section;
 }
 
 /* ── Boot ── */
