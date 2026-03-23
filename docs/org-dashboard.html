@@ -153,7 +153,43 @@ main{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:1.5rem;max-wid
   border-radius:50%;animation:sp .75s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(3,1fr)}.branch-grid{grid-template-columns:repeat(3,1fr)}.section-a{grid-template-columns:1fr}}
+/* PRAJNA INTELLIGENCE */
+.intel-grid{display:grid;grid-template-columns:1fr 360px;gap:1rem;align-items:start}
+.pred-list{display:flex;flex-direction:column;gap:.45rem}
+.pred-item{background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:.65rem 1rem;display:flex;align-items:center;gap:.75rem;transition:border-color .2s}
+.pred-item:hover{border-color:var(--accent)}
+.pred-rank{font-size:.72rem;font-weight:700;color:var(--muted);min-width:1.6rem;text-align:center}
+.pred-info{flex:1;min-width:0}
+.pred-name{font-size:.84rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pred-sub{font-size:.67rem;color:var(--muted);margin-top:.12rem}
+.pred-right{display:flex;flex-direction:column;align-items:flex-end;gap:.22rem;flex-shrink:0}
+.pred-pct{font-size:.9rem;font-weight:800}
+.pred-bar{width:72px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pred-bar-fill{height:100%;border-radius:3px}
+.trend-badge{font-size:.6rem;font-weight:700;padding:.1rem .38rem;border-radius:3px;white-space:nowrap}
+.tr-R{background:#0a2e1a;color:#00d4aa}.tr-S{background:#1e1e35;color:#8b7fff}
+.tr-D{background:#2e1010;color:#ff6b6b}.tr-N{background:#1a1525;color:#6c63ff}
+/* FOCUS CARD */
+.focus-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem}
+.focus-row{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.focus-row:last-of-type{border-bottom:none}
+.focus-subj{font-size:.78rem;font-weight:700;min-width:82px;flex-shrink:0}
+.focus-mid{flex:1;min-width:0}
+.focus-meta{font-size:.63rem;color:var(--muted);margin-bottom:.3rem}
+.focus-bars{display:flex;align-items:center;gap:.4rem}
+.fb-bg{flex:1;height:7px;background:var(--border);border-radius:3px;overflow:hidden}
+.fb-fill{height:100%;border-radius:3px}
+.focus-badge{font-size:.62rem;font-weight:700;padding:.14rem .42rem;border-radius:4px;white-space:nowrap;flex-shrink:0}
+.fb-warn{background:#2e1a00;color:#f59e0b}.fb-ok{background:#0a2e1a;color:#00d4aa}.fb-hi{background:#1a0a2e;color:#8b7fff}
+/* INTEL STRIP */
+.intel-strip{display:flex;flex-wrap:wrap;gap:.5rem;padding:.65rem 1rem;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem}
+.istrip-item{display:flex;align-items:center;gap:.35rem;font-size:.7rem}
+.istrip-dot{width:.45rem;height:.45rem;border-radius:50%;flex-shrink:0}
+.istrip-sep{width:1px;height:1rem;background:var(--border)}
+
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(3,1fr)}.branch-grid{grid-template-columns:repeat(3,1fr)}.section-a{grid-template-columns:1fr}.intel-grid{grid-template-columns:1fr}}
 @media(max-width:800px){.kpi-row{grid-template-columns:repeat(2,1fr)}.branch-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 <script src="/auth.js"></script>
@@ -207,7 +243,7 @@ const ZONE_BG  = {M:'#0d2e22',S:'#1a1a35',D:'#2e2800',W:'#2e1800',C:'#2e0d0d'};
 
 /* ── state ── */
 const S = {exam:'neet',branch:'',city:'',target:'',search:'',sortCol:'avg',sortDir:-1,selBranch:''};
-const G = {all:[],filtered:[],charts:{}};
+const G = {all:[],filtered:[],charts:{},preds:[]};
 
 /* ── helpers ── */
 const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
@@ -219,6 +255,15 @@ const zbg  = z => ZONE_BG[z] ||'#1a1d27';
 async function loadExam(exam){
   const r = await AUTH.apiFetch('/api/students?exam='+exam);
   return (await r.json()).students;
+}
+async function loadPredictions(exam){
+  try{
+    const et = exam==='jee'?'jee':'neet';
+    const r = await fetch(`http://localhost:8001/api/v1/data/predict?exam_type=${et}&year=2026&level=chapter&top_n=15`);
+    if(!r.ok) return [];
+    const d = await r.json();
+    return d.predictions||[];
+  }catch(e){ return []; }
 }
 
 /* ── filters ── */
@@ -264,7 +309,7 @@ async function switchExam(exam){
   document.getElementById('btn-neet').className = exam==='neet'?'active':'';
   document.getElementById('btn-jee').className  = exam==='jee' ?'active':'';
   document.getElementById('main').innerHTML = '<div class="loading-state"><div class="spin"></div><span>Loading…</span></div>';
-  G.all = await loadExam(exam);
+  [G.all, G.preds] = await Promise.all([loadExam(exam), loadPredictions(exam)]);
   populateDropdowns();
   G.filtered = G.all.slice();
   setFilterInfo();
@@ -588,6 +633,93 @@ function renderLB(students){
   </div>`;
 }
 
+/* ── Section E: PRAJNA Exam Intelligence ── */
+function renderPRAJNA(preds, students){
+  const SCOL = {Biology:'#00d4aa',Chemistry:'#6c63ff',Physics:'#f59e0b',Mathematics:'#a855f7'};
+  const TMAP = {RISING:'R',STABLE:'S',DECLINING:'D',NEW:'N'};
+  const TLBL = {RISING:'↑ Rising',STABLE:'→ Stable',DECLINING:'↓ Declining',NEW:'★ New'};
+
+  if(!preds||!preds.length){
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;text-align:center;color:var(--muted);font-size:.82rem">
+      ⚡ PRAJNA Intelligence API not available.<br>
+      <span style="font-size:.72rem">Start the intelligence service on <strong>http://localhost:8001</strong> to see exam predictions.</span>
+    </div>`;
+  }
+
+  /* summary strip */
+  const stripItems = SUBJ[S.exam].map(sub=>{
+    const sp = preds.filter(p=>p.subject===sub);
+    const col = SCOL[sub]||'#7880a4';
+    return `<span class="istrip-item"><span class="istrip-dot" style="background:${col}"></span>
+      <span style="color:${col};font-weight:700">${sub}</span>
+      <span style="color:var(--muted)">${sp.length} predicted · top: <strong style="color:var(--text)">${sp[0]?sp[0].chapter:'—'}</strong></span>
+    </span><span class="istrip-sep"></span>`;
+  }).join('');
+
+  /* prediction list — top 8 */
+  const top8 = preds.slice(0,8);
+  const items = top8.map((p,i)=>{
+    const prob = Math.round((p.appearance_probability||0)*100);
+    const col  = SCOL[p.subject]||'#7880a4';
+    const tr   = TMAP[p.trend_direction]||'S';
+    const expQ = (p.expected_questions||0).toFixed(1);
+    return `<div class="pred-item">
+      <span class="pred-rank" style="color:${i<3?col:'var(--muted)'}">#${i+1}</span>
+      <div class="pred-info">
+        <div class="pred-name">${p.chapter||'—'}</div>
+        <div class="pred-sub" style="color:${col}">${p.subject} &nbsp;·&nbsp; ~${expQ} Q expected</div>
+      </div>
+      <div class="pred-right">
+        <span class="pred-pct" style="color:${col}">${prob}%</span>
+        <div class="pred-bar"><div class="pred-bar-fill" style="width:${prob}%;background:${col}"></div></div>
+        <span class="trend-badge tr-${tr}">${TLBL[p.trend_direction]||p.trend_direction}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  /* subject strategy — student gap vs exam load */
+  const subjs = SUBJ[S.exam];
+  const focusRows = subjs.map(sub=>{
+    const col   = SCOL[sub]||'#7880a4';
+    const sVals = students.filter(s=>s.subjects&&s.subjects[sub]).map(s=>s.subjects[sub].acc||0);
+    const sAvg  = sVals.length ? avg(sVals) : 0;
+    const zone  = pct(sAvg);
+    const sp    = preds.filter(p=>p.subject===sub);
+    const ep    = sp.length ? Math.round(avg(sp.map(p=>p.appearance_probability||0))*100) : 0;
+    const barW  = Math.min(100,sAvg).toFixed(0);
+    /* classify: warn if students weak (<55) AND exam load high (>45%) */
+    const cls   = sAvg<40 && ep>40 ? 'fb-warn' : sAvg<55 && ep>50 ? 'fb-hi' : 'fb-ok';
+    const lbl   = sAvg<40 && ep>40 ? '⚠ HIGH RISK' : sAvg<55 && ep>50 ? '⚡ FOCUS' : '✓ On Track';
+    return `<div class="focus-row">
+      <span class="focus-subj" style="color:${col}">${sub}</span>
+      <div class="focus-mid">
+        <div class="focus-meta">Student avg: <strong style="color:${zcol(zone)}">${sAvg.toFixed(0)}%</strong> &nbsp;·&nbsp;
+          ${sp.length} predicted topics &nbsp;·&nbsp; exam prob avg: <strong style="color:${col}">${ep}%</strong></div>
+        <div class="focus-bars">
+          <div class="fb-bg"><div class="fb-fill" style="width:${barW}%;background:${zcol(zone)}"></div></div>
+        </div>
+      </div>
+      <span class="focus-badge ${cls}">${lbl}</span>
+    </div>`;
+  }).join('');
+
+  return `<div class="intel-strip">${stripItems}</div>
+  <div class="intel-grid">
+    <div>
+      <div class="sec-head" style="margin-bottom:.6rem">Top Predicted Chapters for 2026 &nbsp;<span class="sec-head-tag">PRAJNA v4</span></div>
+      <div class="pred-list">${items}</div>
+    </div>
+    <div class="focus-card">
+      <div class="sec-head" style="margin-bottom:.75rem">Subject Strategy <span style="font-weight:400;color:var(--muted)">— where to focus teaching</span></div>
+      ${focusRows}
+      <div style="font-size:.63rem;color:var(--muted);margin-top:.85rem;line-height:1.6">
+        <strong style="color:#f59e0b">⚠ HIGH RISK</strong> = students weak (&lt;40%) + high exam load (&gt;40%)<br>
+        <strong style="color:#8b7fff">⚡ FOCUS</strong> = students moderate (&lt;55%) + exam load above average
+      </div>
+    </div>
+  </div>`;
+}
+
 /* ── main render ── */
 function renderAll(){
   const st = G.filtered;
@@ -596,6 +728,12 @@ function renderAll(){
     <section>
       <div class="sec-head"><span class="sec-head-tag">A</span>Key Performance Indicators</div>
       <div id="kpi-wrap"></div>
+    </section>
+    <section>
+      <div class="sec-head"><span class="sec-head-tag">E</span>⚡ PRAJNA Exam Intelligence
+        <span style="font-weight:400;color:var(--muted);font-size:.65rem">— upcoming 2026 exam predictions × student gaps</span>
+      </div>
+      <div id="prajna-wrap"></div>
     </section>
     <section>
       <div class="sec-head">
@@ -613,10 +751,11 @@ function renderAll(){
       <div id="lb-wrap"></div>
     </section>`;
 
-  document.getElementById('kpi-wrap').innerHTML   = renderKPI(st);
-  document.getElementById('branch-grid').innerHTML = renderBranches(st);
-  document.getElementById('matrix-wrap').innerHTML = renderMatrix(st);
-  document.getElementById('lb-wrap').innerHTML     = renderLB(st);
+  document.getElementById('kpi-wrap').innerHTML    = renderKPI(st);
+  document.getElementById('prajna-wrap').innerHTML = renderPRAJNA(G.preds, st);
+  document.getElementById('branch-grid').innerHTML  = renderBranches(st);
+  document.getElementById('matrix-wrap').innerHTML  = renderMatrix(st);
+  document.getElementById('lb-wrap').innerHTML      = renderLB(st);
   buildLB(st);
 }
 
@@ -630,7 +769,7 @@ async function boot(){
   }
   document.getElementById('main').innerHTML='<div class="loading-state"><div class="spin"></div><span>Loading student data…</span></div>';
   try{
-    G.all = await loadExam(S.exam);
+    [G.all, G.preds] = await Promise.all([loadExam(S.exam), loadPredictions(S.exam)]);
     populateDropdowns();
     G.filtered = G.all.slice();
     setFilterInfo();
