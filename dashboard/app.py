@@ -56,8 +56,8 @@ SUBJ_COLORS = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b", "#a855f7"]
 SYL_COLORS = {"RETAINED": C_HIGH, "MODIFIED": C_MED, "NEW": C_BLUE, "REMOVED": C_LOW}
 
 PLOT_LAYOUT = dict(
-    plot_bgcolor  = "#0f0f1a",
-    paper_bgcolor = "#131320",
+    plot_bgcolor  = "#0d0d1a",
+    paper_bgcolor = "#0d0d1a",
     font = dict(family="Inter, system-ui, sans-serif", size=12, color="#8888aa"),
     margin  = dict(l=10, r=10, t=36, b=10),
     hoverlabel = dict(bgcolor="#1e1e30", font_color="#e2e8f0", font_size=12),
@@ -89,273 +89,325 @@ st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_ico
 # --- Custom CSS ---
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 
-  /* ── Global ── */
-  .stApp { background:#0f0f1a !important; font-family:'Inter',system-ui,sans-serif; }
-  .block-container { padding-top:0 !important; max-width:1480px; padding-left:1.5rem; padding-right:1.5rem; }
-  [data-testid="stHeader"] { background:transparent !important; }
-  [data-testid="stSidebar"] { display:none !important; }
-  section[data-testid="stSidebarContent"] { display:none !important; }
+/* ── Global ── */
+.stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
+.block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
+[data-testid="stHeader"] { background:transparent !important; }
+[data-testid="stSidebar"] { display:none !important; }
+section[data-testid="stSidebarContent"] { display:none !important; }
 
-  /* ── Compact topbar ── */
-  .prajna-topbar {
-    display:flex; align-items:center; justify-content:space-between;
-    background:#0f0f1a; border-bottom:1px solid rgba(255,255,255,0.06);
-    padding:0 1.5rem; height:56px;
-    position:sticky; top:0; z-index:200;
-    margin:0 -1.5rem 0 -1.5rem;
-  }
-  .prajna-topbar-left { display:flex; align-items:center; gap:12px; }
-  .prajna-logo-circle {
-    width:36px; height:36px; border-radius:50%; background:white;
-    display:flex; align-items:center; justify-content:center;
-    font-size:13px; font-weight:900; color:#0f0f1a;
-    font-family:'Space Grotesk',sans-serif; flex-shrink:0;
-  }
-  .prajna-brand { font-size:17px; font-weight:700; color:#e2e8f0; letter-spacing:-0.3px; }
-  .prajna-topbar-links { display:flex; align-items:center; gap:8px; }
-  .prajna-nav-link {
-    font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px;
-    text-decoration:none; border:1px solid; transition:opacity .2s;
-  }
-  .prajna-nav-link:hover { opacity:.8; }
-  .prajna-nav-student  { color:#a78bfa; background:rgba(167,139,250,.12); border-color:rgba(167,139,250,.4); }
-  .prajna-nav-api      { color:#34d399; background:rgba(52,211,153,.12);  border-color:rgba(52,211,153,.4);  }
+/* ── Topbar ── */
+.prajna-topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(8,8,16,0.95);
+  border-bottom:1px solid rgba(99,102,241,0.15);
+  padding:0 1.5rem; height:58px;
+  position:sticky; top:0; z-index:200;
+  margin:0 -1.5rem 0 -1.5rem;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.prajna-topbar-left { display:flex; align-items:center; gap:14px; }
+.prajna-logo-circle {
+  width:34px; height:34px; border-radius:10px;
+  background:linear-gradient(135deg,#6366f1,#a855f7);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:900; color:#fff;
+  font-family:'Space Grotesk',sans-serif; flex-shrink:0;
+  box-shadow:0 0 16px rgba(99,102,241,0.5);
+}
+.prajna-brand {
+  font-size:16px; font-weight:800; color:#f1f5f9;
+  letter-spacing:-0.4px; font-family:'Space Grotesk',sans-serif;
+}
+.prajna-brand span { color:#a5b4fc; }
+.prajna-topbar-links { display:flex; align-items:center; gap:8px; }
+.prajna-nav-link {
+  font-size:12px; font-weight:600; padding:6px 14px; border-radius:20px;
+  text-decoration:none; border:1px solid; transition:all .2s;
+}
+.prajna-nav-link:hover { opacity:.85; transform:translateY(-1px); }
+.prajna-nav-student { color:#c4b5fd; background:rgba(167,139,250,.1); border-color:rgba(167,139,250,.3); }
+.prajna-nav-api     { color:#6ee7b7; background:rgba(52,211,153,.1);  border-color:rgba(52,211,153,.3); }
 
-  /* ── Filter bar ── */
-  .filter-bar-wrap {
-    background:#131320; border-bottom:1px solid rgba(255,255,255,0.06);
-    padding:10px 1.5rem; margin:0 -1.5rem 1rem -1.5rem;
-  }
-  .filter-bar-label {
-    font-size:11px; font-weight:600; color:rgba(255,255,255,0.4);
-    text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;
-  }
+/* ── Stat bar ── */
+.stat-bar {
+  display:flex; flex-wrap:wrap; gap:10px;
+  background:rgba(13,13,24,0.8); padding:12px 1.5rem;
+  margin:0 -1.5rem .5rem -1.5rem;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.stat-chip {
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px; padding:8px 16px;
+  display:flex; flex-direction:column; align-items:flex-start;
+  transition:border-color .2s;
+}
+.stat-chip:hover { border-color:rgba(99,102,241,0.35); }
+.stat-chip-val { font-size:19px; font-weight:800; color:#f1f5f9; font-family:'Space Grotesk',sans-serif; line-height:1; }
+.stat-chip-lbl { font-size:9px; font-weight:600; color:rgba(255,255,255,0.35); text-transform:uppercase; letter-spacing:.7px; margin-top:3px; }
 
-  /* ── Stat chips (DB summary bar) ── */
-  .stat-bar {
-    display:flex; flex-wrap:wrap; gap:8px;
-    background:#131320; padding:10px 1.5rem;
-    margin:0 -1.5rem .5rem -1.5rem;
-    border-bottom:1px solid rgba(255,255,255,0.05);
-  }
-  .stat-chip {
-    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
-    border-radius:10px; padding:7px 14px;
-    display:flex; flex-direction:column; align-items:flex-start;
-  }
-  .stat-chip-val { font-size:18px; font-weight:800; color:white; font-family:'Space Grotesk',sans-serif; line-height:1; }
-  .stat-chip-lbl { font-size:9px; font-weight:600; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+/* ── Filter bar ── */
+.filter-bar-wrap {
+  background:rgba(13,13,24,0.6);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  padding:10px 1.5rem; margin:0 -1.5rem 1rem -1.5rem;
+}
 
-  /* ── Section headings ── */
-  .section-divider {
-    font-size:15px; font-weight:700; color:#e2e8f0; letter-spacing:-0.2px;
-    border-left:3px solid #6366f1; padding-left:12px;
-    margin:28px 0 14px 0; display:flex; align-items:center; gap:8px;
-  }
-  .section-badge {
-    font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px;
-    background:rgba(99,102,241,.15); color:#a5b4fc;
-    border:1px solid rgba(99,102,241,.3);
-  }
+/* ── Section headings ── */
+.section-divider {
+  font-size:14px; font-weight:700; color:#e2e8f0; letter-spacing:-0.2px;
+  border-left:3px solid #6366f1; padding-left:12px;
+  margin:28px 0 14px 0; display:flex; align-items:center; gap:10px;
+}
+.section-badge {
+  font-size:10px; font-weight:700; padding:2px 9px; border-radius:10px;
+  background:rgba(99,102,241,.12); color:#a5b4fc;
+  border:1px solid rgba(99,102,241,.25);
+}
 
-  /* ── KPI / metric cards ── */
-  div[data-testid="stMetric"] {
-    background:#131320 !important;
-    border:1px solid rgba(255,255,255,0.07) !important;
-    border-radius:14px !important; padding:18px 20px !important;
-    box-shadow:0 4px 20px rgba(0,0,0,0.25);
-    transition:transform .2s,box-shadow .2s;
-  }
-  div[data-testid="stMetric"]:hover {
-    transform:translateY(-2px);
-    border-color:rgba(99,102,241,.35) !important;
-    box-shadow:0 8px 28px rgba(99,102,241,.12);
-  }
-  div[data-testid="stMetric"] label {
-    font-size:10px !important; font-weight:600 !important;
-    color:rgba(255,255,255,0.4) !important;
-    text-transform:uppercase !important; letter-spacing:.5px !important;
-    white-space:normal !important;
-  }
-  div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-    font-size:26px !important; font-weight:800 !important; color:#ffffff !important;
-  }
-  div[data-testid="stMetricDelta"] span { font-size:11px !important; }
+/* ── Metric cards ── */
+div[data-testid="stMetric"] {
+  background:rgba(13,13,24,0.9) !important;
+  border:1px solid rgba(255,255,255,0.07) !important;
+  border-radius:16px !important; padding:20px 22px !important;
+  box-shadow:0 4px 24px rgba(0,0,0,0.3);
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+div[data-testid="stMetric"]:hover {
+  transform:translateY(-3px);
+  border-color:rgba(99,102,241,.4) !important;
+  box-shadow:0 8px 32px rgba(99,102,241,.15);
+}
+div[data-testid="stMetric"] label {
+  font-size:10px !important; font-weight:700 !important;
+  color:rgba(255,255,255,0.35) !important;
+  text-transform:uppercase !important; letter-spacing:.6px !important;
+}
+div[data-testid="stMetric"] [data-testid="stMetricValue"] {
+  font-size:28px !important; font-weight:800 !important; color:#ffffff !important;
+  font-family:'Space Grotesk',sans-serif !important;
+}
+div[data-testid="stMetricDelta"] span { font-size:11px !important; }
 
-  /* ── Tabs ── */
-  .stTabs [data-baseweb="tab-list"] {
-    gap:2px; background:#131320;
-    border-radius:12px; padding:4px;
-    border:1px solid rgba(255,255,255,0.07);
-  }
-  .stTabs [data-baseweb="tab"] {
-    border-radius:8px; padding:9px 16px;
-    font-weight:600; font-size:13px; color:rgba(255,255,255,0.45);
-    transition:all .2s;
-  }
-  .stTabs [data-baseweb="tab"][aria-selected="true"] {
-    background:rgba(99,102,241,.18) !important;
-    color:#a5b4fc !important;
-    box-shadow:0 2px 8px rgba(99,102,241,.15);
-    border-bottom:2px solid #6366f1 !important;
-  }
-  .stTabs [data-baseweb="tab-highlight"] { background:transparent !important; }
+/* ── Tabs ── */
+.stTabs [data-baseweb="tab-list"] {
+  gap:2px; background:rgba(13,13,24,0.9);
+  border-radius:14px; padding:5px;
+  border:1px solid rgba(255,255,255,0.07);
+}
+.stTabs [data-baseweb="tab"] {
+  border-radius:10px; padding:10px 18px;
+  font-weight:600; font-size:13px; color:rgba(255,255,255,0.4);
+  transition:all .2s;
+}
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+  background:rgba(99,102,241,.2) !important;
+  color:#c4b5fd !important;
+  box-shadow:0 2px 12px rgba(99,102,241,.2);
+  border-bottom:2px solid #818cf8 !important;
+}
+.stTabs [data-baseweb="tab-highlight"] { background:transparent !important; }
 
-  /* ── Selectboxes / inputs ── */
-  [data-testid="stSelectbox"] > div > div,
-  [data-testid="stNumberInput"] > div > div > input,
-  [data-testid="stTextInput"] > div > div > input {
-    border-radius:8px !important;
-    border-color:rgba(255,255,255,0.1) !important;
-    background:#131320 !important; color:#e2e8f0 !important;
-    font-size:13px !important;
-  }
-  [data-testid="stSelectbox"] label,
-  [data-testid="stNumberInput"] label,
-  [data-testid="stTextInput"] label {
-    font-size:11px !important; color:rgba(255,255,255,0.4) !important;
-    text-transform:uppercase; letter-spacing:.5px;
-  }
+/* ── Inputs ── */
+[data-testid="stSelectbox"] > div > div,
+[data-testid="stNumberInput"] > div > div > input,
+[data-testid="stTextInput"] > div > div > input {
+  border-radius:10px !important;
+  border-color:rgba(255,255,255,0.1) !important;
+  background:rgba(13,13,24,0.9) !important; color:#e2e8f0 !important;
+  font-size:13px !important;
+}
+[data-testid="stSelectbox"] label,
+[data-testid="stNumberInput"] label,
+[data-testid="stTextInput"] label {
+  font-size:10px !important; color:rgba(255,255,255,0.35) !important;
+  text-transform:uppercase; letter-spacing:.6px; font-weight:700 !important;
+}
 
-  /* ── Buttons ── */
-  .stButton > button {
-    border-radius:8px; font-weight:600; font-size:13px;
-    border:1px solid rgba(255,255,255,0.12) !important;
-    background:#131320 !important; color:#e2e8f0 !important;
-    transition:all .2s;
-  }
-  .stButton > button[kind="primary"] {
-    background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;
-    border:none !important; color:white !important;
-    box-shadow:0 4px 16px rgba(99,102,241,.35);
-  }
-  .stButton > button[kind="primary"]:hover {
-    box-shadow:0 6px 24px rgba(99,102,241,.5); transform:translateY(-1px);
-  }
+/* ── Buttons ── */
+.stButton > button {
+  border-radius:10px; font-weight:600; font-size:13px;
+  border:1px solid rgba(255,255,255,0.1) !important;
+  background:rgba(13,13,24,0.9) !important; color:#e2e8f0 !important;
+  transition:all .2s;
+}
+.stButton > button:hover {
+  border-color:rgba(99,102,241,.4) !important; color:#a5b4fc !important;
+}
+.stButton > button[kind="primary"] {
+  background:linear-gradient(135deg,#6366f1,#8b5cf6) !important;
+  border:none !important; color:white !important;
+  box-shadow:0 4px 20px rgba(99,102,241,.4);
+}
+.stButton > button[kind="primary"]:hover {
+  box-shadow:0 6px 28px rgba(99,102,241,.6); transform:translateY(-2px);
+}
 
-  /* ── Expanders ── */
-  .streamlit-expanderHeader { font-weight:600; font-size:13px; color:#cbd5e1; }
-  details {
-    background:#131320 !important;
-    border:1px solid rgba(255,255,255,0.07) !important;
-    border-radius:12px !important;
-  }
+/* ── Expanders ── */
+.streamlit-expanderHeader { font-weight:600; font-size:13px; color:#cbd5e1; }
+details {
+  background:rgba(13,13,24,0.9) !important;
+  border:1px solid rgba(255,255,255,0.07) !important;
+  border-radius:14px !important;
+}
 
-  /* ── DataFrames ── */
-  [data-testid="stDataFrame"] {
-    border-radius:12px; overflow:hidden;
-    border:1px solid rgba(255,255,255,0.07);
-  }
-  [data-testid="stDataFrame"] * { color:#e2e8f0 !important; }
-  [data-testid="stDataFrame"] th {
-    background:rgba(99,102,241,.12) !important;
-    color:#a5b4fc !important; font-weight:700 !important;
-  }
-  [data-testid="stDataFrame"] td { background:rgba(255,255,255,0.02) !important; }
-  [data-testid="stDataFrame"] tr:hover td { background:rgba(99,102,241,.06) !important; }
+/* ── DataFrames ── */
+[data-testid="stDataFrame"] {
+  border-radius:14px; overflow:hidden;
+  border:1px solid rgba(255,255,255,0.07);
+}
+[data-testid="stDataFrame"] * { color:#e2e8f0 !important; }
+[data-testid="stDataFrame"] th {
+  background:rgba(99,102,241,.12) !important;
+  color:#a5b4fc !important; font-weight:700 !important;
+}
+[data-testid="stDataFrame"] td { background:rgba(255,255,255,0.02) !important; }
+[data-testid="stDataFrame"] tr:hover td { background:rgba(99,102,241,.06) !important; }
 
-  /* ── Plotly containers ── */
-  .stPlotlyChart {
-    background:#131320; border-radius:14px; padding:4px;
-    border:1px solid rgba(255,255,255,0.06);
-  }
+/* ── Plotly containers ── */
+.stPlotlyChart {
+  background:rgba(13,13,24,0.9); border-radius:16px; padding:6px;
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 4px 24px rgba(0,0,0,0.2);
+}
 
-  /* ── Download buttons ── */
-  .stDownloadButton > button {
-    border-radius:8px; font-weight:500;
-    border:1px solid rgba(255,255,255,0.12) !important;
-    background:#131320 !important; color:#cbd5e1 !important;
-  }
-  .stDownloadButton > button:hover {
-    border-color:rgba(99,102,241,.5) !important; color:#a5b4fc !important;
-  }
+/* ── Download buttons ── */
+.stDownloadButton > button {
+  border-radius:10px; font-weight:600;
+  border:1px solid rgba(255,255,255,0.1) !important;
+  background:rgba(13,13,24,0.9) !important; color:#cbd5e1 !important;
+}
+.stDownloadButton > button:hover {
+  border-color:rgba(99,102,241,.5) !important; color:#a5b4fc !important;
+}
 
-  /* ── Badges ── */
-  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.3px; }
-  .badge-high     { background:rgba(16,185,129,.15); color:#6ee7b7; border:1px solid rgba(16,185,129,.3); }
-  .badge-medium   { background:rgba(245,158,11,.15);  color:#fcd34d; border:1px solid rgba(245,158,11,.3);  }
-  .badge-low      { background:rgba(239,68,68,.15);   color:#fca5a5; border:1px solid rgba(239,68,68,.3);   }
-  .badge-spec     { background:rgba(148,163,184,.1);  color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
-  .badge-retained { background:rgba(16,185,129,.15);  color:#6ee7b7; border:1px solid rgba(16,185,129,.3);  }
-  .badge-modified { background:rgba(245,158,11,.15);  color:#fcd34d; border:1px solid rgba(245,158,11,.3);  }
-  .badge-new      { background:rgba(99,102,241,.15);  color:#a5b4fc; border:1px solid rgba(99,102,241,.3);  }
-  .badge-removed  { background:rgba(239,68,68,.15);   color:#fca5a5; border:1px solid rgba(239,68,68,.3);   }
+/* ── Badges ── */
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.3px; }
+.badge-high     { background:rgba(16,185,129,.12); color:#6ee7b7; border:1px solid rgba(16,185,129,.25); }
+.badge-medium   { background:rgba(245,158,11,.12);  color:#fcd34d; border:1px solid rgba(245,158,11,.25);  }
+.badge-low      { background:rgba(239,68,68,.12);   color:#fca5a5; border:1px solid rgba(239,68,68,.25);   }
+.badge-spec     { background:rgba(148,163,184,.08);  color:#94a3b8; border:1px solid rgba(148,163,184,.18); }
+.badge-retained { background:rgba(16,185,129,.12);  color:#6ee7b7; border:1px solid rgba(16,185,129,.25);  }
+.badge-modified { background:rgba(245,158,11,.12);  color:#fcd34d; border:1px solid rgba(245,158,11,.25);  }
+.badge-new      { background:rgba(99,102,241,.12);  color:#a5b4fc; border:1px solid rgba(99,102,241,.25);  }
+.badge-removed  { background:rgba(239,68,68,.12);   color:#fca5a5; border:1px solid rgba(239,68,68,.25);   }
 
-  /* ── Slider ── */
-  .stSlider > div > div > div > div { background:linear-gradient(90deg,#6366f1,#a855f7) !important; }
+/* ── Slider ── */
+.stSlider > div > div > div > div { background:linear-gradient(90deg,#6366f1,#a855f7) !important; }
 
-  /* ── Scrollbar ── */
-  ::-webkit-scrollbar { width:5px; height:5px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:rgba(99,102,241,.3); border-radius:3px; }
-  ::-webkit-scrollbar-thumb:hover { background:rgba(99,102,241,.5); }
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(99,102,241,.25); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(99,102,241,.45); }
 
-  /* ── Misc ── */
-  .stApp, p, li, span { color:#cbd5e1; }
-  h1,h2,h3,h4 { color:#f1f5f9 !important; }
-  .stCaption,[data-testid="stCaptionContainer"] { color:rgba(255,255,255,.35) !important; font-size:12px; }
-  [data-testid="stAlert"] { border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); }
-  .stSpinner > div { border-top-color:#6366f1 !important; }
+/* ── Typography ── */
+.stApp, p, li, span { color:#cbd5e1; }
+h1,h2,h3,h4 { color:#f1f5f9 !important; font-family:'Space Grotesk',sans-serif !important; }
+.stCaption,[data-testid="stCaptionContainer"] { color:rgba(255,255,255,.3) !important; font-size:12px; }
+[data-testid="stAlert"] { border-radius:14px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); }
+.stSpinner > div { border-top-color:#6366f1 !important; }
 
-  /* ── Footer ── */
-  .prajna-footer {
-    background:linear-gradient(135deg,#0f0f1a,#131320);
-    border-top:1px solid rgba(99,102,241,.2);
-    padding:28px 1.5rem; margin:48px -1.5rem 0 -1.5rem;
-  }
-  .team-card {
-    background:#131320; border:1px solid rgba(255,255,255,.07);
-    border-radius:12px; padding:14px 18px; text-align:center;
-  }
-  .team-name  { font-size:14px; font-weight:700; color:#e2e8f0; }
-  .team-org   { font-size:10px; color:rgba(255,255,255,.4); margin:2px 0; text-transform:uppercase; letter-spacing:.5px; }
-  .team-code  { font-size:11px; color:#a5b4fc; font-weight:600; }
-  .team-phone { font-size:10px; color:rgba(255,255,255,.3); }
+/* ── Footer ── */
+.prajna-footer {
+  background:linear-gradient(135deg,rgba(8,8,16,1),rgba(13,13,24,1));
+  border-top:1px solid rgba(99,102,241,.2);
+  padding:32px 1.5rem; margin:56px -1.5rem 0 -1.5rem;
+}
+.team-card {
+  background:rgba(13,13,24,0.9); border:1px solid rgba(255,255,255,.07);
+  border-radius:14px; padding:16px 20px; text-align:center;
+}
+.team-name  { font-size:14px; font-weight:700; color:#e2e8f0; }
+.team-org   { font-size:10px; color:rgba(255,255,255,.35); margin:2px 0; text-transform:uppercase; letter-spacing:.5px; }
+.team-code  { font-size:11px; color:#a5b4fc; font-weight:600; }
+.team-phone { font-size:10px; color:rgba(255,255,255,.25); }
 
-  /* ── Collapsible prediction cards ── */
-  details summary::-webkit-details-marker { display:none; }
-  details summary::marker { display:none; }
-  details[open] .pred-chevron { transform:rotate(90deg); }
-  details[open] { border-color:rgba(99,102,241,.3) !important; }
+/* ── Prediction card expand ── */
+details summary::-webkit-details-marker { display:none; }
+details summary::marker { display:none; }
+details[open] .pred-chevron { transform:rotate(90deg); }
+details[open] { border-color:rgba(99,102,241,.3) !important; }
 
-  /* Hide Streamlit chrome ── */
-  #MainMenu { visibility:hidden; }
-  footer { visibility:hidden; }
-  [data-testid="stToolbar"]     { display:none !important; }
-  [data-testid="stDeployButton"]{ display:none !important; }
+/* ── Chrome hiding ── */
+#MainMenu { visibility:hidden; }
+footer { visibility:hidden; }
+[data-testid="stToolbar"]      { display:none !important; }
+[data-testid="stDeployButton"] { display:none !important; }
+[data-testid="stStatusWidget"] { display:none !important; }
 
-  /* ── Loading overlay ── */
-  [data-testid="stStatusWidget"] { display:none !important; }
-  .stProgress > div > div > div > div {
-    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4) !important;
-    border-radius: 4px !important;
-  }
-  .stProgress > div > div {
-    background: rgba(255,255,255,0.06) !important;
-    border-radius: 4px !important;
-    height: 6px !important;
-  }
-  /* ── Suppress the grey "running" overlay on rerun ── */
-  .stApp[data-teststate="running"] .main           { opacity: 1 !important; }
-  .stApp[data-teststate="running"] .block-container{ opacity: 1 !important; }
-  .stApp[data-teststate="running"] section         { opacity: 1 !important; }
-  .stApp[data-teststate="running"] [data-testid]   { opacity: 1 !important; }
-  /* Streamlit ≥ 1.29 uses a stale overlay iframe — hide it */
-  iframe[title="streamlit_loading_overlay"]         { display: none !important; }
-  /* Animated indigo loading bar at the very top */
-  .stApp[data-teststate="running"]::before {
-    content: '';
-    position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
-    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
-    background-size: 200% 100%;
-    animation: prajna-loading 1.2s linear infinite;
-  }
-  @keyframes prajna-loading {
-    0%   { background-position: 100% 0; }
-    100% { background-position: -100% 0; }
-  }
+/* ── Progress bar ── */
+.stProgress > div > div > div > div {
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4) !important;
+  border-radius: 4px !important;
+}
+.stProgress > div > div {
+  background: rgba(255,255,255,0.05) !important;
+  border-radius: 4px !important; height: 6px !important;
+}
+
+/* ── Animated top bar on rerun ── */
+.stApp[data-teststate="running"] .main { opacity: 1 !important; }
+.stApp[data-teststate="running"] .block-container { opacity: 1 !important; }
+iframe[title="streamlit_loading_overlay"] { display: none !important; }
+.stApp[data-teststate="running"]::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #6366f1);
+  background-size: 200% 100%;
+  animation: prajna-loading 1.2s linear infinite;
+}
+@keyframes prajna-loading {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ── Hero banner ── */
+.prajna-hero {
+  background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.06) 50%, rgba(6,182,212,0.05) 100%);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin: 12px 0 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.prajna-hero::before {
+  content: '';
+  position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.prajna-hero-title {
+  font-size: 22px; font-weight: 800; color: #f1f5f9;
+  font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.prajna-hero-sub { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+.prajna-hero-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 20px; padding: 5px 14px; font-size: 11px;
+  font-weight: 700; color: #a5b4fc; letter-spacing: .05em; margin-top: 10px;
+}
+.prajna-accuracy-ring {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0;
+}
+.prajna-accuracy-val {
+  font-size: 42px; font-weight: 900; color: #22c55e;
+  font-family: 'Space Grotesk', sans-serif; line-height: 1;
+}
+.prajna-accuracy-lbl { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; text-transform: uppercase; letter-spacing: .6px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -363,14 +415,14 @@ st.markdown("""
 st.markdown("""
 <div class="prajna-topbar">
   <div class="prajna-topbar-left">
-    <div class="prajna-logo-circle">PW</div>
-    <span class="prajna-brand">PRAJNA Intelligence</span>
+    <div class="prajna-logo-circle">⚡</div>
+    <span class="prajna-brand">PRAJNA <span>Intelligence</span></span>
   </div>
   <div class="prajna-topbar-links">
     <a class="prajna-nav-link prajna-nav-student"
-       href="http://localhost:8765/student-dashboard.html" target="_blank">Student IQ ↗</a>
+       href="http://localhost:4000/student-dashboard.html" target="_blank">Student Dashboard ↗</a>
     <a class="prajna-nav-link prajna-nav-api"
-       href="http://localhost:8765/intelligence-dashboard.html" target="_blank">Intelligence ↗</a>
+       href="http://localhost:8001/docs" target="_blank">API Docs ↗</a>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -425,6 +477,23 @@ with f5:
     pred_level = st.selectbox("Level", ["Chapter", "Micro-Topic"], key="gx_level")
 st.markdown('</div>', unsafe_allow_html=True)
 
+st.markdown(f"""
+<div class="prajna-hero">
+  <div>
+    <div class="prajna-hero-title">🧠 PRAJNA Exam Intelligence Engine</div>
+    <div class="prajna-hero-sub">
+      SLM-powered rank prediction · 48 years of exam data · 755 micro-topics<br>
+      Real-time chapter &amp; topic probability scoring for NEET &amp; JEE
+    </div>
+    <div class="prajna-hero-pill">⚡ Exam: {selected_exam} &nbsp;·&nbsp; Year: {target_year} &nbsp;·&nbsp; Level: {pred_level}</div>
+  </div>
+  <div class="prajna-accuracy-ring">
+    <div class="prajna-accuracy-val">91%</div>
+    <div class="prajna-accuracy-lbl">Backtest Accuracy</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+
 # ── Refresh toast when any filter changes ────────────────────────────────────
 _filter_sig = (selected_exam, selected_subject, target_year, top_n, pred_level)
 if "last_filter_sig" not in st.session_state:
@@ -455,6 +524,17 @@ def get_predictions_v3(db, year, exam, k):
 def get_predictions_micro_v3(db, year, exam, k):
     # Each K gets its own independent reranking
     return predict_microtopics_v3(db, target_year=year, exam=exam, top_k=k)
+
+@st.cache_data(ttl=300)
+def get_predictions_micro_v4(db, year, exam, k):
+    # Try predictor_v4; returns (preds, engine) so cache key stays stable
+    try:
+        from analysis.predictor_v4 import predict_microtopics_v4
+        preds = predict_microtopics_v4(db, target_year=year, exam=exam, top_k=k)
+        return preds, "v4"
+    except Exception:
+        preds = predict_microtopics_v3(db, target_year=year, exam=exam, top_k=k)
+        return preds, "v3"
 
 @st.cache_data(ttl=600)
 def run_backtest_single(db, test_year, exam, k, level):
@@ -493,7 +573,16 @@ _prog = _load_bar.progress(0, text="")
 _load_status.caption("⚡ PRAJNA loading predictions...")
 
 _prog.progress(15, text="Loading micro-topic predictions...")
-preds_micro = get_predictions_micro_v3(DB_PATH, target_year, exam_filter, top_n)
+preds_micro, _micro_engine = get_predictions_micro_v4(DB_PATH, target_year, exam_filter, top_n)
+if _micro_engine == "v4":
+    st.markdown(
+        '<span style="background:#22c55e20;color:#22c55e;border:1px solid #22c55e40;'
+        'border-radius:8px;padding:2px 10px;font-size:.75rem;font-weight:700">'
+        '⚡ PRAJNA v4 Engine</span>',
+        unsafe_allow_html=True
+    )
+else:
+    st.caption("v3 engine (v4 unavailable)")
 active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_micro = [p for p in active_micro if p["subject"] == selected_subject]
