@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PRAJNA · Organisation Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--card:#21253a;--border:#2a2e45;
+  --accent:#6c63ff;--accent2:#00d4aa;--warn:#ff6b6b;--gold:#ffd166;--amber:#f59e0b;
+  --text:#e8eaf6;--muted:#7880a4;--sm:0.78rem;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+
+/* NAV */
+nav{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;
+  background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-logo{font-weight:800;font-size:1rem;color:var(--accent);white-space:nowrap;letter-spacing:-.01em}
+.nav-logo span{color:var(--accent2)}
+.nav-badge{font-size:.62rem;background:var(--accent);color:#fff;padding:.15rem .55rem;border-radius:999px;font-weight:700;letter-spacing:.06em}
+.nav-links{display:flex;gap:.75rem;margin-left:auto;align-items:center}
+.nav-link{color:var(--muted);text-decoration:none;font-size:var(--sm);transition:color .2s}
+.nav-link:hover{color:var(--text)}
+.exam-toggle{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.exam-toggle button{background:none;border:none;color:var(--muted);padding:.35rem .9rem;
+  font-size:.75rem;cursor:pointer;transition:all .2s;font-weight:700;letter-spacing:.04em}
+.exam-toggle button.active{background:var(--accent);color:#fff}
+
+/* FILTERS */
+.filters{display:flex;flex-wrap:wrap;gap:.6rem;padding:.85rem 1.5rem;
+  background:var(--surface);border-bottom:1px solid var(--border);align-items:center}
+.filters select,.filters input{
+  background:var(--card);border:1px solid var(--border);color:var(--text);
+  padding:.38rem .75rem;border-radius:6px;font-size:var(--sm);min-width:148px;outline:none}
+.filters select:focus,.filters input:focus{border-color:var(--accent)}
+.btn-clear{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:.38rem .9rem;border-radius:6px;font-size:var(--sm);cursor:pointer;transition:all .2s}
+.btn-clear:hover{border-color:var(--warn);color:var(--warn)}
+.filter-info{margin-left:auto;font-size:.72rem;color:var(--muted);white-space:nowrap}
+
+/* MAIN */
+main{padding:1.2rem 1.5rem;display:flex;flex-direction:column;gap:1.5rem;max-width:1600px;margin:0 auto;width:100%}
+.sec-head{font-size:.68rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem}
+.sec-head-tag{background:var(--accent);color:#fff;font-size:.58rem;padding:.1rem .4rem;border-radius:3px}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:.9rem 1.1rem;border-left:3px solid var(--border);transition:border-color .2s}
+.kpi.c-accent{border-left-color:var(--accent)}.kpi.c-teal{border-left-color:var(--accent2)}
+.kpi.c-warn{border-left-color:var(--warn)}.kpi.c-gold{border-left-color:var(--gold)}
+.kpi.c-amber{border-left-color:var(--amber)}
+.kpi-lbl{font-size:.65rem;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:.35rem}
+.kpi-val{font-size:1.75rem;font-weight:800;line-height:1;margin-bottom:.3rem}
+.kpi-sub{font-size:.7rem;color:var(--muted);line-height:1.4}
+.kpi-sub strong{color:var(--text)}
+
+/* ZONE DONUT ROW */
+.section-a{display:grid;grid-template-columns:1fr 300px;gap:1rem;align-items:start}
+.donut-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem}
+.donut-inner{display:flex;flex-direction:column;align-items:center;gap:.6rem}
+.donut-inner canvas{max-height:155px}
+.zone-pills{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center}
+.zpill{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;
+  background:var(--surface);padding:.18rem .5rem;border-radius:4px;font-weight:600}
+.zdot{width:.5rem;height:.5rem;border-radius:50%;display:inline-block}
+
+/* BRANCH GRID */
+.branch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem}
+.bcard{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:.85rem 1rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.bcard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background .2s}
+.bcard:hover{border-color:var(--accent)}.bcard:hover::before{background:var(--accent)}
+.bcard.sel{border-color:var(--accent);background:#1c1f35}.bcard.sel::before{background:var(--accent)}
+.bcard-name{font-weight:700;font-size:.82rem;margin-bottom:.5rem;padding-left:.5rem}
+.bcard-row{display:flex;align-items:center;justify-content:space-between;padding-left:.5rem;margin-bottom:.3rem}
+.bcard-stat{font-size:.72rem;color:var(--muted)}.bcard-stat strong{color:var(--text);font-size:.85rem}
+.bcard-risk{position:absolute;top:.5rem;right:.5rem;background:var(--warn);color:#fff;
+  font-size:.58rem;padding:.1rem .35rem;border-radius:3px;font-weight:700}
+.bcard-bar{height:4px;background:var(--border);border-radius:2px;margin:.5rem .5rem 0;overflow:hidden}
+.bcard-bar-fill{height:100%;border-radius:2px;transition:width .6s}
+.bcard-weak{font-size:.64rem;color:var(--muted);padding-left:.5rem;margin-top:.3rem}
+.trend-up{color:var(--accent2);font-size:.7rem;font-weight:700}
+.trend-dn{color:var(--warn);font-size:.7rem;font-weight:700}
+
+/* BRANCH BAR CHART */
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem}
+
+/* MATRIX */
+.matrix-scroll{overflow-x:auto}
+.matrix-table{width:100%;border-collapse:collapse;font-size:.76rem;white-space:nowrap}
+.matrix-table th{background:var(--surface);padding:.5rem .8rem;text-align:left;
+  font-size:.64rem;font-weight:700;letter-spacing:.06em;color:var(--muted);
+  border-bottom:1px solid var(--border)}
+.matrix-table td{padding:.4rem .8rem;border-bottom:1px solid var(--border)}
+.matrix-table tr:last-child td{border-bottom:none}
+.matrix-table tr:hover td{background:var(--surface)}
+.branch-col{font-weight:600;font-size:.75rem;color:var(--text)}
+.bar-cell{display:flex;align-items:center;gap:.5rem;min-width:110px}
+.bar-bg{flex:1;height:7px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fg{height:100%;border-radius:3px}
+.lvl{font-size:.62rem;font-weight:700;padding:.12rem .35rem;border-radius:3px;white-space:nowrap}
+.lM{background:#0d2e22;color:#00d4aa}.lS{background:#1a1a35;color:#8b7fff}
+.lD{background:#2e2800;color:#ffd166}.lW{background:#2e1800;color:#ff9966}.lC{background:#2e0d0d;color:#ff6b6b}
+
+/* LEADERBOARD */
+.lb-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;flex-wrap:wrap}
+.sort-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);
+  padding:.3rem .7rem;border-radius:5px;font-size:.7rem;cursor:pointer;transition:all .15s;font-weight:600}
+.sort-btn:hover{border-color:var(--accent);color:var(--text)}
+.sort-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lb-scroll{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+.lb-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.lb-table th{background:var(--surface);padding:.5rem .8rem;text-align:left;
+  font-size:.63rem;font-weight:700;letter-spacing:.06em;color:var(--muted);
+  border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+.lb-table th:hover{color:var(--text)}
+.lb-table th.on{color:var(--accent)}
+.lb-table td{padding:.42rem .8rem;border-bottom:1px solid var(--border);white-space:nowrap}
+.lb-table tr:last-child td{border-bottom:none}
+.lb-table tr:hover td{background:var(--surface);cursor:pointer}
+.rnk{font-weight:700;font-size:.82rem;width:2rem;text-align:center}
+.r1{color:var(--gold)}.r2{color:#b0b8c8}.r3{color:#cd7f32}.rm{color:var(--muted)}
+.sname{font-weight:600}.schip{font-size:.64rem;color:var(--muted);display:block;margin-top:.1rem}
+.zb{font-size:.64rem;font-weight:700;padding:.15rem .4rem;border-radius:4px}
+.zbM{background:#0d2e22;color:#00d4aa}.zbS{background:#1a1a35;color:#8b7fff}
+.zbD{background:#2e2800;color:#ffd166}.zbW{background:#2e1800;color:#ff9966}.zbC{background:#2e0d0d;color:#ff6b6b}
+.imp-p{color:var(--accent2);font-weight:600}.imp-n{color:var(--warn);font-weight:600}
+.spark{vertical-align:middle}
+.no-data{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
+
+/* LEGEND STRIP */
+.legend-strip{display:flex;align-items:center;gap:.5rem;padding:.5rem 1.5rem;
+  background:var(--bg);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.legend-label{font-size:.63rem;font-weight:700;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;margin-right:.25rem}
+.legend-item{display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .6rem .22rem .45rem;
+  border-radius:5px;font-size:.68rem;font-weight:600;border:1px solid transparent}
+.legend-dot{width:.45rem;height:.45rem;border-radius:50%;flex-shrink:0}
+.leg-M{background:#0d2e22;border-color:#00d4aa33;color:#00d4aa}
+.leg-S{background:#1a1a35;border-color:#8b7fff33;color:#8b7fff}
+.leg-D{background:#2e2800;border-color:#ffd16633;color:#ffd166}
+.leg-W{background:#2e1800;border-color:#ff996633;color:#ff9966}
+.leg-C{background:#2e0d0d;border-color:#ff6b6b33;color:#ff6b6b}
+.legend-sep{width:1px;height:1rem;background:var(--border);margin:0 .25rem}
+
+/* LOADING */
+.loading-state{display:flex;align-items:center;justify-content:center;min-height:300px;
+  flex-direction:column;gap:1rem;color:var(--muted)}
+.spin{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:sp .75s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(3,1fr)}.branch-grid{grid-template-columns:repeat(3,1fr)}.section-a{grid-template-columns:1fr}}
+@media(max-width:800px){.kpi-row{grid-template-columns:repeat(2,1fr)}.branch-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+<script src="/auth.js"></script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">PRAJNA <span>× PhysicsWallah</span></div>
+  <span class="nav-badge">ORG DASHBOARD</span>
+  <div class="nav-links">
+    <div class="exam-toggle">
+      <button id="btn-neet" class="active" onclick="switchExam('neet')">NEET</button>
+      <button id="btn-jee"  onclick="switchExam('jee')">JEE</button>
+    </div>
+    <a href="student-dashboard.html" class="nav-link">Student View ↗</a>
+    <a href="index.html" class="nav-link">← Back to PRAJNA</a>
+    <button onclick="AUTH.logout()" class="nav-link" style="background:none;border:none;cursor:pointer;color:var(--muted);font-family:inherit;font-size:var(--sm)">Sign Out</button>
+  </div>
+</nav>
+
+<div class="filters">
+  <select id="f-branch" onchange="applyFilters()"><option value="">All Branches</option></select>
+  <select id="f-city"   onchange="applyFilters()"><option value="">All Cities</option></select>
+  <select id="f-target" onchange="applyFilters()"><option value="">All Targets</option></select>
+  <input  id="f-search" type="text" placeholder="Search student name / ID…" oninput="applyFilters()">
+  <button class="btn-clear" onclick="clearFilters()">✕ Clear filters</button>
+  <span class="filter-info" id="f-info"></span>
+</div>
+
+<div class="legend-strip">
+  <span class="legend-label">Score Levels:</span>
+  <span class="legend-item leg-M"><span class="legend-dot" style="background:#00d4aa"></span>M · Mastery &nbsp;≥ 80%</span>
+  <span class="legend-item leg-S"><span class="legend-dot" style="background:#8b7fff"></span>S · Strong &nbsp;65–79%</span>
+  <span class="legend-item leg-D"><span class="legend-dot" style="background:#ffd166"></span>D · Developing &nbsp;45–64%</span>
+  <span class="legend-item leg-W"><span class="legend-dot" style="background:#ff9966"></span>W · Weak &nbsp;25–44%</span>
+  <span class="legend-item leg-C"><span class="legend-dot" style="background:#ff6b6b"></span>C · Critical &nbsp;&lt; 25%</span>
+  <div class="legend-sep"></div>
+  <span style="font-size:.63rem;color:var(--muted)">Click any branch card to filter · Click leaderboard row to open student profile</span>
+</div>
+
+<main id="main"></main>
+
+<script>
+const _user = AUTH.requireAuth(['center','central']);
+/* ── constants ── */
+const PW = ['PW Kota','PW Delhi','PW Patna','PW Lucknow','PW Jaipur','PW Mumbai',
+            'PW Hyderabad','PW Kolkata','PW Chennai','PW Pune','PW Ahmedabad','PW Bhopal'];
+const SUBJ = {neet:['Physics','Chemistry','Biology'], jee:['Physics','Chemistry','Mathematics']};
+const ZONE_COL = {M:'#00d4aa',S:'#8b7fff',D:'#ffd166',W:'#ff9966',C:'#ff6b6b'};
+const ZONE_BG  = {M:'#0d2e22',S:'#1a1a35',D:'#2e2800',W:'#2e1800',C:'#2e0d0d'};
+
+/* ── state ── */
+const S = {exam:'neet',branch:'',city:'',target:'',search:'',sortCol:'avg',sortDir:-1,selBranch:''};
+const G = {all:[],filtered:[],charts:{}};
+
+/* ── helpers ── */
+const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0;
+function pct(p){ if(p>=80)return 'M'; if(p>=65)return 'S'; if(p>=45)return 'D'; if(p>=25)return 'W'; return 'C'; }
+const zcol = z => ZONE_COL[z]||'#7880a4';
+const zbg  = z => ZONE_BG[z] ||'#1a1d27';
+
+/* ── load ── */
+async function loadExam(exam){
+  const r = await AUTH.apiFetch('/api/students?exam='+exam);
+  return (await r.json()).students;
+}
+
+/* ── filters ── */
+function filtered(){
+  return G.all.filter(s=>{
+    if(S.branch && s.coaching !== S.branch) return false;
+    if(S.city   && s.city    !== S.city)    return false;
+    if(S.target && s.target  !== S.target)  return false;
+    if(S.search){
+      const q = S.search.toLowerCase();
+      if(!s.name.toLowerCase().includes(q) && !s.id.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+function applyFilters(){
+  S.branch = document.getElementById('f-branch').value;
+  S.city   = document.getElementById('f-city').value;
+  S.target = document.getElementById('f-target').value;
+  S.search = document.getElementById('f-search').value;
+  G.filtered = filtered();
+  setFilterInfo();
+  renderAll();
+}
+function clearFilters(){
+  S.branch=S.city=S.target=S.search=S.selBranch='';
+  ['f-branch','f-city','f-target'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-search').value='';
+  G.filtered = G.all.slice();
+  setFilterInfo();
+  renderAll();
+}
+function setFilterInfo(){
+  document.getElementById('f-info').textContent =
+    G.filtered.length === G.all.length
+      ? G.all.length+' students'
+      : G.filtered.length+' of '+G.all.length+' students';
+}
+
+/* ── exam switch ── */
+async function switchExam(exam){
+  S.exam = exam;
+  document.getElementById('btn-neet').className = exam==='neet'?'active':'';
+  document.getElementById('btn-jee').className  = exam==='jee' ?'active':'';
+  document.getElementById('main').innerHTML = '<div class="loading-state"><div class="spin"></div><span>Loading…</span></div>';
+  G.all = await loadExam(exam);
+  populateDropdowns();
+  G.filtered = G.all.slice();
+  setFilterInfo();
+  renderAll();
+}
+function populateDropdowns(){
+  const branches = [...new Set(G.all.map(s=>s.coaching))].sort();
+  const cities   = [...new Set(G.all.map(s=>s.city))].sort();
+  const targets  = [...new Set(G.all.map(s=>s.target))].sort();
+  function fill(id,vals,label){
+    const el = document.getElementById(id), cur = el.value;
+    el.innerHTML = '<option value="">'+label+'</option>';
+    vals.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; el.appendChild(o); });
+    if(vals.includes(cur)) el.value=cur;
+  }
+  fill('f-branch',branches,'All Branches');
+  fill('f-city',  cities,  'All Cities');
+  fill('f-target',targets, 'All Targets');
+}
+
+/* ── branch stats ── */
+function branchStats(name, students){
+  const bs = students.filter(s=>s.coaching===name);
+  if(!bs.length) return null;
+  const scores  = bs.map(s=>s.metrics.avg_percentage||0);
+  const avgSc   = avg(scores);
+  const subjs   = SUBJ[S.exam];
+  const subAvg  = {};
+  subjs.forEach(sub=>{
+    const vals = bs.filter(s=>s.subjects&&s.subjects[sub]).map(s=>s.subjects[sub].acc||0);
+    subAvg[sub] = vals.length ? avg(vals) : 0;
+  });
+  const weakest = subjs.reduce((a,b)=>subAvg[a]<=subAvg[b]?a:b);
+  const atRisk  = bs.filter(s=>pct(s.metrics.avg_percentage||0)==='C').length;
+  const trendAvg= avg(bs.map(s=>s.metrics.improvement||0));
+  const top     = bs.reduce((a,b)=>(a.metrics.avg_percentage||0)>=(b.metrics.avg_percentage||0)?a:b);
+  return {name,count:bs.length,avgScore:avgSc,trend:trendAvg,subAvg,weakest,atRisk,top};
+}
+
+/* ── sparkline ── */
+function spark(traj){
+  const vals = Array.isArray(traj) ? traj.slice(-8) : [];
+  if(vals.length<2) return '<span style="color:var(--muted);font-size:.65rem">—</span>';
+  const W=60,H=22,p=2;
+  const mn=Math.min(...vals),mx=Math.max(...vals),rng=mx-mn||1;
+  const pts=vals.map((v,i)=>{
+    const x=p+(i/(vals.length-1))*(W-2*p);
+    const y=H-p-((v-mn)/rng)*(H-2*p);
+    return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  const col=vals[vals.length-1]>=vals[0]?'#00d4aa':'#ff6b6b';
+  return '<svg class="spark" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">'
+    +'<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+    +'</svg>';
+}
+
+/* ── destroyChart helper ── */
+function killChart(key){
+  if(G.charts[key]){ G.charts[key].destroy(); delete G.charts[key]; }
+}
+
+/* ── Section A: KPI ── */
+function renderKPI(students){
+  if(!students.length) return '<div class="no-data">No students match the current filters.</div>';
+  const scores = students.map(s=>s.metrics.avg_percentage||0);
+  const avgSc  = avg(scores);
+  const danger = students.filter(s=>pct(s.metrics.avg_percentage||0)==='C').length;
+  const mastery= students.filter(s=>pct(s.metrics.avg_percentage||0)==='M').length;
+  const top    = students.reduce((a,b)=>(a.metrics.avg_percentage||0)>=(b.metrics.avg_percentage||0)?a:b);
+  const mostImp= students.reduce((a,b)=>(a.metrics.improvement||0)>=(b.metrics.improvement||0)?a:b);
+  const branches= [...new Set(students.map(s=>s.coaching))].length;
+  const cities  = [...new Set(students.map(s=>s.city))].length;
+
+  const zoneCounts = {M:0,S:0,D:0,W:0,C:0};
+  students.forEach(s=>{ const l=pct(s.metrics.avg_percentage||0); zoneCounts[l]++; });
+
+  const kpis = `
+  <div class="kpi c-accent">
+    <div class="kpi-lbl">Total Students</div>
+    <div class="kpi-val">${students.length}</div>
+    <div class="kpi-sub"><strong>${branches}</strong> branches · <strong>${cities}</strong> cities</div>
+  </div>
+  <div class="kpi c-teal">
+    <div class="kpi-lbl">Avg Score</div>
+    <div class="kpi-val" style="color:${zcol(pct(avgSc))}">${avgSc.toFixed(1)}%</div>
+    <div class="kpi-sub">Level <strong>${pct(avgSc)} · ${{M:'Mastery',S:'Strong',D:'Developing',W:'Weak',C:'Critical'}[pct(avgSc)]}</strong> · range ${Math.min(...scores).toFixed(0)}–${Math.max(...scores).toFixed(0)}%</div>
+  </div>
+  <div class="kpi c-warn">
+    <div class="kpi-lbl">Critical (C)</div>
+    <div class="kpi-val" style="color:#ff6b6b">${danger}</div>
+    <div class="kpi-sub">${((danger/students.length)*100).toFixed(0)}% of students · need urgent help</div>
+  </div>
+  <div class="kpi c-gold">
+    <div class="kpi-lbl">Top Scorer</div>
+    <div class="kpi-val" style="font-size:1.05rem;padding-top:.25rem">${top.name.split(' ')[0]} ${top.name.split(' ')[1]||''}</div>
+    <div class="kpi-sub"><strong>${(top.metrics.avg_percentage||0).toFixed(1)}%</strong> · ${top.coaching}</div>
+  </div>
+  <div class="kpi c-amber">
+    <div class="kpi-lbl">Most Improved</div>
+    <div class="kpi-val" style="font-size:1.05rem;padding-top:.25rem">${mostImp.name.split(' ')[0]} ${mostImp.name.split(' ')[1]||''}</div>
+    <div class="kpi-sub">+<strong>${(mostImp.metrics.improvement||0).toFixed(1)}pp</strong> · ${mostImp.coaching}</div>
+  </div>`;
+
+  const donut = `
+  <div class="donut-card">
+    <div class="sec-head" style="margin-bottom:.6rem">Zone Distribution</div>
+    <div class="donut-inner">
+      <canvas id="donut-cv" style="max-height:155px"></canvas>
+      <div class="zone-pills" id="zone-pills"></div>
+    </div>
+  </div>`;
+
+  setTimeout(()=>{
+    killChart('donut');
+    const cv=document.getElementById('donut-cv'); if(!cv)return;
+    const labels=['M · Mastery (≥80%)','S · Strong (65–79%)','D · Developing (45–64%)','W · Weak (25–44%)','C · Critical (<25%)'];
+    const colors=[ZONE_COL.M,ZONE_COL.S,ZONE_COL.D,ZONE_COL.W,ZONE_COL.C];
+    const data=[zoneCounts.M,zoneCounts.S,zoneCounts.D,zoneCounts.W,zoneCounts.C];
+    G.charts['donut']=new Chart(cv,{
+      type:'doughnut',
+      data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#21253a',hoverBorderColor:'#fff'}]},
+      options:{cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} students`}}},responsive:true,maintainAspectRatio:true}
+    });
+    const pills=document.getElementById('zone-pills');
+    if(pills){
+      pills.innerHTML='';
+      ['M','S','D','W','C'].forEach((z,i)=>{
+        if(!data[i])return;
+        const p=document.createElement('span');
+        p.className='zpill';
+        const fullName={M:'Mastery',S:'Strong',D:'Developing',W:'Weak',C:'Critical'}[z];
+        p.innerHTML=`<span class="zdot" style="background:${ZONE_COL[z]}"></span>${z} · ${fullName} <strong style="color:var(--text)">${data[i]}</strong>`;
+        pills.appendChild(p);
+      });
+    }
+  },30);
+
+  return `<div class="section-a">
+    <div class="kpi-row">${kpis}</div>
+    ${donut}
+  </div>`;
+}
+
+/* ── Section B: Branches ── */
+function renderBranches(students){
+  const stats = PW.map(b=>branchStats(b,students)).filter(Boolean);
+  if(!stats.length) return '<div class="no-data">No branch data.</div>';
+
+  const cards = stats.map(b=>{
+    const l   = pct(b.avgScore);
+    const col = zcol(l);
+    const pct_w = Math.min(100,b.avgScore).toFixed(0);
+    const tStr = b.trend>=0
+      ? `<span class="trend-up">▲ ${b.trend.toFixed(1)}pp</span>`
+      : `<span class="trend-dn">▼ ${Math.abs(b.trend).toFixed(1)}pp</span>`;
+    const risk = b.atRisk ? `<div class="bcard-risk">${b.atRisk} critical</div>` : '';
+    const isSel = S.selBranch===b.name ? 'sel' : '';
+    return `<div class="bcard ${isSel}" onclick="toggleBranch('${b.name}')">
+      ${risk}
+      <div class="bcard-name">${b.name}</div>
+      <div class="bcard-row">
+        <div class="bcard-stat"><strong>${b.count}</strong> students</div>
+        <div class="bcard-stat" style="color:${col}"><strong>${b.avgScore.toFixed(1)}%</strong></div>
+        ${tStr}
+      </div>
+      <div class="bcard-bar"><div class="bcard-bar-fill" style="width:${pct_w}%;background:${col}"></div></div>
+      <div class="bcard-weak">⚠ weakest: ${b.weakest} · top: ${b.top.name.split(' ')[0]}</div>
+    </div>`;
+  }).join('');
+
+  const sorted = [...stats].sort((a,b)=>b.avgScore-a.avgScore);
+  setTimeout(()=>{
+    killChart('branch');
+    const cv=document.getElementById('branch-cv'); if(!cv)return;
+    G.charts['branch']=new Chart(cv,{
+      type:'bar',
+      data:{
+        labels:sorted.map(b=>b.name.replace('PW ','')),
+        datasets:[{
+          label:'Avg Score %',
+          data:sorted.map(b=>b.avgScore),
+          backgroundColor:sorted.map(b=>zcol(pct(b.avgScore))+'bb'),
+          borderColor:sorted.map(b=>zcol(pct(b.avgScore))),
+          borderWidth:1,borderRadius:4,borderSkipped:false
+        }]
+      },
+      options:{
+        indexAxis:'y',responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw.toFixed(1)}%`}}},
+        scales:{
+          x:{grid:{color:'#2a2e45'},ticks:{color:'#7880a4',font:{size:11}},min:0,max:100,
+             title:{display:true,text:'Average Score (%)',color:'#7880a4',font:{size:11}}},
+          y:{grid:{display:false},ticks:{color:'#e8eaf6',font:{size:11,weight:'600'}}}
+        }
+      }
+    });
+  },40);
+
+  return `${cards}
+  <div class="chart-wrap" style="margin-top:.75rem">
+    <div class="sec-head">Branch comparison — avg score</div>
+    <div style="height:230px"><canvas id="branch-cv"></canvas></div>
+  </div>`;
+}
+function toggleBranch(name){
+  S.selBranch = S.selBranch===name ? '' : name;
+  S.branch    = S.selBranch;
+  document.getElementById('f-branch').value = S.branch;
+  G.filtered  = filtered();
+  setFilterInfo();
+  renderAll();
+}
+
+/* ── Section C: Matrix ── */
+function renderMatrix(students){
+  const subjs = SUBJ[S.exam];
+  const activeBranches = PW.filter(b=>students.some(s=>s.coaching===b));
+  if(!activeBranches.length) return '<div class="no-data">No data.</div>';
+
+  const rows = activeBranches.map(b=>{
+    const bs = students.filter(s=>s.coaching===b);
+    const cells = subjs.map(sub=>{
+      const vals = bs.filter(s=>s.subjects&&s.subjects[sub]).map(s=>s.subjects[sub].acc||0);
+      const a = vals.length ? avg(vals) : 0;
+      const l = pct(a);
+      return `<td><div class="bar-cell">
+        <div class="bar-bg"><div class="bar-fg" style="width:${a.toFixed(0)}%;background:${zcol(l)}"></div></div>
+        <span class="lvl l${l}" title="${{M:'Mastery ≥80%',S:'Strong 65–79%',D:'Developing 45–64%',W:'Weak 25–44%',C:'Critical <25%'}[l]}">${a.toFixed(0)}% · ${l}</span>
+      </div></td>`;
+    }).join('');
+    return `<tr><td class="branch-col">${b}</td>${cells}</tr>`;
+  }).join('');
+
+  const heads = subjs.map(s=>`<th>${s}</th>`).join('');
+  return `<div class="matrix-scroll">
+    <table class="matrix-table">
+      <thead><tr><th>Branch</th>${heads}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ── Section D: Leaderboard ── */
+const COLS = [
+  {id:'avg',  label:'Avg %',  fn:(a,b)=>(b.metrics.avg_percentage||0)-(a.metrics.avg_percentage||0)},
+  {id:'best', label:'Best %', fn:(a,b)=>(b.metrics.best_percentage||0)-(a.metrics.best_percentage||0)},
+  {id:'imp',  label:'Improvement', fn:(a,b)=>(b.metrics.improvement||0)-(a.metrics.improvement||0)},
+  {id:'cons', label:'Consistency', fn:(a,b)=>(b.metrics.consistency_score||0)-(a.metrics.consistency_score||0)},
+  {id:'name', label:'Name',   fn:(a,b)=>a.name.localeCompare(b.name)},
+];
+function sortBy(col){
+  if(S.sortCol===col) S.sortDir*=-1; else{S.sortCol=col;S.sortDir=-1;}
+  buildLB(G.filtered);
+}
+function buildLB(students){
+  const col = COLS.find(c=>c.id===S.sortCol)||COLS[0];
+  const sorted = [...students].sort((a,b)=>col.fn(a,b)*S.sortDir);
+
+  // global rank by avg
+  const rankMap = {};
+  [...students].sort((a,b)=>(b.metrics.avg_percentage||0)-(a.metrics.avg_percentage||0))
+    .forEach((s,i)=>{ rankMap[s.id]=i+1; });
+
+  const rows = sorted.map(s=>{
+    const rank = rankMap[s.id]||0;
+    const rnkCls = rank===1?'r1':rank===2?'r2':rank===3?'r3':'rm';
+    const z   = pct(s.metrics.avg_percentage||0);
+    const imp = s.metrics.improvement||0;
+    const impStr = imp>=0
+      ? `<span class="imp-p">+${imp.toFixed(1)}pp</span>`
+      : `<span class="imp-n">${imp.toFixed(1)}pp</span>`;
+    const traj = Array.isArray(s.metrics.trajectory) ? s.metrics.trajectory : [];
+    const cons = (s.metrics.consistency_score||0).toFixed(0)+'%';
+    return `<tr onclick="openStudent('${s.id}')">
+      <td><span class="rnk ${rnkCls}">${rank}</span></td>
+      <td><span class="sname">${s.name}</span><span class="schip">${s.coaching} · ${s.city}</span></td>
+      <td><strong style="color:${zcol(z)}">${(s.metrics.avg_percentage||0).toFixed(1)}%</strong></td>
+      <td>${(s.metrics.best_percentage||0).toFixed(1)}%</td>
+      <td>${impStr}</td>
+      <td>${cons}</td>
+      <td>${spark(traj)}</td>
+      <td><span class="zb zb${z}" title="${{M:'Mastery ≥80%',S:'Strong 65–79%',D:'Developing 45–64%',W:'Weak 25–44%',C:'Critical <25%'}[z]}">${z} · ${{M:'Mastery',S:'Strong',D:'Developing',W:'Weak',C:'Critical'}[z]}</span></td>
+    </tr>`;
+  }).join('');
+
+  // update header highlights
+  document.querySelectorAll('.lb-table th[data-col]').forEach(th=>{
+    const cid = th.getAttribute('data-col');
+    th.className = cid===S.sortCol?'on':'';
+    const arr = th.querySelector('.arr');
+    if(arr) arr.textContent = cid===S.sortCol?(S.sortDir===-1?' ▼':' ▲'):' ▾';
+  });
+
+  const tbody = document.getElementById('lb-body');
+  if(tbody) tbody.innerHTML = rows||`<tr><td colspan="8" class="no-data">No students.</td></tr>`;
+}
+function openStudent(id){
+  window.location.href='student-dashboard.html?id='+id+'&exam='+S.exam;
+}
+function renderLB(students){
+  const btnRow = COLS.map(c=>`<button class="sort-btn${S.sortCol===c.id?' on':''}"
+    onclick="sortBy('${c.id}')">${c.label}${S.sortCol===c.id?(S.sortDir===-1?' ▼':' ▲'):' ▾'}</button>`).join('');
+
+  const ths = COLS.map(c=>`<th data-col="${c.id}" class="${S.sortCol===c.id?'on':''}"
+    onclick="sortBy('${c.id}')">${c.label}<span class="arr">${S.sortCol===c.id?(S.sortDir===-1?' ▼':' ▲'):'  ▾'}</span></th>`).join('');
+
+  return `<div class="lb-header">
+    <span style="font-size:.72rem;color:var(--muted)">Sort by:</span>
+    ${btnRow}
+    <span style="font-size:.7rem;color:var(--muted);margin-left:auto">Click a row to open student profile →</span>
+  </div>
+  <div class="lb-scroll">
+    <table class="lb-table">
+      <thead><tr>
+        <th>Rank</th><th>Student</th>
+        ${ths}
+        <th>Trend</th><th>Zone</th>
+      </tr></thead>
+      <tbody id="lb-body"></tbody>
+    </table>
+  </div>`;
+}
+
+/* ── main render ── */
+function renderAll(){
+  const st = G.filtered;
+  const mc = document.getElementById('main');
+  mc.innerHTML = `
+    <section>
+      <div class="sec-head"><span class="sec-head-tag">A</span>Key Performance Indicators</div>
+      <div id="kpi-wrap"></div>
+    </section>
+    <section>
+      <div class="sec-head">
+        <span class="sec-head-tag">B</span>Branch Performance
+        ${S.selBranch?`<span style="color:var(--accent);font-size:.7rem">· Filtered: ${S.selBranch} — click again to clear</span>`:''}
+      </div>
+      <div class="branch-grid" id="branch-grid"></div>
+    </section>
+    <section>
+      <div class="sec-head"><span class="sec-head-tag">C</span>Subject Health Matrix</div>
+      <div class="chart-wrap" id="matrix-wrap"></div>
+    </section>
+    <section>
+      <div class="sec-head"><span class="sec-head-tag">D</span>Student Leaderboard <span style="color:var(--muted);font-size:.65rem;font-weight:400">(${st.length} students)</span></div>
+      <div id="lb-wrap"></div>
+    </section>`;
+
+  document.getElementById('kpi-wrap').innerHTML   = renderKPI(st);
+  document.getElementById('branch-grid').innerHTML = renderBranches(st);
+  document.getElementById('matrix-wrap').innerHTML = renderMatrix(st);
+  document.getElementById('lb-wrap').innerHTML     = renderLB(st);
+  buildLB(st);
+}
+
+/* ── boot ── */
+async function boot(){
+  const params = new URLSearchParams(location.search);
+  if(params.get('exam')==='jee'){
+    S.exam='jee';
+    document.getElementById('btn-neet').className='';
+    document.getElementById('btn-jee').className='active';
+  }
+  document.getElementById('main').innerHTML='<div class="loading-state"><div class="spin"></div><span>Loading student data…</span></div>';
+  try{
+    G.all = await loadExam(S.exam);
+    populateDropdowns();
+    G.filtered = G.all.slice();
+    setFilterInfo();
+    renderAll();
+  }catch(e){
+    document.getElementById('main').innerHTML=`<div class="loading-state">
+      <span style="color:var(--warn)">⚠ Could not load data.</span>
+      <span style="font-size:.8rem">Open via <strong>http://localhost:8080/org-dashboard.html</strong></span>
+    </div>`;
+  }
+}
+boot();
+</script>
+</body>
+</html>
