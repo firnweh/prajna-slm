@@ -85,6 +85,8 @@ st.plotly_chart = styled_plotly_chart
 
 # --- Page Config ---
 st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
+# Prevent sidebar from being collapsed — hide the collapse button
+
 
 # --- Custom CSS ---
 st.markdown("""
@@ -94,10 +96,12 @@ st.markdown("""
 /* ── Global ── */
 .stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
 .block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
-/* Keep Streamlit header functional but transparent — sidebar toggle lives here */
-[data-testid="stHeader"] { background:rgba(8,8,16,0.95) !important; z-index:999 !important; }
-/* Sidebar nav styling */
-[data-testid="stSidebar"] { background:#0c0c18 !important; border-right:1px solid #1e1e3a !important; }
+[data-testid="stHeader"] { background:transparent !important; }
+/* Sidebar — always visible, not collapsible */
+[data-testid="stSidebar"] { background:#0c0c18 !important; border-right:1px solid #1e1e3a !important; min-width:260px !important; }
+[data-testid="stSidebar"] button[kind="headerNoPadding"],
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] { display:none !important; }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#94a3b8; font-size:.82rem; }
 [data-testid="stSidebar"] .stRadio label { font-size:.84rem !important; padding:6px 8px !important; border-radius:6px; transition:background .15s; }
 [data-testid="stSidebar"] .stRadio label:hover { background:#ffffff08; }
@@ -109,7 +113,7 @@ st.markdown("""
   background:rgba(8,8,16,0.95);
   border-bottom:1px solid rgba(99,102,241,0.15);
   padding:0 1.5rem; height:58px;
-  position:sticky; top:0; z-index:100;
+  position:sticky; top:0; z-index:200;
   margin:0 -1.5rem 0 -1.5rem;
   backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);
