@@ -84,7 +84,7 @@ st.plotly_chart = styled_plotly_chart
 
 
 # --- Page Config ---
-st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_icon="🧠", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
 
 # --- Custom CSS ---
 st.markdown("""
@@ -95,8 +95,12 @@ st.markdown("""
 .stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
 .block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
 [data-testid="stHeader"] { background:transparent !important; }
-[data-testid="stSidebar"] { display:none !important; }
-section[data-testid="stSidebarContent"] { display:none !important; }
+/* Sidebar nav styling */
+[data-testid="stSidebar"] { background:#0c0c18 !important; border-right:1px solid #1e1e3a !important; }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#94a3b8; font-size:.82rem; }
+[data-testid="stSidebar"] .stRadio label { font-size:.84rem !important; padding:6px 8px !important; border-radius:6px; transition:background .15s; }
+[data-testid="stSidebar"] .stRadio label:hover { background:#ffffff08; }
+[data-testid="stSidebar"] .stRadio [data-checked="true"] + label { background:rgba(99,102,241,.12) !important; color:#a5b4fc !important; font-weight:600 !important; }
 
 /* ── Topbar ── */
 .prajna-topbar {
@@ -621,17 +625,36 @@ _load_bar.empty()
 _load_status.empty()
 
 
-# --- Tabs ---
-tab_main, tab_backtest, tab_deep, tab_lesson, tab_revision, tab_timeline, tab_explorer, tab_paper, tab_chat, tab_api = st.tabs([
-    "📊 Predictions", "🎯 Backtest", "🔬 Topic Deep Dive", "📚 Lesson Plan", "📅 Revision Plan",
-    "📈 Historical Timeline", "❓ Question Explorer", "📄 Paper Generator", "🤖 Ask PRAJNA", "🔌 API Docs",
-])
+# --- Sidebar Navigation ---
+with st.sidebar:
+    st.markdown("### 🧠 PRAJNA v4")
+    st.markdown("*Predictive Resource Allocation for JEE/NEET Aspirants*")
+    st.markdown("---")
+    _nav = st.radio(
+        "Navigate",
+        [
+            "📊 Predictions",
+            "🎯 Backtest",
+            "🔬 Topic Deep Dive",
+            "📚 Lesson Plan",
+            "📅 Revision Plan",
+            "📈 Historical Timeline",
+            "❓ Question Explorer",
+            "📄 Paper Generator",
+            "🤖 Ask PRAJNA",
+            "🔌 API Docs",
+        ],
+        label_visibility="collapsed",
+        key="nav_tab",
+    )
+    st.markdown("---")
+    st.caption(f"Exam: **{selected_exam}** · Year: **{target_year}** · K: **{top_n}**")
 
 
 # ================================================================
 # TAB 1: PREDICTIONS DASHBOARD
 # ================================================================
-with tab_main:
+if _nav == "📊 Predictions":
 
     if not pred_list:
         st.warning("No predictions available for the selected filters.")
@@ -1212,7 +1235,7 @@ with tab_main:
 # ================================================================
 # TAB 2: INTERACTIVE BACKTEST
 # ================================================================
-with tab_backtest:
+if _nav == "🎯 Backtest":
     st.markdown('<div class="section-divider">Interactive Backtest — Select a Year <span class="section-badge">23K DB</span></div>', unsafe_allow_html=True)
     st.caption("Train on all data before the selected year. Predict that year. Match against actual paper questions.")
 
@@ -1395,7 +1418,7 @@ with tab_backtest:
 # ================================================================
 # TAB 3: DEEP TOPIC ANALYSIS
 # ================================================================
-with tab_deep:
+if _nav == "🔬 Topic Deep Dive":
     st.markdown('<div class="section-divider">Deep Topic Analysis <span class="section-badge">LIVE</span></div>', unsafe_allow_html=True)
     st.caption("Select a topic to see its complete history, questions, and patterns.")
 
@@ -1545,7 +1568,7 @@ with tab_deep:
 # ================================================================
 # TAB 3: LESSON PLAN
 # ================================================================
-with tab_lesson:
+if _nav == "📚 Lesson Plan":
     st.markdown('<div class="section-divider">Syllabus-Based Lesson Plan <span class="section-badge">AI</span></div>', unsafe_allow_html=True)
     st.caption(f"Official syllabus mapped to historical data. Priority = prediction score. Trained excluding {holdout_str}.")
 
@@ -1650,7 +1673,7 @@ with tab_lesson:
 # ================================================================
 # TAB 4: REVISION PLAN
 # ================================================================
-with tab_revision:
+if _nav == "📅 Revision Plan":
     st.markdown('<div class="section-divider">📅 Prajna Revision Plan <span class="section-badge">AI</span></div>', unsafe_allow_html=True)
     st.caption(f"Personalised {target_year} revision schedule based on PRAJNA predictions — prioritised by appearance probability & confidence.")
 
@@ -1786,7 +1809,7 @@ with tab_revision:
 # ================================================================
 # TAB 5: HISTORICAL TIMELINE
 # ================================================================
-with tab_timeline:
+if _nav == "📈 Historical Timeline":
     st.markdown('<div class="section-divider">Historical Timeline — Syllabus, Policy & News <span class="section-badge">2026</span></div>', unsafe_allow_html=True)
     st.caption("How exam patterns, syllabus changes, and real-world events correlate with question trends.")
 
@@ -1846,7 +1869,7 @@ with tab_timeline:
 # ================================================================
 # TAB 5: QUESTION EXPLORER
 # ================================================================
-with tab_explorer:
+if _nav == "❓ Question Explorer":
     st.markdown('<div class="section-divider">Question Explorer <span class="section-badge">23K DB</span></div>', unsafe_allow_html=True)
 
     ec1, ec2, ec3, ec4 = st.columns(4)
@@ -1904,7 +1927,7 @@ with tab_explorer:
 # ================================================================
 # TAB 6: PAPER GENERATOR
 # ================================================================
-with tab_paper:
+if _nav == "📄 Paper Generator":
     st.markdown('<div class="section-divider">Practice Paper Generator <span class="section-badge">AI</span></div>', unsafe_allow_html=True)
 
     pc1, pc2, pc3 = st.columns(3)
@@ -1958,7 +1981,7 @@ with tab_paper:
 # ================================================================
 # TAB 8: ASK PRAJNA (Chatbot)
 # ================================================================
-with tab_chat:
+if _nav == "🤖 Ask PRAJNA":
     st.markdown('<div class="section-divider">🤖 Ask PRAJNA — Exam Intelligence Chatbot <span class="section-badge">PRAJNA</span></div>', unsafe_allow_html=True)
     st.caption("Ask questions about 23,119 exam questions across 48 years. Powered by semantic search + intent detection.")
 
@@ -2075,7 +2098,7 @@ with tab_chat:
                 })
 
 
-with tab_api:
+if _nav == "🔌 API Docs":
     st.markdown('<div class="section-divider">🔌 PRAJNA Intelligence API <span class="section-badge">REST</span></div>', unsafe_allow_html=True)
     st.caption("FastAPI service running on http://localhost:8001 — all endpoints return JSON. Interactive docs at /docs.")
 
