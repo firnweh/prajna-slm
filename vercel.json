@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "buildCommand": "",
+  "outputDirectory": "docs",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://prajna-backend.up.railway.app/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options",        "value": "DENY"    }
+      ]
+    }
+  ]
+}
