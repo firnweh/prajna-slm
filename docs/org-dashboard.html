@@ -642,6 +642,12 @@ function renderPRAJNA(preds, students){
   const TMAP = {RISING:'R',STABLE:'S',DECLINING:'D',NEW:'N'};
   const TLBL = {RISING:'↑ Rising',STABLE:'→ Stable',DECLINING:'↓ Declining',NEW:'★ New'};
 
+  /* Guard — keep only subjects valid for this exam.
+     Prevents Mathematics chapters from appearing in NEET view
+     or Biology chapters in JEE view due to mixed DB rows. */
+  const validSubjs = new Set(SUBJ[S.exam]);
+  preds = preds.filter(p => validSubjs.has(p.subject));
+
   if(!preds||!preds.length){
     return `<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;text-align:center;color:var(--muted);font-size:.82rem">
       ⚡ PRAJNA Intelligence API not available.<br>

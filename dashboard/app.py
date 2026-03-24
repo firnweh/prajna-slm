@@ -449,7 +449,7 @@ st.markdown("""
   <div class="stat-chip"><div class="stat-chip-val">78</div><div class="stat-chip-lbl">JEE Adv.</div></div>
   <div class="stat-chip"><div class="stat-chip-val">755</div><div class="stat-chip-lbl">Micro-Topics</div></div>
   <div class="stat-chip"><div class="stat-chip-val">143</div><div class="stat-chip-lbl">Chapters</div></div>
-  <div class="stat-chip"><div class="stat-chip-val">82.1%</div><div class="stat-chip-lbl">Backtest</div></div>
+  <div class="stat-chip"><div class="stat-chip-val">v4 ⚡</div><div class="stat-chip-lbl">Engine</div></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -474,7 +474,7 @@ with f3:
 with f4:
     top_n = st.selectbox("Top K", [20, 40, 60, 80, 100, 150, 200], index=4, key="gx_topn")
 with f5:
-    pred_level = st.selectbox("Level", ["Micro-Topic", "Chapter"], key="gx_level")
+    pred_level = st.selectbox("Level", ["Micro-Topic", "Chapter"], index=0, key="gx_level")
 st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown(f"""
@@ -482,8 +482,8 @@ st.markdown(f"""
   <div>
     <div class="prajna-hero-title">🧠 PRAJNA Exam Intelligence Engine</div>
     <div class="prajna-hero-sub">
-      SLM-powered rank prediction · 48 years of exam data · 755 micro-topics<br>
-      Real-time chapter &amp; topic probability scoring for NEET &amp; JEE
+      v4 Hierarchical Engine · 10 signals · parent gate · hill-climbing weights<br>
+      48 years · 23,119 questions · 755 micro-topics · NEET &amp; JEE
     </div>
     <div class="prajna-hero-pill">⚡ Exam: {selected_exam} &nbsp;·&nbsp; Year: {target_year} &nbsp;·&nbsp; Level: {pred_level}</div>
   </div>
@@ -667,8 +667,8 @@ with tab_main:
 
     # ── SECTION 2: RANKED PREDICTION TABLE ──
     is_micro = pred_level == "Micro-Topic"
-    st.markdown(f'<div class="section-divider">Ranked {pred_level} Predictions — Top {top_n} <span class="section-badge">REAL ENGINE</span></div>', unsafe_allow_html=True)
-    with st.expander(f"📋 Top {top_n} {pred_level} Predictions", expanded=False):
+    with st.expander(f"📋 Ranked {pred_level} Predictions — Top {top_n}  ·  REAL ENGINE", expanded=False):
+        st.markdown(f'<div class="section-divider" style="margin-top:0">Ranked {pred_level} Predictions — Top {top_n} <span class="section-badge">REAL ENGINE</span></div>', unsafe_allow_html=True)
         st.caption(f"Subject-balanced reranking for K={top_n}. {'Micro-topic + parent chapter.' if is_micro else 'Chapter-level aggregation.'}")
 
         # ── Detailed Prediction Cards ─────────────────────────────────────────────
@@ -2214,7 +2214,7 @@ st.markdown("""
     </a>
   </div>
   <div style="text-align:center; font-size:11px; color:rgba(255,255,255,0.2);">
-    PRAJNA v1.0 · 23,119 questions · 292 papers · 1978–2026 · Model: 3-Stage Prajna with subject-balanced reranking
+    PRAJNA v4 · 23,119 questions · 292 papers · 1978–2026 · Engine: Hierarchical Micro-Topic Predictor · 10 signals · parent gate · hill-climbing weights
   </div>
 </div>
 """, unsafe_allow_html=True)

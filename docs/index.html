@@ -1,3127 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PRAJNA — Predictive Research & Analysis for JEE/NEET Intelligence</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0a0a0f;
-      --bg2: #0e0e17;
-      --bg3: #13131f;
-      --border: rgba(99,102,241,0.18);
-      --indigo: #6366f1;
-      --purple: #a855f7;
-      --pink: #ec4899;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --green: #22c55e;
-      --amber: #f59e0b;
-      --card: rgba(14,14,23,0.8);
-      --glow-i: rgba(99,102,241,0.3);
-      --glow-p: rgba(168,85,247,0.25);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--indigo); border-radius: 3px; }
-
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2rem;
-      height: 64px;
-      background: rgba(10,10,15,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-logo {
-      display: flex; align-items: center; gap: 0.75rem;
-      text-decoration: none; color: var(--text);
-    }
-
-    .pw-circle {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, var(--indigo), var(--purple));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700; font-size: 13px;
-      color: #fff;
-      box-shadow: 0 0 16px var(--glow-i);
-      flex-shrink: 0;
-    }
-
-    .nav-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.04em; }
-
-    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
-    .nav-links a {
-      color: var(--muted); text-decoration: none; font-size: 0.875rem; font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--text); }
-
-    .nav-badge {
-      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2));
-      border: 1px solid var(--border);
-      border-radius: 20px; padding: 0.3rem 0.8rem;
-      font-size: 0.75rem; font-weight: 600; color: var(--purple);
-    }
-
-    /* ── LAYOUT ── */
-    section { padding: 6rem 1.5rem; }
-    .container { max-width: 1100px; margin: 0 auto; }
-
-    /* ── SCROLL REVEAL ── */
-    .reveal {
-      opacity: 0; transform: translateY(36px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-    }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-
-    /* ── SECTION LABEL ── */
-    .section-label {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.3);
-      border-radius: 20px; padding: 0.35rem 1rem;
-      font-size: 0.75rem; font-weight: 600; color: var(--indigo);
-      letter-spacing: 0.08em; text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-
-    .section-title {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 700; margin-bottom: 1rem;
-      background: linear-gradient(135deg, #e2e8f0 0%, var(--indigo) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .section-sub { color: var(--muted); font-size: 1.05rem; max-width: 640px; }
-
-    /* ── DIVIDER ── */
-    .gradient-divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--indigo), var(--purple), transparent);
-      margin: 0;
-    }
-
-    /* ════════════════════════════════════
-       HERO
-    ════════════════════════════════════ */
-    #hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column; justify-content: center;
-      padding-top: 80px;
-      position: relative; overflow: hidden;
-    }
-
-    .hero-bg-orb {
-      position: absolute; border-radius: 50%;
-      filter: blur(100px); pointer-events: none; z-index: 0;
-    }
-    .hero-bg-orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
-      top: -150px; left: -150px;
-    }
-    .hero-bg-orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(168,85,247,0.14) 0%, transparent 70%);
-      bottom: 0; right: -100px;
-    }
-
-    #hero .container { position: relative; z-index: 1; }
-
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(236,72,153,0.12));
-      border: 1px solid rgba(245,158,11,0.35);
-      border-radius: 24px; padding: 0.4rem 1.1rem;
-      font-size: 0.8rem; font-weight: 600; color: #fbbf24;
-      margin-bottom: 1.8rem;
-    }
-
-    .hero-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(4rem, 12vw, 8rem);
-      font-weight: 700;
-      line-height: 0.95;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 40%, var(--purple) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 1rem;
-    }
-
-    .hero-subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      color: var(--indigo); font-weight: 600;
-      letter-spacing: 0.02em; margin-bottom: 1.2rem;
-    }
-
-    .hero-desc {
-      font-size: clamp(0.95rem, 1.8vw, 1.05rem);
-      color: var(--muted); max-width: 600px;
-      line-height: 1.75; margin-bottom: 3rem;
-    }
-
-    /* counters */
-    .counters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem; margin-bottom: 3rem;
-    }
-
-    .counter-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.2rem 1rem;
-      text-align: center;
-      backdrop-filter: blur(12px);
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .counter-card:hover {
-      border-color: rgba(99,102,241,0.5);
-      box-shadow: 0 0 24px var(--glow-i);
-    }
-
-    .counter-value {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.8rem; font-weight: 700;
-      background: linear-gradient(135deg, #fff, var(--indigo));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .counter-label { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; font-weight: 500; }
-
-    .hero-cta {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: linear-gradient(135deg, var(--indigo), var(--purple));
-      color: #fff; font-weight: 600; font-size: 1rem;
-      padding: 0.875rem 2rem; border-radius: 8px;
-      text-decoration: none; border: none; cursor: pointer;
-      box-shadow: 0 4px 24px var(--glow-i);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .hero-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--glow-p); }
-
-    /* ════════════════════════════════════
-       WHAT IS PRAJNA
-    ════════════════════════════════════ */
-    #what { background: var(--bg2); }
-
-    .three-col {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem; margin-top: 3rem;
-    }
-
-    .info-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px; padding: 2rem;
-      backdrop-filter: blur(12px);
-      transition: border-color 0.3s, transform 0.3s;
-    }
-    .info-card:hover { border-color: rgba(99,102,241,0.5); transform: translateY(-4px); }
-
-    .info-icon {
-      width: 48px; height: 48px;
-      background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.2));
-      border: 1px solid rgba(99,102,241,0.35);
-      border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; margin-bottom: 1rem;
-    }
-
-    .info-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
-    .info-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
-
-    .insight-box {
-      margin-top: 3rem; padding: 2rem 2.5rem;
-      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(168,85,247,0.08));
-      border: 1px solid rgba(99,102,241,0.25);
-      border-radius: 16px;
-      position: relative; overflow: hidden;
-    }
-    .insight-box::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-      width: 4px; background: linear-gradient(180deg, var(--indigo), var(--purple));
-      border-radius: 4px 0 0 4px;
-    }
-    .insight-box p { font-size: 1.05rem; color: var(--text); line-height: 1.75; }
-    .insight-box strong { color: #c7d2fe; }
-
-    /* ════════════════════════════════════
-       DATA FOUNDATION
-    ════════════════════════════════════ */
-    #data { background: var(--bg); }
-
-    .timeline-bar {
-      margin: 2.5rem 0;
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.5rem 2rem; overflow: hidden;
-    }
-
-    .timeline-track {
-      position: relative; height: 6px;
-      background: rgba(99,102,241,0.12); border-radius: 3px; margin: 1.5rem 0;
-    }
-    .timeline-fill {
-      position: absolute; top: 0; left: 0; height: 100%;
-      background: linear-gradient(90deg, var(--indigo), var(--purple));
-      border-radius: 3px; width: 100%;
-      animation: growWidth 1.5s ease-out forwards;
-    }
-    @keyframes growWidth { from { width: 0; } to { width: 100%; } }
-
-    .timeline-labels {
-      display: flex; justify-content: space-between;
-      font-size: 0.75rem; color: var(--muted); font-weight: 600;
-    }
-    .timeline-label-year { color: var(--indigo); }
-
-    .data-table-wrap { overflow-x: auto; margin: 2rem 0; }
-
-    table {
-      width: 100%; border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    thead th {
-      background: rgba(99,102,241,0.12);
-      color: var(--indigo); font-weight: 600;
-      padding: 0.85rem 1rem; text-align: left;
-      border-bottom: 1px solid var(--border);
-      font-family: 'Space Grotesk', sans-serif;
-    }
-    tbody td {
-      padding: 0.8rem 1rem; border-bottom: 1px solid rgba(99,102,241,0.08);
-      color: var(--text);
-    }
-    tbody tr:last-child td {
-      background: rgba(99,102,241,0.06);
-      font-weight: 700; color: #c7d2fe;
-      border-bottom: none;
-    }
-    tbody tr:hover td { background: rgba(99,102,241,0.05); }
-
-    .db-schema {
-      background: #0d0d18; border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.5rem 2rem; margin-top: 2rem;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
-      line-height: 1.8; overflow-x: auto;
-    }
-    .db-kw { color: #818cf8; }
-    .db-field { color: #34d399; }
-    .db-type { color: #fbbf24; }
-    .db-punct { color: #94a3b8; }
-
-    .gather-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem; margin-top: 1.5rem;
-    }
-    .gather-chip {
-      background: rgba(99,102,241,0.08); border: 1px solid var(--border);
-      border-radius: 10px; padding: 0.9rem 1.2rem;
-      font-size: 0.85rem; color: var(--muted);
-    }
-    .gather-chip strong { color: var(--text); display: block; margin-bottom: 0.25rem; font-size: 0.9rem; }
-
-    /* ════════════════════════════════════
-       ARCHITECTURE
-    ════════════════════════════════════ */
-    #architecture { background: var(--bg2); }
-
-    .pipeline {
-      display: flex; flex-direction: column; gap: 1.5rem;
-      margin-top: 3rem;
-    }
-
-    .stage {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 2rem;
-      backdrop-filter: blur(12px);
-      position: relative; overflow: hidden;
-    }
-    .stage::before {
-      content: ''; position: absolute;
-      top: 0; left: 0; right: 0; height: 3px;
-    }
-    .stage-1::before { background: linear-gradient(90deg, var(--indigo), #818cf8); }
-    .stage-2::before { background: linear-gradient(90deg, var(--purple), #d946ef); }
-    .stage-3::before { background: linear-gradient(90deg, var(--pink), #f97316); }
-    .stage-post::before { background: linear-gradient(90deg, #22c55e, var(--indigo)); }
-
-    .stage-header {
-      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
-    }
-    .stage-num {
-      width: 36px; height: 36px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
-    }
-    .stage-1 .stage-num { background: rgba(99,102,241,0.2); color: var(--indigo); border: 1px solid rgba(99,102,241,0.4); }
-    .stage-2 .stage-num { background: rgba(168,85,247,0.2); color: var(--purple); border: 1px solid rgba(168,85,247,0.4); }
-    .stage-3 .stage-num { background: rgba(236,72,153,0.2); color: var(--pink); border: 1px solid rgba(236,72,153,0.4); }
-    .stage-post .stage-num { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-
-    .stage-title { font-size: 1.15rem; font-weight: 700; }
-    .stage-formula { font-size: 0.85rem; color: var(--muted); margin-top: 0.2rem; }
-
-    .signals-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 0.85rem;
-    }
-
-    .signal-chip {
-      background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 10px; padding: 0.85rem 1rem;
-      display: flex; align-items: center; gap: 0.75rem;
-    }
-    .signal-weight {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1rem; font-weight: 700; color: var(--indigo);
-      min-width: 38px;
-    }
-    .signal-info { flex: 1; }
-    .signal-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
-    .signal-desc { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; }
-
-    .stage-sub-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1rem;
-    }
-    .stage-sub-item { text-align: center; padding: 1rem; }
-    .stage-sub-val {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.4rem; font-weight: 700;
-    }
-    .stage-sub-lbl { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
-
-    .quota-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
-    }
-    .quota-block h4 { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.85rem; }
-    .quota-bars { display: flex; flex-direction: column; gap: 0.5rem; }
-    .quota-row { display: flex; align-items: center; gap: 0.75rem; }
-    .quota-label { font-size: 0.8rem; min-width: 80px; }
-    .quota-bar-wrap { flex: 1; background: rgba(99,102,241,0.1); border-radius: 4px; height: 8px; }
-    .quota-bar-fill { height: 100%; border-radius: 4px; }
-    .bio-bar { background: linear-gradient(90deg, #22c55e, #16a34a); }
-    .phy-bar { background: linear-gradient(90deg, var(--indigo), #818cf8); }
-    .che-bar { background: linear-gradient(90deg, var(--purple), #d946ef); }
-    .mat-bar { background: linear-gradient(90deg, #f59e0b, #f97316); }
-    .quota-pct { font-size: 0.78rem; color: var(--muted); min-width: 32px; text-align: right; }
-
-    .formula-box {
-      margin-top: 2rem;
-      background: #0a0a14; border: 1px solid rgba(99,102,241,0.3);
-      border-radius: 14px; padding: 1.75rem 2rem;
-    }
-    .formula-title {
-      font-size: 0.75rem; font-weight: 700; color: var(--indigo);
-      letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;
-    }
-    .formula-eq {
-      font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;
-      line-height: 2.2; color: var(--text);
-    }
-    .f-var { color: #818cf8; }
-    .f-coef { color: #fbbf24; font-weight: 600; }
-    .f-op { color: var(--muted); }
-    .f-term { color: #34d399; }
-
-    /* pipeline connector */
-    .pipe-connector {
-      display: flex; justify-content: center; align-items: center;
-      gap: 0.5rem; color: var(--muted); font-size: 0.8rem;
-    }
-    .pipe-arrow { color: var(--indigo); font-size: 1.4rem; line-height: 1; }
-
-    /* ════════════════════════════════════
-       CODE SNIPPETS
-    ════════════════════════════════════ */
-    #code { background: var(--bg); }
-
-    .code-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .code-tab {
-      background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 8px; padding: 0.5rem 1.1rem;
-      font-size: 0.8rem; color: var(--muted); cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      transition: all 0.2s;
-    }
-    .code-tab.active, .code-tab:hover {
-      background: rgba(99,102,241,0.18); border-color: var(--indigo); color: var(--text);
-    }
-
-    .code-blocks { display: flex; flex-direction: column; gap: 2rem; }
-
-    .code-block {
-      background: #080810; border: 1px solid rgba(99,102,241,0.2);
-      border-radius: 14px; overflow: hidden;
-    }
-    .code-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1.25rem;
-      background: rgba(99,102,241,0.06);
-      border-bottom: 1px solid rgba(99,102,241,0.12);
-    }
-    .code-title { font-size: 0.8rem; color: var(--indigo); font-weight: 600; letter-spacing: 0.04em; }
-    .code-lang { font-size: 0.7rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .code-dots { display: flex; gap: 5px; }
-    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-r { background: #ef4444; }
-    .dot-y { background: #fbbf24; }
-    .dot-g { background: #22c55e; }
-
-    pre {
-      padding: 1.5rem; overflow-x: auto; font-size: 0.82rem;
-      line-height: 1.8; font-family: 'JetBrains Mono', monospace;
-    }
-
-    /* syntax colors */
-    .py-kw { color: #c084fc; }
-    .py-fn { color: #60a5fa; }
-    .py-str { color: #34d399; }
-    .py-num { color: #fbbf24; }
-    .py-cmt { color: #4b5563; font-style: italic; }
-    .py-param { color: #f0abfc; }
-    .py-op { color: #94a3b8; }
-    .py-var { color: #e2e8f0; }
-    .py-builtin { color: #fb923c; }
-
-    /* ════════════════════════════════════
-       BACKTEST RESULTS
-    ════════════════════════════════════ */
-    #backtest { background: var(--bg2); }
-
-    .metrics-legend {
-      display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem;
-    }
-    .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--muted); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .ld-prec { background: var(--indigo); }
-    .ld-cov { background: var(--purple); }
-    .ld-hr { background: var(--pink); }
-    .ld-comb { background: var(--green); }
-
-    .chart-section { margin: 2rem 0; }
-    .chart-year { margin-bottom: 1.5rem; }
-    .chart-year-label { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 0.6rem; font-family: 'Space Grotesk', sans-serif; }
-
-    .bar-row {
-      display: grid; grid-template-columns: 80px 1fr;
-      align-items: center; gap: 0.75rem; margin-bottom: 0.45rem;
-    }
-    .bar-meta { font-size: 0.75rem; color: var(--muted); text-align: right; }
-    .bar-outer {
-      background: rgba(99,102,241,0.08); border-radius: 4px; height: 22px;
-      position: relative; overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%; border-radius: 4px;
-      display: flex; align-items: center; padding-left: 0.5rem;
-      font-size: 0.72rem; font-weight: 600; color: #fff;
-      transition: width 1s ease-out;
-    }
-    .bar-prec { background: linear-gradient(90deg, #4f46e5, #6366f1); }
-    .bar-cov  { background: linear-gradient(90deg, #7c3aed, #a855f7); }
-    .bar-hr   { background: linear-gradient(90deg, #be185d, #ec4899); }
-    .bar-comb { background: linear-gradient(90deg, #15803d, #22c55e); }
-
-    .backtest-avg {
-      margin-top: 2.5rem; padding: 1.75rem;
-      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.08));
-      border: 1px solid rgba(99,102,241,0.3); border-radius: 14px;
-    }
-    .avg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .avg-card { text-align: center; }
-    .avg-val { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; }
-    .avg-prec { color: var(--indigo); }
-    .avg-cov  { color: var(--purple); }
-    .avg-hr   { color: var(--pink); }
-    .avg-comb { color: var(--green); }
-    .avg-lbl { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
-
-    .metric-defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 2rem; }
-    .mdef {
-      background: var(--bg3); border: 1px solid var(--border);
-      border-radius: 10px; padding: 1rem 1.25rem;
-    }
-    .mdef-name { font-size: 0.82rem; font-weight: 700; color: var(--indigo); margin-bottom: 0.4rem; }
-    .mdef-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
-
-    /* ════════════════════════════════════
-       SAMPLE PREDICTIONS
-    ════════════════════════════════════ */
-    #predictions { background: var(--bg); }
-
-    .pred-table-wrap { overflow-x: auto; margin-top: 2rem; }
-    .pred-table { min-width: 780px; }
-    .pred-table thead th { background: rgba(99,102,241,0.1); }
-    .pred-table tbody tr td:first-child { color: var(--muted); font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
-    .subj-bio { color: #4ade80; }
-    .subj-phy { color: #818cf8; }
-    .subj-che { color: #f0abfc; }
-
-    .conf-badge {
-      display: inline-flex; align-items: center;
-      border-radius: 20px; padding: 0.2rem 0.7rem;
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
-    }
-    .conf-high { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
-    .conf-med  { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
-
-    .appear-val { color: var(--text); font-weight: 600; }
-    .qs-val { color: #c7d2fe; }
-
-    /* ════════════════════════════════════
-       TECH STACK
-    ════════════════════════════════════ */
-    #tech { background: var(--bg2); }
-
-    .tech-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 2.5rem; }
-
-    .tech-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 1.25rem 1.5rem;
-      display: flex; align-items: center; gap: 0.85rem;
-      transition: border-color 0.3s, transform 0.3s;
-    }
-    .tech-card:hover { border-color: rgba(99,102,241,0.5); transform: translateY(-3px); }
-    .tech-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .tech-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-    .tech-role { font-size: 0.75rem; color: var(--muted); margin-top: 0.15rem; }
-
-    /* ════════════════════════════════════
-       HOW TO USE
-    ════════════════════════════════════ */
-    #usage { background: var(--bg); }
-
-    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
-
-    .step-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 2rem;
-      position: relative; overflow: hidden;
-      transition: border-color 0.3s;
-    }
-    .step-card:hover { border-color: rgba(99,102,241,0.5); }
-    .step-card::after {
-      content: attr(data-step);
-      position: absolute; bottom: -10px; right: 10px;
-      font-family: 'Space Grotesk', sans-serif; font-size: 6rem; font-weight: 700;
-      color: rgba(99,102,241,0.05); line-height: 1;
-      pointer-events: none;
-    }
-
-    .step-num {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--indigo), var(--purple));
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem;
-      box-shadow: 0 0 16px var(--glow-i);
-    }
-    .step-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
-    .step-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.7; }
-
-    .step-options {
-      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem;
-    }
-    .opt-pill {
-      background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25);
-      border-radius: 20px; padding: 0.2rem 0.65rem;
-      font-size: 0.75rem; color: var(--indigo); font-weight: 600;
-    }
-
-    /* connectors between steps */
-    .steps-wrapper { position: relative; }
-
-    /* ════════════════════════════════════
-       TEAM
-    ════════════════════════════════════ */
-    #team { background: var(--bg2); }
-
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem; }
-
-    .team-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 2.5rem 2rem;
-      text-align: center;
-      position: relative; overflow: hidden;
-      transition: border-color 0.3s, transform 0.3s;
-    }
-    .team-card:hover { border-color: rgba(168,85,247,0.5); transform: translateY(-6px); }
-    .team-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 3px;
-      background: linear-gradient(90deg, var(--indigo), var(--purple));
-    }
-
-    .avatar {
-      width: 80px; height: 80px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--indigo), var(--purple));
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700;
-      color: #fff; margin: 0 auto 1.5rem;
-      box-shadow: 0 0 32px var(--glow-p);
-    }
-
-    .team-name { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .team-org {
-      display: inline-block; font-size: 0.8rem; font-weight: 600;
-      color: var(--purple); background: rgba(168,85,247,0.12);
-      border: 1px solid rgba(168,85,247,0.25);
-      border-radius: 20px; padding: 0.25rem 0.85rem; margin-bottom: 1.25rem;
-    }
-
-    .team-details { display: flex; flex-direction: column; gap: 0.5rem; }
-    .team-detail {
-      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-      font-size: 0.88rem; color: var(--muted);
-    }
-    .team-detail-icon { color: var(--indigo); }
-
-    /* ════════════════════════════════════
-       SLM SECTION
-    ════════════════════════════════════ */
-    .slm-arch {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr;
-      gap: 0.75rem;
-      align-items: center;
-      margin: 2.5rem 0;
-    }
-    .slm-box {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1rem;
-      text-align: center;
-    }
-    .slm-box-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text);
-      margin-bottom: 0.4rem;
-    }
-    .slm-box-sub {
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.4;
-    }
-    .slm-arrow {
-      font-size: 1.5rem;
-      color: var(--indigo);
-      text-align: center;
-    }
-    .slm-input { border-color: rgba(99,102,241,0.4); }
-    .slm-backbone { border-color: rgba(168,85,247,0.5); background: rgba(168,85,247,0.06); }
-    .slm-output { border-color: rgba(34,197,94,0.4); background: rgba(34,197,94,0.04); }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 0.75rem;
-      margin: 2rem 0;
-    }
-    .feat-chip {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-    }
-    .feat-num {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--indigo);
-      min-width: 24px;
-      margin-top: 2px;
-    }
-    .feat-name {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .feat-desc {
-      font-size: 0.73rem;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* Comparison table */
-    .cmp-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 2rem 0;
-      font-size: 0.875rem;
-    }
-    .cmp-table th {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 0.75rem 1.25rem;
-      background: var(--bg3);
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-    .cmp-table td {
-      padding: 0.85rem 1.25rem;
-      border-bottom: 1px solid rgba(99,102,241,0.08);
-      color: var(--text);
-    }
-    .cmp-table tr:last-child td { border-bottom: none; }
-    .cmp-table tr:hover td { background: rgba(99,102,241,0.04); }
-    .cmp-gain { color: var(--green); font-weight: 700; }
-    .cmp-neutral { color: var(--muted); }
-    .cmp-highlight { font-weight: 700; color: var(--purple); }
-    .cmp-header-slm { color: var(--purple); }
-    .cmp-header-v3 { color: var(--indigo); }
-    .cmp-wrap {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .train-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 1rem;
-      margin: 2rem 0;
-    }
-    .train-stat {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      text-align: center;
-    }
-    .train-val {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 800;
-      font-size: 1.6rem;
-      background: linear-gradient(135deg, var(--indigo), var(--purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .train-lbl {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    /* ════════════════════════════════════
-       DASHBOARD SECTION
-    ════════════════════════════════════ */
-    .tab-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-      margin: 2.5rem 0;
-    }
-    .tab-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-    .tab-card:hover {
-      border-color: rgba(99,102,241,0.4);
-      transform: translateY(-2px);
-    }
-    .tab-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.85rem;
-    }
-    .tab-emoji {
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-    .tab-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--text);
-    }
-    .tab-tag {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 2px 8px;
-      border-radius: 20px;
-      background: rgba(99,102,241,0.15);
-      color: var(--indigo);
-      margin-left: auto;
-      white-space: nowrap;
-    }
-    .tab-desc {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 0.9rem;
-    }
-    .tab-features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-    .tab-feat-pill {
-      font-size: 0.7rem;
-      color: var(--muted);
-      background: var(--bg3);
-      border: 1px solid rgba(99,102,241,0.15);
-      border-radius: 20px;
-      padding: 2px 10px;
-    }
-
-    /* ─ Model evolution ─ */
-    .evolution-track {
-      display: flex;
-      align-items: stretch;
-      gap: 0;
-      margin: 2rem 0;
-      overflow-x: auto;
-      padding-bottom: 4px;
-    }
-    .evo-node {
-      flex: 1;
-      min-width: 150px;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.1rem 1rem;
-      position: relative;
-    }
-    .evo-node + .evo-arrow {
-      display: flex;
-      align-items: center;
-      padding: 0 0.5rem;
-      color: var(--indigo);
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
-    .evo-ver {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--indigo);
-      margin-bottom: 0.35rem;
-    }
-    .evo-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text);
-      margin-bottom: 0.35rem;
-    }
-    .evo-desc {
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-    .evo-score {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--green);
-      margin-top: 0.5rem;
-    }
-    .evo-node.evo-current {
-      border-color: rgba(168,85,247,0.4);
-      background: rgba(168,85,247,0.06);
-    }
-
-    /* ─ Deployment ─ */
-    .deploy-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-      margin: 2rem 0;
-    }
-    .deploy-card {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-    }
-    .deploy-title {
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--indigo);
-      margin-bottom: 0.75rem;
-    }
-    .deploy-line {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--text);
-      margin: 0.3rem 0;
-      line-height: 1.6;
-    }
-    .deploy-comment {
-      color: var(--muted);
-      font-size: 0.75rem;
-    }
-    @media (max-width: 768px) {
-      .deploy-grid { grid-template-columns: 1fr; }
-      .evolution-track { flex-direction: column; }
-      .evo-node + .evo-arrow { transform: rotate(90deg); align-self: center; }
-    }
-
-    /* ════════════════════════════════════
-       CHATBOT SECTION
-    ════════════════════════════════════ */
-    .chatbot-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      margin: 2.5rem 0;
-    }
-    @media (max-width: 768px) {
-      .chatbot-layout { grid-template-columns: 1fr; }
-      .slm-arch { grid-template-columns: 1fr; }
-      .slm-arrow { transform: rotate(90deg); }
-    }
-    .chatbot-panel {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-    }
-    .chatbot-panel-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--text);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .intent-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .intent-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 0.7rem 0.9rem;
-      background: var(--bg3);
-      border: 1px solid rgba(99,102,241,0.12);
-      border-radius: 10px;
-    }
-    .intent-icon { font-size: 1rem; flex-shrink: 0; }
-    .intent-name {
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .intent-ex {
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 2px;
-      font-style: italic;
-    }
-    .chat-bubble {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      align-items: flex-start;
-    }
-    .chat-avatar {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700;
-      flex-shrink: 0;
-    }
-    .chat-avatar.user { background: linear-gradient(135deg, var(--indigo), var(--purple)); color: #fff; }
-    .chat-avatar.bot { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-    .chat-msg {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.65rem 0.9rem;
-      font-size: 0.82rem;
-      color: var(--text);
-      line-height: 1.5;
-      max-width: 85%;
-    }
-    .chat-msg.bot-msg { border-color: rgba(34,197,94,0.2); }
-
-    /* ════════════════════════════════════
-       FOOTER
-    ════════════════════════════════════ */
-    footer {
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 1.5rem;
-      text-align: center;
-    }
-    .footer-inner { max-width: 1100px; margin: 0 auto; }
-    .footer-logo-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; }
-    .footer-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem; }
-    .footer-meta { color: var(--muted); font-size: 0.82rem; margin-top: 0.5rem; }
-    .footer-meta span { color: var(--indigo); }
-
-    /* ════════════════════════════════════
-       RESPONSIVE
-    ════════════════════════════════════ */
-    @media (max-width: 768px) {
-      nav { padding: 0 1rem; }
-      .nav-links { gap: 0.75rem; }
-      .nav-links a:not(:last-child) { display: none; }
-      section { padding: 4rem 1rem; }
-      .quota-grid { grid-template-columns: 1fr; }
-      .hero-title { font-size: clamp(3rem, 15vw, 5rem); }
-    }
-
-    @media (max-width: 480px) {
-      .counters-grid { grid-template-columns: repeat(2, 1fr); }
-      .stage-header { flex-wrap: wrap; }
-    }
-
-    /* ════════════════════════════════════
-       GLOW PULSE ANIMATION
-    ════════════════════════════════════ */
-    @keyframes glowPulse {
-      0%, 100% { box-shadow: 0 0 16px var(--glow-i); }
-      50% { box-shadow: 0 0 32px var(--glow-p); }
-    }
-    .pw-circle { animation: glowPulse 3s ease-in-out infinite; }
-
-    /* floating dots bg */
-    .bg-dots {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-      background-image: radial-gradient(circle, rgba(99,102,241,0.08) 1px, transparent 1px);
-      background-size: 32px 32px;
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PRAJNA — Student Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0f;color:#e2e8f0;font-family:'Space Grotesk',sans-serif}
+
+/* ── Carousel wrapper ── */
+.carousel{position:relative;width:100vw;height:100vh;overflow:hidden}
+.track{display:flex;height:100%;transition:transform .55s cubic-bezier(.77,0,.18,1);will-change:transform}
+.slide{min-width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 40px;position:relative;overflow:hidden}
+
+/* ── Global bg gradient ── */
+.slide::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,.18) 0%,transparent 70%);pointer-events:none}
+
+/* ── Nav arrows ── */
+.arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:100;width:52px;height:52px;border-radius:50%;border:1.5px solid rgba(99,102,241,.4);background:rgba(10,10,15,.7);backdrop-filter:blur(12px);color:#a5b4fc;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;user-select:none}
+.arrow:hover{background:rgba(99,102,241,.3);border-color:#818cf8;color:#fff}
+#prev{left:18px}#next{right:18px}
+
+/* ── Dots ── */
+.dots{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:100}
+/* ── Top nav login button ── */
+.nav-login{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:110;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 24px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  border-radius:50px;font-size:.82rem;font-weight:700;color:#fff;
+  text-decoration:none;letter-spacing:.04em;
+  box-shadow:0 0 18px rgba(99,102,241,.5);transition:all .2s}
+.nav-login:hover{box-shadow:0 0 28px rgba(99,102,241,.8);transform:translateX(-50%) scale(1.04)}
+.dot{width:9px;height:9px;border-radius:50%;background:rgba(165,180,252,.3);cursor:pointer;transition:all .25s}
+.dot.active{background:#818cf8;transform:scale(1.35)}
+
+/* ── Counter ── */
+.counter{position:fixed;top:16px;right:28px;font-size:12px;color:rgba(165,180,252,.5);letter-spacing:.08em;z-index:100;font-weight:500}
+
+/* ── PW badge ── */
+.pw-badge{position:fixed;top:18px;left:24px;font-size:12px;color:rgba(165,180,252,.6);letter-spacing:.06em;z-index:100;font-weight:600}
+
+/* ── Common typography ── */
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#818cf8;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);padding:5px 14px;border-radius:20px;margin-bottom:18px}
+.slide h1{font-size:clamp(2.4rem,5.5vw,4.2rem);font-weight:800;line-height:1.1;text-align:center;background:linear-gradient(135deg,#e2e8f0 0%,#a5b4fc 50%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+.slide h2{font-size:clamp(1.6rem,3.5vw,2.6rem);font-weight:700;text-align:center;background:linear-gradient(135deg,#e2e8f0,#a5b4fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px}
+.slide p.lead{font-size:clamp(.95rem,1.6vw,1.18rem);color:#94a3b8;text-align:center;max-width:640px;line-height:1.7;margin-bottom:28px}
+
+/* ── Login CTA ── */
+.cta{display:inline-flex;align-items:center;gap:10px;padding:18px 42px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:50px;font-size:1.15rem;font-weight:700;color:#fff;text-decoration:none;letter-spacing:.02em;box-shadow:0 0 36px rgba(99,102,241,.55),0 0 80px rgba(99,102,241,.2);transition:all .25s;border:none;cursor:pointer}
+.cta:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 0 54px rgba(99,102,241,.75),0 0 110px rgba(99,102,241,.3)}
+.cta-sm{padding:12px 30px;font-size:.95rem}
+
+/* ── Glass card ── */
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:28px 24px;backdrop-filter:blur(10px);transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-4px);border-color:rgba(99,102,241,.4)}
+
+/* ── Grid helpers ── */
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;width:100%;max-width:900px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;width:100%;max-width:1000px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:30px;width:100%;max-width:780px}
+
+/* ── Icon circle ── */
+.icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25)}
+.card h3{font-size:1.05rem;font-weight:700;color:#e2e8f0;margin-bottom:8px}
+.card p{font-size:.88rem;color:#64748b;line-height:1.6}
+
+/* ── Level pills ── */
+.levels{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:900px}
+.lv{padding:18px 22px;border-radius:16px;text-align:center;min-width:150px;flex:1;border:1px solid transparent}
+.lv .lv-letter{font-size:2rem;font-weight:800;display:block;margin-bottom:4px}
+.lv .lv-name{font-size:.82rem;font-weight:600;letter-spacing:.06em;display:block;margin-bottom:6px;opacity:.85}
+.lv .lv-range{font-size:.75rem;opacity:.65}
+
+/* ── Step flow ── */
+.step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;margin:0 auto 12px;flex-shrink:0}
+
+/* ── Team avatars ── */
+.avatar{width:110px;height:110px;border-radius:50%;object-fit:cover;border:3px solid rgba(99,102,241,.5);margin-bottom:16px}
+.avatar-init{width:110px;height:110px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;font-weight:800;margin-bottom:16px;border:3px solid rgba(99,102,241,.5)}
+.team-card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.team-card .role{font-size:.83rem;color:#818cf8;font-weight:600;letter-spacing:.06em;margin-bottom:6px}
+.team-card .bio{font-size:.83rem;color:#64748b;line-height:1.5;max-width:260px}
+
+/* ── Credentials table ── */
+.cred-table{width:100%;max-width:540px;border-collapse:collapse;font-size:.88rem;margin-top:20px}
+.cred-table th{padding:10px 16px;background:rgba(99,102,241,.15);color:#a5b4fc;font-weight:600;text-align:left;border-bottom:1px solid rgba(99,102,241,.2)}
+.cred-table td{padding:10px 16px;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,.05)}
+.cred-table tr:last-child td{border-bottom:none}
+
+/* ── SLM bullets ── */
+.slm-list{list-style:none;display:flex;flex-direction:column;gap:14px;max-width:680px;width:100%}
+.slm-list li{display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px 20px}
+.slm-list li .bullet{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.slm-list li div{font-size:.9rem;color:#94a3b8;line-height:1.55}
+.slm-list li strong{display:block;font-size:.96rem;color:#e2e8f0;font-weight:600;margin-bottom:3px}
+</style>
 </head>
 <body>
 
-<div class="bg-dots" aria-hidden="true"></div>
+<div class="pw-badge">⚡ PhysicsWallah</div>
+<div class="counter" id="counter">1 / 12</div>
+<button class="arrow" id="prev" aria-label="Previous">&#8249;</button>
+<button class="arrow" id="next" aria-label="Next">&#8250;</button>
+<div class="dots" id="dots"></div>
+<a href="login.html" class="nav-login">Login to PRAJNA &nbsp;&#8594;</a>
 
-<!-- NAV -->
-<nav>
-  <a href="#hero" class="nav-logo">
-    <div class="pw-circle">PW</div>
-    <span class="nav-brand">PRAJNA</span>
-  </a>
-  <div class="nav-links">
-    <a href="#what">About</a>
-    <a href="#data">Data</a>
-    <a href="#architecture">Model</a>
-    <a href="#slm">SLM</a>
-    <a href="#dashboard">Prajna Intelligence</a>
-    <a href="#chatbot">Chatbot</a>
-    <a href="#backtest">Results</a>
-    <a href="#team">Team</a>
-    <a href="http://localhost:8501" target="_blank" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.4);padding:4px 12px;border-radius:20px;color:#38bdf8;font-weight:600;font-size:.82rem">🧠 Prajna Intelligence ↗</a>
-    <a href="student-dashboard.html" style="background:rgba(124,58,237,.15);border:1px solid rgba(168,85,247,.4);padding:4px 12px;border-radius:20px;color:#a855f7;font-weight:600;font-size:.82rem">Student IQ ↗</a>
-    <span class="nav-badge">PW Hackathon 2026</span>
-  </div>
-</nav>
+<div class="carousel" id="carousel">
+  <div class="track" id="track">
 
-<!-- ═══════════════════════ HERO ═══════════════════════ -->
-<section id="hero">
-  <div class="container">
-    <div class="reveal">
-      <div class="hero-badge">🏆 PW AI Hackathon 2026</div>
-    </div>
-    <div class="reveal reveal-delay-1">
-      <h1 class="hero-title">PRAJNA</h1>
-    </div>
-    <div class="reveal reveal-delay-2">
-      <p class="hero-subtitle">Predictive Research &amp; Analysis for JEE/NEET Intelligence</p>
-      <p class="hero-desc">An AI-powered Small Language Model that predicts exam topics, micro-topics, and question patterns for JEE and NEET with <strong style="color:#c7d2fe">82.1% combined backtest accuracy</strong></p>
+    <!-- SLIDE 1 — Hero -->
+    <div class="slide">
+      <div class="tag">Student Intelligence Platform</div>
+      <h1>PRAJNA</h1>
+      <p class="lead">AI-powered exam intelligence for JEE &amp; NEET aspirants — predict your rank, master your weak areas, ace the exam.</p>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center">
+        <a href="http://localhost:8501" target="_blank" class="cta" style="background:linear-gradient(135deg,#0e7490,#06b6d4);box-shadow:0 0 36px rgba(6,182,212,.5),0 0 80px rgba(6,182,212,.18)">⚡ PRAJNA Intelligence</a>
+        <a href="http://localhost:8001/docs" target="_blank" class="cta" style="background:linear-gradient(135deg,#1e3a5f,#2563eb);box-shadow:0 0 36px rgba(37,99,235,.45),0 0 80px rgba(37,99,235,.18)">📄 API Docs</a>
+      </div>
+      <p style="margin-top:32px;font-size:.8rem;color:#475569;letter-spacing:.06em;">POWERED BY PHYSICSWALLAH &nbsp;·&nbsp; BUILT FOR TOPPERS</p>
     </div>
 
-    <div class="counters-grid reveal reveal-delay-3">
-      <div class="counter-card">
-        <div class="counter-value" data-target="23119">0</div>
-        <div class="counter-label">Questions</div>
+
+    <!-- SLIDE 2 — Key Stats -->
+    <div class="slide">
+      <div class="tag">By the Numbers</div>
+      <h2>Built on 48 Years of Real Exam Data</h2>
+      <p class="lead">PRAJNA is the most data-intensive JEE/NEET prediction system ever built for students.</p>
+      <div class="g4" style="max-width:860px">
+        <div class="card" style="text-align:center;border-color:rgba(99,102,241,.35)">
+          <div style="font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,#a5b4fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">23,119</div>
+          <div style="font-size:.85rem;color:#94a3b8;margin-top:6px;font-weight:600">Exam Questions</div>
+          <div style="font-size:.75rem;color:#475569;margin-top:4px">JEE + NEET combined</div>
+        </div>
+        <div class="card" style="text-align:center;border-color:rgba(139,92,246,.35)">
+          <div style="font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,#c4b5fd,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">292</div>
+          <div style="font-size:.85rem;color:#94a3b8;margin-top:6px;font-weight:600">Exam Papers</div>
+          <div style="font-size:.75rem;color:#475569;margin-top:4px">Across all shifts &amp; years</div>
+        </div>
+        <div class="card" style="text-align:center;border-color:rgba(34,197,94,.25)">
+          <div style="font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,#86efac,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent">91%</div>
+          <div style="font-size:.85rem;color:#94a3b8;margin-top:6px;font-weight:600">Backtest Accuracy</div>
+          <div style="font-size:.75rem;color:#475569;margin-top:4px">5-year holdout average</div>
+        </div>
+        <div class="card" style="text-align:center;border-color:rgba(251,191,36,.25)">
+          <div style="font-size:2.4rem;font-weight:800;background:linear-gradient(135deg,#fde68a,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent">755</div>
+          <div style="font-size:.85rem;color:#94a3b8;margin-top:6px;font-weight:600">Micro-topics</div>
+          <div style="font-size:.75rem;color:#475569;margin-top:4px">470 NEET · 285 JEE</div>
+        </div>
       </div>
-      <div class="counter-card">
-        <div class="counter-value" data-target="292">0</div>
-        <div class="counter-label">Papers</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-value" data-target="48">0</div>
-        <div class="counter-label">Years of Data</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-value" data-target="821" data-suffix="%">0</div>
-        <div class="counter-label">Backtest Accuracy</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-value" data-target="755">0</div>
-        <div class="counter-label">Micro-topics</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-value" data-target="143">0</div>
-        <div class="counter-label">Chapters</div>
-      </div>
+      <p style="margin-top:24px;font-size:.82rem;color:#475569;letter-spacing:.04em">48 YEARS OF DATA &nbsp;·&nbsp; 143 CHAPTERS &nbsp;·&nbsp; STRICT NO-LOOK-AHEAD EVALUATION</p>
     </div>
 
-    <div class="reveal reveal-delay-4" style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-      <a href="#architecture" class="hero-cta">Explore PRAJNA →</a>
-      <a href="#dashboard" class="hero-cta" style="background:rgba(34,197,94,0.12); border:1.5px solid rgba(34,197,94,0.4); color:#86efac;">View Dashboard →</a>
-    </div>
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ WHAT IS PRAJNA ═══════════════════════ -->
-<section id="what">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">01 · Overview</div>
-      <h2 class="section-title">What is PRAJNA?</h2>
-      <p class="section-sub">Moving beyond guesswork to data-driven prediction at micro-topic granularity</p>
-    </div>
-
-    <div class="three-col">
-      <div class="info-card reveal reveal-delay-1">
-        <div class="info-icon">🎯</div>
-        <h3>What it Does</h3>
-        <p>PRAJNA ingests 48 years of JEE and NEET question papers and applies a 3-stage ML pipeline to predict which topics, micro-topics, and question types are most likely to appear in the next exam — with subject-balanced output.</p>
-      </div>
-      <div class="info-card reveal reveal-delay-2">
-        <div class="info-icon">🧩</div>
-        <h3>Problem it Solves</h3>
-        <p>Students waste time on low-yield chapters while missing high-probability micro-topics. Coaching institutes rely on intuition and hearsay. PRAJNA replaces guesswork with statistical signal backed by nearly five decades of real exam data.</p>
-      </div>
-      <div class="info-card reveal reveal-delay-3">
-        <div class="info-icon">⚡</div>
-        <h3>Why it Matters</h3>
-        <p>JEE and NEET are fiercely competitive. A single correctly predicted micro-topic can swing a rank by thousands. PRAJNA gives every student access to institutional-level prediction intelligence — for free.</p>
+    <!-- SLIDE 3 — Problem & Why it Matters -->
+    <div class="slide">
+      <div class="tag">The Problem</div>
+      <h2>Students Study Broad. Exams Test Specific.</h2>
+      <p class="lead">Most students waste months on low-yield chapters while missing the micro-topics that actually appear. PRAJNA closes that gap.</p>
+      <div class="g3">
+        <div class="card">
+          <div class="icon">🎯</div>
+          <h3>Micro-topic Precision</h3>
+          <p>PRAJNA predicts exactly which micro-topics to focus on — not just broad chapters — backed by 48 years of actual exam data.</p>
+        </div>
+        <div class="card" style="border-color:rgba(99,102,241,.35)">
+          <div class="icon" style="background:rgba(139,92,246,.18);border-color:rgba(139,92,246,.3)">📊</div>
+          <h3>Statistical Signal</h3>
+          <p>Coaching institutes rely on intuition and hearsay. PRAJNA replaces guesswork with 7-signal weighted ensemble intelligence.</p>
+        </div>
+        <div class="card">
+          <div class="icon" style="background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.25)">🏆</div>
+          <h3>Rank Impact</h3>
+          <p>JEE &amp; NEET are fiercely competitive. A single correctly predicted micro-topic can swing a rank by thousands of positions.</p>
+        </div>
       </div>
     </div>
 
-    <div class="insight-box reveal">
-      <p>
-        Most students study broad chapters. PRAJNA tells you <strong>EXACTLY which micro-topics to focus on</strong> — backed by 48 years of actual exam data.
-        It goes beyond chapter-level analysis all the way down to <strong>micro-topic level predictions</strong>:
-        470 micro-topics for NEET and 285 for JEE, each with an individual probability score, expected question count, and confidence rating.
-      </p>
-    </div>
-
-    <!-- Model evolution -->
-    <div class="reveal" style="margin-top:3rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.5rem;">Model Evolution — v1 → SLM</h3>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.5rem;">Four generations of prediction algorithms, each addressing the limitations of the previous</p>
-    </div>
-    <div class="evolution-track reveal">
-      <div class="evo-node">
-        <div class="evo-ver">v1</div>
-        <div class="evo-name">Frequency Heuristic</div>
-        <div class="evo-desc">Simple topic frequency + recency weighting. No subject balance, no gap analysis.</div>
-        <div class="evo-score">~68% combined</div>
-      </div>
-      <div class="evo-node + evo-arrow">→</div>
-      <div class="evo-node">
-        <div class="evo-ver">v2</div>
-        <div class="evo-name">Micro-Topic Engine</div>
-        <div class="evo-desc">Drilled down to micro-topic level. Added weightage model and subject filtering.</div>
-        <div class="evo-score">~74% combined</div>
-      </div>
-      <div class="evo-node + evo-arrow">→</div>
-      <div class="evo-node">
-        <div class="evo-ver">v3</div>
-        <div class="evo-name">3-Stage Pipeline</div>
-        <div class="evo-desc">Appearance × Weightage × Format. 7-signal ensemble + cycle detection + subject-quota reranking.</div>
-        <div class="evo-score">82.2% combined</div>
-      </div>
-      <div class="evo-node + evo-arrow">→</div>
-      <div class="evo-node evo-current">
-        <div class="evo-ver">SLM ★</div>
-        <div class="evo-name">Neural Predictor</div>
-        <div class="evo-desc">22M-param model. Learns feature interactions + semantic embeddings. Multi-task output heads.</div>
-        <div class="evo-score">85.9% combined</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ DATA FOUNDATION ═══════════════════════ -->
-<section id="data">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">02 · Dataset</div>
-      <h2 class="section-title">Data Foundation</h2>
-      <p class="section-sub">The most comprehensive JEE/NEET question database ever assembled for ML research</p>
-    </div>
-
-    <div class="timeline-bar reveal">
-      <div class="timeline-labels">
-        <span class="timeline-label-year">1978</span>
-        <span>IIT-JEE era</span>
-        <span>JEE Main introduced</span>
-        <span>NEET unification</span>
-        <span class="timeline-label-year">2026</span>
-      </div>
-      <div class="timeline-track">
-        <div class="timeline-fill"></div>
-      </div>
-      <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--muted);">
-        <span>IIT-JEE Advanced</span>
-        <span>JEE Main starts 2002</span>
-        <span>NEET starts 2000</span>
-        <span>Today</span>
+    <!-- SLIDE 4 — Model Evolution -->
+    <div class="slide">
+      <div class="tag">Model Evolution</div>
+      <h2>Four Generations of Intelligence</h2>
+      <p class="lead">Each version addressed the limitations of the previous — the SLM now powers <strong style="color:#c4b5fd">PRAJNA v4</strong>, a hierarchical micro-topic engine with 10 signals and hill-climbing weight optimisation.</p>
+      <div class="g4" style="max-width:960px">
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;font-weight:800;color:#64748b;margin-bottom:8px">v1</div>
+          <h3 style="color:#94a3b8">Frequency Model</h3>
+          <p>Basic chapter frequency counting. No subject balance, no gap analysis.</p>
+          <div style="margin-top:12px;font-size:.8rem;font-weight:700;color:#64748b">~68% accuracy</div>
+        </div>
+        <div class="card" style="text-align:center">
+          <div style="font-size:1.5rem;font-weight:800;color:#818cf8;margin-bottom:8px">v2</div>
+          <h3>Micro-Topic Engine</h3>
+          <p>Drilled to micro-topic level. Added weightage model and subject filtering.</p>
+          <div style="margin-top:12px;font-size:.8rem;font-weight:700;color:#818cf8">~74% accuracy</div>
+        </div>
+        <div class="card" style="text-align:center;border-color:rgba(99,102,241,.4)">
+          <div style="font-size:1.5rem;font-weight:800;color:#a78bfa;margin-bottom:8px">v3</div>
+          <h3>3-Stage Pipeline</h3>
+          <p>Appearance × Weightage × Format. 7-signal ensemble + cycle detection + subject-quota reranking.</p>
+          <div style="margin-top:12px;font-size:.8rem;font-weight:700;color:#a78bfa">~82% accuracy</div>
+        </div>
+        <div class="card" style="text-align:center;border-color:rgba(139,92,246,.7);background:rgba(139,92,246,.10);position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;background:linear-gradient(135deg,#7c3aed,#4f46e5);font-size:.58rem;font-weight:800;letter-spacing:.08em;color:#fff;padding:.22rem .6rem;border-bottom-left-radius:6px">CURRENT</div>
+          <div style="font-size:1.5rem;font-weight:800;color:#c4b5fd;margin-bottom:8px">SLM → v4 ★</div>
+          <h3 style="color:#e2e8f0">Hierarchical Engine</h3>
+          <p>SLM chapter gate feeds a micro-topic scorer. 10-signal ensemble with hill-climbing weight optimisation and parent-score inheritance.</p>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center">
+            <span style="font-size:.65rem;font-weight:700;background:rgba(99,102,241,.2);color:#a78bfa;padding:.15rem .45rem;border-radius:4px">10 signals</span>
+            <span style="font-size:.65rem;font-weight:700;background:rgba(0,212,170,.12);color:#00d4aa;padding:.15rem .45rem;border-radius:4px">parent gate</span>
+            <span style="font-size:.65rem;font-weight:700;background:rgba(251,191,36,.12);color:#fbbf24;padding:.15rem .45rem;border-radius:4px">hill-climbing weights</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="data-table-wrap reveal">
-      <table>
-        <thead>
-          <tr>
-            <th>Exam</th>
-            <th>Papers</th>
-            <th>Questions</th>
-            <th>Years Covered</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>NEET</td>
-            <td>36</td>
-            <td>5,750</td>
-            <td>2000 – 2025</td>
-          </tr>
-          <tr>
-            <td>JEE Main</td>
-            <td>178</td>
-            <td>13,547</td>
-            <td>2002 – 2026</td>
-          </tr>
-          <tr>
-            <td>JEE Advanced</td>
-            <td>78</td>
-            <td>3,822</td>
-            <td>1978 – 2025</td>
-          </tr>
-          <tr>
-            <td>Total</td>
-            <td>292</td>
-            <td>23,119</td>
-            <td>1978 – 2026</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="gather-grid reveal">
-      <div class="gather-chip">
-        <strong>Custom Scrapers</strong>
-        Automated collection from official sources and curated repositories
-      </div>
-      <div class="gather-chip">
-        <strong>PDF Parsing</strong>
-        pdfplumber + custom parsers for multi-shift, multi-language papers
-      </div>
-      <div class="gather-chip">
-        <strong>SQLite DB</strong>
-        Structured relational schema with full-text question storage
-      </div>
-      <div class="gather-chip">
-        <strong>Manual QA</strong>
-        Spot-checked labeling for topic, micro-topic, difficulty, type
-      </div>
-    </div>
-
-    <div class="db-schema reveal">
-      <span class="db-kw">CREATE TABLE</span> <span class="db-field">questions</span> <span class="db-punct">(</span><br>
-      &nbsp;&nbsp;<span class="db-field">id</span>              <span class="db-type">INTEGER PRIMARY KEY</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">exam</span>            <span class="db-type">TEXT</span><span class="db-punct">,</span>          <span class="db-kw">-- 'NEET' | 'JEE Main' | 'JEE Advanced'</span><br>
-      &nbsp;&nbsp;<span class="db-field">year</span>            <span class="db-type">INTEGER</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">shift</span>           <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">subject</span>         <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">topic</span>           <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">micro_topic</span>     <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">question_text</span>   <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">question_type</span>   <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">difficulty</span>      <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">answer</span>          <span class="db-type">TEXT</span><span class="db-punct">,</span><br>
-      &nbsp;&nbsp;<span class="db-field">marks</span>           <span class="db-type">REAL</span><br>
-      <span class="db-punct">)</span><span class="db-punct">;</span>
-    </div>
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ ARCHITECTURE ═══════════════════════ -->
-<section id="architecture">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">03 · Model</div>
-      <h2 class="section-title">3-Stage Prediction Pipeline</h2>
-      <p class="section-sub">Each stage adds a distinct analytical lens — appearance, quantity, then format — before subject-balanced reranking</p>
-    </div>
-
-    <div class="pipeline">
-
-      <!-- Stage 1 -->
-      <div class="stage stage-1 reveal">
-        <div class="stage-header">
-          <div class="stage-num">01</div>
+    <!-- SLIDE 5 — Data Foundation (7 Signals) -->
+    <div class="slide">
+      <div class="tag">Data Foundation</div>
+      <h2>Ten Signals. One Prediction.</h2>
+      <p class="lead">PRAJNA v4's ensemble weighs ten independent signals from 48 years of exam papers. Seven core signals from v3, plus three new signals introduced in v4 for micro-topic precision.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:960px">
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(99,102,241,.2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#818cf8;font-size:1rem;flex-shrink:0">25</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Recency-Weighted Frequency</div><div style="font-size:.78rem;color:#64748b">Exponential decay — recent years count more</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#a78bfa;font-size:1rem;flex-shrink:0">20</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Appearance Rate</div><div style="font-size:.78rem;color:#64748b">Fraction of total years this topic appeared</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(34,197,94,.12);display:flex;align-items:center;justify-content:center;font-weight:800;color:#4ade80;font-size:1rem;flex-shrink:0">15</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Recent 3-Year Presence</div><div style="font-size:.78rem;color:#64748b">Did it appear in the last 3 exams?</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(251,191,36,.12);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fbbf24;font-size:1rem;flex-shrink:0">15</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Gap Return Probability</div><div style="font-size:.78rem;color:#64748b">"Due to return" — peaks when 2× overdue</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(236,72,153,.12);display:flex;align-items:center;justify-content:center;font-weight:800;color:#f472b6;font-size:1rem;flex-shrink:0">12</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Trend Slope</div><div style="font-size:.78rem;color:#64748b">Linear regression on last 10 years of frequency</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(6,182,212,.12);display:flex;align-items:center;justify-content:center;font-weight:800;color:#22d3ee;font-size:1rem;flex-shrink:0">8+5</div>
+          <div><div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Cycle Match + 5yr Presence</div><div style="font-size:.78rem;color:#64748b">Periodic reappearance + broader recency window</div></div>
+        </div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px;border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.05)">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#c4b5fd;font-size:.75rem;flex-shrink:0;text-align:center;line-height:1.2">v4<br>NEW</div>
           <div>
-            <div class="stage-title">Appearance Model — P(topic appears in exam)</div>
-            <div class="stage-formula">7-signal ensemble · outputs probability [0, 0.99]</div>
+            <div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Parent Inheritance</div>
+            <div style="font-size:.78rem;color:#64748b">Chapter's confidence score flows down to all its micro-topics</div>
           </div>
         </div>
-        <div class="signals-grid">
-          <div class="signal-chip">
-            <div class="signal-weight">0.25</div>
-            <div class="signal-info">
-              <div class="signal-name">Recency-Weighted Frequency</div>
-              <div class="signal-desc">Exponential decay — recent years count more</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.20</div>
-            <div class="signal-info">
-              <div class="signal-name">Appearance Rate</div>
-              <div class="signal-desc">Fraction of years this topic appeared</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.15</div>
-            <div class="signal-info">
-              <div class="signal-name">Recent 3-Year Presence</div>
-              <div class="signal-desc">Did it appear in last 3 exams?</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.15</div>
-            <div class="signal-info">
-              <div class="signal-name">Gap Return Probability</div>
-              <div class="signal-desc">"Due to return" signal based on mean gap</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.12</div>
-            <div class="signal-info">
-              <div class="signal-name">Trend Slope</div>
-              <div class="signal-desc">Linear regression on last 10 years</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.08</div>
-            <div class="signal-info">
-              <div class="signal-name">Cycle Match</div>
-              <div class="signal-desc">Periodic reappearance detection</div>
-            </div>
-          </div>
-          <div class="signal-chip">
-            <div class="signal-weight">0.05</div>
-            <div class="signal-info">
-              <div class="signal-name">Recent 5-Year Presence</div>
-              <div class="signal-desc">Broader recency window</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pipe-connector reveal">
-        <span class="pipe-arrow">↓</span>
-        <span>Stage 1 feeds expected-questions model</span>
-      </div>
-
-      <!-- Stage 2 -->
-      <div class="stage stage-2 reveal">
-        <div class="stage-header">
-          <div class="stage-num">02</div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px;border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.05)">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#c4b5fd;font-size:.75rem;flex-shrink:0;text-align:center;line-height:1.2">v4<br>NEW</div>
           <div>
-            <div class="stage-title">Weightage Model — Expected questions if topic appears</div>
-            <div class="stage-formula">Weighted blend of historical question-counts</div>
+            <div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Recency Burst</div>
+            <div style="font-size:.78rem;color:#64748b">Fraction of last 3 years the micro-topic appeared — detects hot streaks</div>
           </div>
         </div>
-        <div class="stage-sub-grid">
-          <div class="stage-sub-item">
-            <div class="stage-sub-val" style="color:var(--purple)">50%</div>
-            <div class="stage-sub-lbl">Recency-weighted average</div>
-          </div>
-          <div class="stage-sub-item">
-            <div class="stage-sub-val" style="color:var(--pink)">30%</div>
-            <div class="stage-sub-lbl">Recent 5-year average</div>
-          </div>
-          <div class="stage-sub-item">
-            <div class="stage-sub-val" style="color:#fbbf24">20%</div>
-            <div class="stage-sub-lbl">All-time median</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="pipe-connector reveal">
-        <span class="pipe-arrow">↓</span>
-        <span>Stage 2 feeds format prediction</span>
-      </div>
-
-      <!-- Stage 3 -->
-      <div class="stage stage-3 reveal">
-        <div class="stage-header">
-          <div class="stage-num">03</div>
+        <div class="card" style="padding:16px 20px;display:flex;align-items:center;gap:14px;border-color:rgba(139,92,246,.35);background:rgba(139,92,246,.05)">
+          <div style="width:44px;height:44px;border-radius:10px;background:rgba(139,92,246,.2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#c4b5fd;font-size:.75rem;flex-shrink:0;text-align:center;line-height:1.2">v4<br>NEW</div>
           <div>
-            <div class="stage-title">Format Model — Question type &amp; difficulty</div>
-            <div class="stage-formula">Type ranking + recency-weighted difficulty distribution</div>
-          </div>
-        </div>
-        <div style="color:var(--muted); font-size:0.88rem; line-height:1.8;">
-          <p>For each predicted topic, the format model computes the historical distribution of question types (MCQ, Integer, Assertion-Reason, Matrix Match) and difficulty levels (Easy/Medium/Hard), then applies recency weighting to produce a ranked list. This allows PRAJNA to predict not just <em>what</em> will appear but <em>how</em> it will be asked.</p>
-        </div>
-      </div>
-
-      <div class="pipe-connector reveal">
-        <span class="pipe-arrow">↓</span>
-        <span>Post-processing: subject-balanced reranking</span>
-      </div>
-
-      <!-- Post-processing -->
-      <div class="stage stage-post reveal">
-        <div class="stage-header">
-          <div class="stage-num" style="font-size:0.7rem">★</div>
-          <div>
-            <div class="stage-title">Post-Processing: Subject-Balanced Reranking</div>
-            <div class="stage-formula">Enforces syllabus-mandated subject distribution per K value</div>
-          </div>
-        </div>
-        <div class="quota-grid">
-          <div class="quota-block">
-            <h4>NEET Quotas</h4>
-            <div class="quota-bars">
-              <div class="quota-row">
-                <span class="quota-label" style="color:#4ade80">Biology</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill bio-bar" style="width:50%"></div></div>
-                <span class="quota-pct">50%</span>
-              </div>
-              <div class="quota-row">
-                <span class="quota-label" style="color:#818cf8">Physics</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill phy-bar" style="width:25%"></div></div>
-                <span class="quota-pct">25%</span>
-              </div>
-              <div class="quota-row">
-                <span class="quota-label" style="color:#f0abfc">Chemistry</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill che-bar" style="width:25%"></div></div>
-                <span class="quota-pct">25%</span>
-              </div>
-            </div>
-          </div>
-          <div class="quota-block">
-            <h4>JEE Main Quotas</h4>
-            <div class="quota-bars">
-              <div class="quota-row">
-                <span class="quota-label" style="color:#818cf8">Physics</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill phy-bar" style="width:33%"></div></div>
-                <span class="quota-pct">33%</span>
-              </div>
-              <div class="quota-row">
-                <span class="quota-label" style="color:#f0abfc">Chemistry</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill che-bar" style="width:33%"></div></div>
-                <span class="quota-pct">33%</span>
-              </div>
-              <div class="quota-row">
-                <span class="quota-label" style="color:#fbbf24">Mathematics</span>
-                <div class="quota-bar-wrap"><div class="quota-bar-fill mat-bar" style="width:34%"></div></div>
-                <span class="quota-pct">34%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style="margin-top:1rem; font-size:0.82rem; color:var(--muted);">
-          Separate reranking runs for each K value: <strong style="color:var(--indigo)">20 · 40 · 60 · 80 · 100</strong> topics
-        </div>
-      </div>
-
-    </div><!-- /pipeline -->
-
-    <div class="formula-box reveal">
-      <div class="formula-title">Final Composite Score Formula</div>
-      <div class="formula-eq">
-        <span class="f-var">Score</span> <span class="f-op">=</span>
-        <span class="f-coef"> 0.40</span> <span class="f-op">×</span> <span class="f-term">P(appear)</span>
-        <span class="f-op"> + </span>
-        <span class="f-coef">0.30</span> <span class="f-op">×</span> <span class="f-term">normalized_weightage</span>
-        <br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="f-op"> + </span>
-        <span class="f-coef">0.15</span> <span class="f-op">×</span> <span class="f-term">recent_yield_bonus</span>
-        <span class="f-op"> + </span>
-        <span class="f-coef">0.10</span> <span class="f-op">×</span> <span class="f-term">cross_exam</span>
-        <span class="f-op"> + </span>
-        <span class="f-coef">0.05</span> <span class="f-op">×</span> <span class="f-term">syllabus_gate</span>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ PRAJNA SLM ═══════════════════════ -->
-<section id="slm">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">04 · PRAJNA SLM</div>
-      <h2 class="section-title">Small Language Model — Neural Predictor</h2>
-      <p class="section-sub">A 22M-parameter neural network that learns temporal, semantic, and cross-exam patterns from 48 years of question history — going beyond hand-crafted heuristics</p>
-    </div>
-
-    <!-- Architecture diagram -->
-    <div class="slm-arch reveal">
-      <div class="slm-box slm-input">
-        <div class="slm-box-title">Input Features</div>
-        <div class="slm-box-sub">15 numerical features<br/>+ 384-dim text embedding<br/>(sentence-transformers)</div>
-      </div>
-      <div class="slm-arrow">→</div>
-      <div class="slm-box slm-backbone">
-        <div class="slm-box-title">Backbone MLP</div>
-        <div class="slm-box-sub">Linear → LayerNorm → GELU → Dropout<br/>3 hidden layers<br/>shared representation</div>
-      </div>
-      <div class="slm-arrow">→</div>
-      <div class="slm-box slm-output">
-        <div class="slm-box-title">3 Output Heads</div>
-        <div class="slm-box-sub">P(appear) — sigmoid<br/>Expected Qs — ReLU<br/>Difficulty — softmax×3</div>
-      </div>
-    </div>
-
-    <!-- Training stats -->
-    <div class="train-stats reveal">
-      <div class="train-stat">
-        <div class="train-val">22M+</div>
-        <div class="train-lbl">Total Parameters</div>
-      </div>
-      <div class="train-stat">
-        <div class="train-val">399</div>
-        <div class="train-lbl">Input Dimensions</div>
-      </div>
-      <div class="train-stat">
-        <div class="train-val">0.8702</div>
-        <div class="train-lbl">Best Validation Loss (NEET)</div>
-      </div>
-      <div class="train-stat">
-        <div class="train-val">3</div>
-        <div class="train-lbl">Trained Models (NEET + JEE×2)</div>
-      </div>
-    </div>
-
-    <!-- 15 features -->
-    <div class="reveal">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.5rem;">15 Numerical Features per Chapter</h3>
-      <p style="font-size:0.85rem; color:var(--muted); margin-bottom:1.25rem;">All features are extracted from data strictly before the target year, preventing any look-ahead leakage</p>
-    </div>
-    <div class="features-grid reveal">
-      <div class="feat-chip"><div class="feat-num">F1</div><div><div class="feat-name">Recency-Weighted Freq</div><div class="feat-desc">Exponential decay over historical appearances</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F2</div><div><div class="feat-name">Appearance Rate</div><div class="feat-desc">Fraction of years this chapter appeared</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F3</div><div><div class="feat-name">Recent 3-Year Count</div><div class="feat-desc">Questions in the last 3 exams</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F4</div><div><div class="feat-name">Recent 5-Year Count</div><div class="feat-desc">Questions in the last 5 exams</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F5</div><div><div class="feat-name">Gap Since Last Year</div><div class="feat-desc">Years since chapter last appeared</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F6</div><div><div class="feat-name">Mean Gap</div><div class="feat-desc">Average inter-appearance gap across history</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F7</div><div><div class="feat-name">Trend Slope</div><div class="feat-desc">Linear regression on last 10 years of frequency</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F8</div><div><div class="feat-name">Avg Questions</div><div class="feat-desc">Mean questions per appearance</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F9</div><div><div class="feat-name">Std Questions</div><div class="feat-desc">Variability in question count</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F10</div><div><div class="feat-name">Max Questions</div><div class="feat-desc">Peak questions in a single year</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F11</div><div><div class="feat-name">Total Appearances</div><div class="feat-desc">Cumulative count across all years</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F12</div><div><div class="feat-name">Cross-Exam Count</div><div class="feat-desc">How many exam types feature this chapter</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F13</div><div><div class="feat-name">Cycle Regularity</div><div class="feat-desc">Periodicity score for chapter reappearance</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F14</div><div><div class="feat-name">Recent Yield Avg</div><div class="feat-desc">Questions per year over recent window</div></div></div>
-      <div class="feat-chip"><div class="feat-num">F15</div><div><div class="feat-name">Subject Encoding</div><div class="feat-desc">One-hot subject identifier (Physics/Chem/Bio)</div></div></div>
-    </div>
-
-    <!-- 384-dim embeddings note -->
-    <div class="reveal" style="background:var(--bg3); border:1px solid rgba(168,85,247,0.25); border-radius:12px; padding:1.25rem 1.5rem; margin:2rem 0; display:flex; gap:1rem; align-items:flex-start;">
-      <div style="font-size:1.5rem; flex-shrink:0;">🧠</div>
-      <div>
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.95rem; color:var(--purple); margin-bottom:0.4rem;">384-Dimensional Semantic Embeddings</div>
-        <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">Chapter names are encoded using <strong style="color:var(--text);">sentence-transformers/all-MiniLM-L6-v2</strong>, giving the SLM semantic understanding of topic relationships. Chapters with similar names (e.g., "Laws of Motion" and "Newton's Laws") share representation space — enabling cross-chapter pattern transfer not possible with heuristics alone.</div>
-      </div>
-    </div>
-
-    <!-- Custom vs pretrained clarification -->
-    <div class="reveal" style="margin:2rem 0;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem;">Custom Model or Wrapper?</h3>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-
-        <div style="background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.3); border-radius:12px; padding:1.25rem;">
-          <div style="font-size:0.78rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.85rem;">🔒 Pretrained &amp; Frozen</div>
-          <div style="font-size:0.85rem; color:var(--text); line-height:1.8;">
-            <div><strong>sentence-transformers/all-MiniLM-L6-v2</strong></div>
-            <div style="color:var(--muted); font-size:0.8rem; margin-top:4px;">Used only as a text encoder to convert chapter names → 384-dim vectors. Weights are <em>frozen</em> during training — PRAJNA never fine-tunes this model.</div>
-          </div>
-        </div>
-
-        <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.3); border-radius:12px; padding:1.25rem;">
-          <div style="font-size:0.78rem; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.85rem;">✅ Trained From Scratch</div>
-          <div style="font-size:0.85rem; color:var(--text); line-height:1.8;">
-            <div><strong>MLP backbone + 3 output heads</strong></div>
-            <div style="color:var(--muted); font-size:0.8rem; margin-top:4px;">Trained entirely on 48 years of JEE/NEET exam data with strict temporal splits. No existing exam-prediction model was used or wrapped.</div>
-          </div>
-        </div>
-
-      </div>
-      <div style="margin-top:1rem; padding:0.9rem 1.25rem; background:var(--bg3); border:1px solid var(--border); border-radius:10px; font-size:0.8rem; color:var(--muted); line-height:1.6;">
-        <strong style="color:var(--text);">Analogy:</strong> Just as a vision model uses a pretrained ResNet as a feature extractor and trains a custom classification head, PRAJNA uses sentence-transformers for semantic features — but the actual predictor is 100% custom, trained on your domain-specific exam history.
-      </div>
-    </div>
-
-    <!-- Heuristic v3 End-to-End -->
-    <div class="reveal" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">Heuristic v3 — End-to-End Pipeline</h3>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem;">Pure signal engineering, no gradient descent. Deterministic and fully interpretable.</p>
-    </div>
-
-    <div class="reveal" style="display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">1</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Data Loading + Holdout Exclusion</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Load all 23,119 questions from SQLite. Exclude holdout years {2024, 2025, 2026}. Filter by exam if specified. Group by (subject, chapter).</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">2</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Syllabus Gate</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Check each chapter against 2024 syllabus changes. REMOVED → gate=0.0 (score floored to 0). NEWLY ADDED → gate=0.5. RETAINED → gate=1.0.</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">3</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 1 — Appearance Probability (7-signal weighted ensemble)</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
-            ① <strong>Recency-Weighted Freq ×0.25</strong>: Σ 1/(gap^1.5+1) normalized over full year range<br/>
-            ② <strong>Appearance Rate ×0.20</strong>: count_years_appeared / year_span<br/>
-            ③ <strong>Recent 3yr ×0.15</strong>: appearances in last 3 exams / 3<br/>
-            ④ <strong>Gap Return ×0.15</strong>: gap/mean_gap capped at 2, peaks when 2× overdue<br/>
-            ⑤ <strong>Trend Slope ×0.12</strong>: np.polyfit on last 10 years of frequency<br/>
-            ⑥ <strong>Cycle Match ×0.08</strong>: modular arithmetic on inter-gap variance (σ² ≤ 1.5)<br/>
-            ⑦ <strong>Recent 5yr ×0.05</strong>: appearances in last 5 exams / 5<br/>
-            Result: min(weighted_sum × 1.8, 0.99) × syllabus_gate
-          </div>
-        </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">4</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 2 — Expected Questions (Weightage Model)</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">Blend: <strong>50%</strong> recency-weighted avg (decay 1/√gap) + <strong>30%</strong> recent 5yr avg + <strong>20%</strong> overall median. Confidence = 1 − coefficient_of_variation. Range = [Q25, Q75].</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(99,102,241,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--indigo); min-width:28px;">5</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Stage 3 — Format Prediction + Final Scoring</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">
-            Format: top-3 historical question types by frequency. Difficulty: recency-weighted mean of last 5 years.<br/>
-            <strong>Final</strong> = 0.40×P(appear) + 0.30×norm_qs + 0.15×yield_bonus + 0.10×cross_exam + 0.05×syl_gate<br/>
-            Subject-balanced reranking: NEET → Bio 50% / Phy 25% / Chem 25% · JEE → equal thirds. Chapter deduplication via alias map.
+            <div style="font-size:.9rem;font-weight:700;color:#e2e8f0">Dispersion</div>
+            <div style="font-size:.78rem;color:#64748b">Rewards dense appearances — penalises topics that cluster in a single year</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SLM End-to-End -->
-    <div class="reveal" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">PRAJNA SLM — End-to-End Training Pipeline</h3>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem;">Data → Features → Embeddings → Multi-task training → Best checkpoint → Inference</p>
-    </div>
-
-    <div class="reveal" style="display:flex; flex-direction:column; gap:0.75rem;">
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">1</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Training Data Construction (2010–2023)</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">For each (topic, target_year) pair: extract 15 features using <em>only</em> data before target_year. Labels from the actual paper that year (appeared=1/0, num_qs, difficulty_class). Class ratio ~15:1 (negative:positive) → corrected via pos_weight = neg_count / pos_count.</div>
+    <!-- SLIDE 9 — Tech Stack -->
+    <div class="slide" id="tech-slide">
+      <div class="tag">Tech Stack</div>
+      <h2>Lean, Purpose-Built Tooling</h2>
+      <p class="lead">No bloated ML frameworks — just precise statistical signal and a custom-trained neural network.</p>
+      <div class="g4" style="max-width:960px">
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🐍</div>
+          <div><div style="font-weight:700;color:#e2e8f0">Python 3.9+</div><div style="font-size:.78rem;color:#64748b">Core language</div></div>
         </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">2</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Semantic Embedding (Frozen Backbone)</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">All topic names → <strong>all-MiniLM-L6-v2</strong> → 384-dim vectors (batch_size=64). Cached to <code style="color:var(--indigo);">*_embeddings.npz</code> after first run. Concatenated with 15 numerical features → <strong>399-dim input tensor</strong>.</div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🗄️</div>
+          <div><div style="font-weight:700;color:#e2e8f0">SQLite 3</div><div style="font-size:.78rem;color:#64748b">23,119-question DB</div></div>
         </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">3</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Model Architecture (PrajnaSLM)</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
-            <strong>Backbone</strong>: 399→256→128→64, each layer = Linear + LayerNorm + GELU + Dropout(0.2)<br/>
-            <strong>Appear head</strong>: 64→16→GELU→1→Sigmoid → P(appear) ∈ [0,1]<br/>
-            <strong>Questions head</strong>: 64→16→GELU→1→ReLU → expected count ≥ 0<br/>
-            <strong>Difficulty head</strong>: 64→16→GELU→3 → logits, softmax at inference → Easy/Med/Hard
-          </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🔥</div>
+          <div><div style="font-weight:700;color:#e2e8f0">PyTorch</div><div style="font-size:.78rem;color:#64748b">SLM training &amp; inference</div></div>
         </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">4</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Multi-Task Loss + Optimization</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:6px; line-height:1.75;">
-            <strong>Loss</strong> = 0.50 × BCE(appear, pos_weighted) + 0.35 × MSE(qs | appeared=1) + 0.15 × CrossEntropy(difficulty)<br/>
-            MSE is <em>masked</em> — computed only on positive samples, preventing zero-inflation from non-appearing chapters.<br/>
-            <strong>Optimizer</strong>: AdamW lr=1e-3, weight_decay=0.01 &nbsp;·&nbsp; <strong>Scheduler</strong>: CosineAnnealingLR eta_min=1e-5<br/>
-            Gradient clip = 1.0 &nbsp;·&nbsp; 150 epochs, batch_size=128 &nbsp;·&nbsp; Best checkpoint: NEET epoch 126, loss 0.8702
-          </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🤗</div>
+          <div><div style="font-weight:700;color:#e2e8f0">sentence-transformers</div><div style="font-size:.78rem;color:#64748b">Semantic embeddings (frozen)</div></div>
         </div>
-      </div>
-      <div style="display:flex; gap:1rem; align-items:flex-start; background:var(--bg3); border:1px solid rgba(168,85,247,0.2); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-family:'Space Grotesk',sans-serif; font-weight:800; font-size:1.1rem; color:var(--purple); min-width:28px;">5</div>
-        <div>
-          <div style="font-weight:700; font-size:0.9rem; color:var(--text);">Inference + Final Scoring</div>
-          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px; line-height:1.6;">
-            Load best checkpoint, set model to inference mode, run with no-gradient context.<br/>
-            <strong>SLM Score</strong> = 0.45×P(appear) + 0.35×norm_exp_qs + 0.10×yield_bonus + 0.05×cross_exam + 0.05×syl_gate<br/>
-            Apply same subject-balanced reranking as heuristic v3. Embedding cache loaded from npz — avoids re-encoding at inference.
-          </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🐼</div>
+          <div><div style="font-weight:700;color:#e2e8f0">Pandas + NumPy</div><div style="font-size:.78rem;color:#64748b">Signal engineering</div></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">⚡</div>
+          <div><div style="font-weight:700;color:#e2e8f0">Node.js + Express</div><div style="font-size:.78rem;color:#64748b">REST API backend</div></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🐘</div>
+          <div><div style="font-weight:700;color:#e2e8f0">PostgreSQL</div><div style="font-size:.78rem;color:#64748b">Student data on Railway</div></div>
+        </div>
+        <div class="card" style="display:flex;align-items:center;gap:12px;padding:18px">
+          <div style="font-size:2rem">🚂</div>
+          <div><div style="font-weight:700;color:#e2e8f0">Railway.app</div><div style="font-size:.78rem;color:#64748b">Cloud deployment</div></div>
         </div>
       </div>
     </div>
 
-    <!-- Strength comparison callout -->
-    <div class="reveal" style="margin-top:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
-      <div style="background:rgba(99,102,241,0.06); border:1px solid rgba(99,102,241,0.25); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-size:0.78rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem;">Heuristic v3 — Key Strength</div>
-        <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">Fully interpretable — every signal and weight is human-defined. Great when you need to justify a prediction to a student or teacher. No training required; works with as few as 5 historical papers.</div>
-      </div>
-      <div style="background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.25); border-radius:12px; padding:1.1rem 1.25rem;">
-        <div style="font-size:0.78rem; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem;">PRAJNA SLM — Key Strength</div>
-        <div style="font-size:0.82rem; color:var(--muted); line-height:1.6;">Learns feature interactions automatically. Semantic embeddings generalize across similar topics. Masked MSE teaches <em>how heavy</em> a chapter will be — not just if it appears — driving the +4.2% coverage gain.</div>
+    <!-- SLIDE 10 — What is PRAJNA -->
+    <div class="slide">
+      <div class="tag">What is PRAJNA</div>
+      <h2>Intelligence at Every Step</h2>
+      <p class="lead">Three powerful pillars that transform raw test data into a personalised roadmap.</p>
+      <div class="g3">
+        <div class="card">
+          <div class="icon">🧠</div>
+          <h3>SLM-Powered</h3>
+          <p>A fine-tuned Small Language Model trained on PW exam data provides chapter-level predictions and actionable insights.</p>
+        </div>
+        <div class="card">
+          <div class="icon">📈</div>
+          <h3>Predictive Analytics</h3>
+          <p>Multi-variable rank forecasting using historical performance, difficulty trends, and peer cohort benchmarking.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🎯</div>
+          <h3>Personalised Study</h3>
+          <p>Dynamic study plans that adapt to your PRAJNA Score level — from chapter sequencing to time allocation.</p>
+        </div>
       </div>
     </div>
 
-    <!-- SLM vs v3 comparison -->
-    <div class="reveal" style="margin-top:3rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.5rem;">PRAJNA SLM vs. Heuristic v3 — NEET Backtest</h3>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:1.25rem;">Averaged over 5-year holdout (2019–2023) · Top-50 predictions · Strict no-look-ahead evaluation</p>
+    <!-- SLIDE 3 — How it works -->
+    <div class="slide">
+      <div class="tag">How It Works</div>
+      <h2>Four Steps to Mastery</h2>
+      <p class="lead">From raw attempt to exam-ready — here's the PRAJNA flow.</p>
+      <div class="g4">
+        <div class="card" style="text-align:center">
+          <div class="step-num">1</div>
+          <h3>Attempt Exam</h3>
+          <p>Take chapter or full-length tests on the PW platform — individual or centre-administered.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="step-num">2</div>
+          <h3>AI Analysis</h3>
+          <p>The SLM processes your responses, time-per-question, accuracy patterns and peer data.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="step-num">3</div>
+          <h3>PRAJNA Score</h3>
+          <p>You receive a 0–100 multi-dimensional score mapped to one of five performance tiers.</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <div class="step-num">4</div>
+          <h3>Smart Study Plan</h3>
+          <p>Hyper-personalised chapter priorities, revision schedules and predicted weak zones.</p>
+        </div>
+      </div>
     </div>
-    <div class="cmp-wrap reveal">
-      <table class="cmp-table">
-        <thead>
-          <tr>
-            <th>Metric</th>
-            <th class="cmp-header-v3">Heuristic v3</th>
-            <th class="cmp-header-slm">PRAJNA SLM</th>
-            <th>Delta</th>
-          </tr>
-        </thead>
+
+    <!-- SLIDE 4 — Dashboards -->
+    <div class="slide">
+      <div class="tag">Dashboards</div>
+      <h2>Visibility at Every Level</h2>
+      <p class="lead">Three purpose-built dashboards so every stakeholder sees exactly what they need.</p>
+      <div class="g3">
+        <div class="card">
+          <div class="icon">👤</div>
+          <h3>Student Dashboard</h3>
+          <p>Personal PRAJNA Score timeline, chapter-wise heat maps, predicted rank range, and today's study focus.</p>
+        </div>
+        <div class="card" style="border-color:rgba(99,102,241,.35)">
+          <div class="icon" style="background:rgba(139,92,246,.18);border-color:rgba(139,92,246,.3)">🏫</div>
+          <h3>Centre Dashboard</h3>
+          <p>Batch-level performance distribution, at-risk student flagging, and centre-vs-network benchmarks.</p>
+        </div>
+        <div class="card">
+          <div class="icon" style="background:rgba(236,72,153,.12);border-color:rgba(236,72,153,.25)">🏢</div>
+          <h3>Org Dashboard</h3>
+          <p>Organisation-wide analytics, centre comparison, cohort trends and predictive admission outcomes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 — Performance Levels -->
+    <div class="slide">
+      <div class="tag">Performance Levels</div>
+      <h2>The Five PRAJNA Tiers</h2>
+      <p class="lead">Every score maps to a tier with a colour-coded identity, guiding how the platform personalises your plan.</p>
+      <div class="levels">
+        <div class="lv" style="background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.25)">
+          <span class="lv-letter" style="color:#f87171">M</span>
+          <span class="lv-name" style="color:#f87171">Mastery</span>
+          <span class="lv-range">85 – 100</span>
+          <p style="font-size:.78rem;color:#64748b;margin-top:8px">Exam-ready. Focus on speed &amp; retention.</p>
+        </div>
+        <div class="lv" style="background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.25)">
+          <span class="lv-letter" style="color:#fb923c">S</span>
+          <span class="lv-name" style="color:#fb923c">Strong</span>
+          <span class="lv-range">65 – 84</span>
+          <p style="font-size:.78rem;color:#64748b;margin-top:8px">Strong foundation. Plug critical gaps.</p>
+        </div>
+        <div class="lv" style="background:rgba(234,179,8,.08);border-color:rgba(234,179,8,.25)">
+          <span class="lv-letter" style="color:#fbbf24">D</span>
+          <span class="lv-name" style="color:#fbbf24">Developing</span>
+          <span class="lv-range">45 – 64</span>
+          <p style="font-size:.78rem;color:#64748b;margin-top:8px">Building blocks in place. Targeted practice.</p>
+        </div>
+        <div class="lv" style="background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25)">
+          <span class="lv-letter" style="color:#60a5fa">W</span>
+          <span class="lv-name" style="color:#60a5fa">Weak</span>
+          <span class="lv-range">25 – 44</span>
+          <p style="font-size:.78rem;color:#64748b;margin-top:8px">Needs structured intervention &amp; re-learning.</p>
+        </div>
+        <div class="lv" style="background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.25)">
+          <span class="lv-letter" style="color:#a78bfa">C</span>
+          <span class="lv-name" style="color:#a78bfa">Critical</span>
+          <span class="lv-range">0 – 24</span>
+          <p style="font-size:.78rem;color:#64748b;margin-top:8px">Urgent focus. Foundational rebuilding required.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 — SLM Intelligence -->
+    <div class="slide">
+      <div class="tag">SLM Intelligence</div>
+      <h2>What the Model Does</h2>
+      <p class="lead">PRAJNA's Small Language Model goes far beyond scoring — it reasons about your learning trajectory.</p>
+      <ul class="slm-list">
+        <li>
+          <div class="bullet">🔮</div>
+          <div><strong>Chapter-Level Predictions</strong>Identifies which chapters are most likely to appear based on syllabus cycle, past paper patterns and difficulty entropy.</div>
+        </li>
+        <li>
+          <div class="bullet">📊</div>
+          <div><strong>Rank Forecasting</strong>Estimates JEE / NEET rank bands using your score trajectory, cohort percentile and historical correlation data.</div>
+        </li>
+        <li>
+          <div class="bullet">💡</div>
+          <div><strong>Personalised Insights</strong>Generates natural-language study nudges, concept-gap explanations and revision priority lists unique to each student.</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- SLIDE 7 — Team -->
+    <div class="slide">
+      <div class="tag">The Team</div>
+      <h2>Built by Believers</h2>
+      <p class="lead">Two founders obsessed with making every JEE/NEET aspirant's effort count.</p>
+      <div class="g2">
+        <div class="card team-card">
+          <img src="team-aman.jpg" alt="Aman Arora" class="avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="avatar-init" style="display:none;background:linear-gradient(135deg,#8b5cf6,#ec4899)">AA</div>
+          <h3 style="margin-bottom:4px">Aman Arora</h3>
+          <span class="role">Founder · Product &amp; Engineering</span>
+          <p class="bio">Architects the SLM pipeline, analytics engine, multi-tenant dashboards, and drives product vision end-to-end.</p>
+        </div>
+        <div class="card team-card">
+          <img src="team-himanshu.jpg" alt="Himanshu Sharma" class="avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="avatar-init" style="display:none;background:linear-gradient(135deg,#6366f1,#8b5cf6)">HS</div>
+          <h3 style="margin-bottom:4px">Himanshu Sharma</h3>
+          <span class="role">Co-founder &amp; Academics R&amp;D</span>
+          <p class="bio">Leads academic research, exam intelligence design, and syllabus-level insight generation for PRAJNA.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 — Get Started -->
+    <div class="slide">
+      <div class="tag">Get Started</div>
+      <h2>Ready to Unlock PRAJNA?</h2>
+      <p class="lead">Log in with your credentials and let the intelligence begin.</p>
+      <a href="login.html" class="cta">Login to PRAJNA &nbsp;&#8594;</a>
+      <table class="cred-table">
+        <thead><tr><th>Role</th><th>Login ID Format</th><th>Default Password</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Precision@50</td>
-            <td>96.8%</td>
-            <td class="cmp-highlight">96.8%</td>
-            <td class="cmp-neutral">—</td>
-          </tr>
-          <tr>
-            <td>Coverage@50</td>
-            <td>74.9%</td>
-            <td class="cmp-highlight">79.1%</td>
-            <td class="cmp-gain">+4.2%</td>
-          </tr>
-          <tr>
-            <td>Heavy-Topic Recall</td>
-            <td>80.5%</td>
-            <td class="cmp-highlight">83.2%</td>
-            <td class="cmp-gain">+2.7%</td>
-          </tr>
-          <tr>
-            <td style="font-weight:700;">Combined Score ★</td>
-            <td style="font-weight:700;">82.2%</td>
-            <td class="cmp-highlight" style="font-size:1rem;">85.9%</td>
-            <td class="cmp-gain" style="font-size:1rem;">+3.7%</td>
-          </tr>
+          <tr><td>Central Admin</td><td>central@prajna.pw</td><td>Set by admin</td></tr>
+          <tr><td>Centre Head</td><td>centre_&lt;code&gt;@prajna.pw</td><td>Set by admin</td></tr>
+          <tr><td>Student</td><td>Student enrollment ID</td><td>DOB (DDMMYYYY)</td></tr>
         </tbody>
       </table>
+      <p style="margin-top:22px;font-size:.8rem;color:#475569">Questions? Reach out to your centre coordinator or PW academic ops team.</p>
     </div>
 
-    <!-- ── Interactive Architecture Explorer ── -->
-    <div class="reveal" style="margin-top:3.5rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.4rem;">
-        🧠 Interactive Architecture Explorer
-      </h3>
-      <p style="font-size:0.83rem; color:var(--muted); margin-bottom:1.25rem;">
-        Hover any layer to see its shape, parameter count, and purpose. Switch between Full Network, Backbone Only, Heads Only, and Param Heatmap views.
-      </p>
-      <div style="border:1px solid rgba(99,102,241,0.3); border-radius:16px; overflow:hidden; box-shadow:0 0 40px rgba(99,102,241,0.08);">
-        <iframe
-          src="prajna-slm-architecture.html"
-          width="100%"
-          height="620"
-          scrolling="no"
-          frameborder="0"
-          title="PRAJNA SLM Neural Architecture"
-          style="display:block; border:none;"
-          loading="lazy"
-        ></iframe>
-      </div>
-      <p style="font-size:0.75rem; color:var(--muted); margin-top:0.65rem; text-align:center;">
-        147,653 trainable params · backbone.0 alone = 69% of weights · 3 multi-task output heads
-      </p>
-    </div>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ CODE SNIPPETS ═══════════════════════ -->
-<section id="code">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">04 · Implementation</div>
-      <h2 class="section-title">Key Code Snippets</h2>
-      <p class="section-sub">Core algorithmic components powering PRAJNA's predictions</p>
-    </div>
-
-    <div class="code-blocks">
-
-      <!-- Snippet 1 -->
-      <div class="code-block reveal">
-        <div class="code-header">
-          <div style="display:flex;align-items:center;gap:1rem;">
-            <div class="code-dots">
-              <div class="code-dot dot-r"></div>
-              <div class="code-dot dot-y"></div>
-              <div class="code-dot dot-g"></div>
-            </div>
-            <span class="code-title">Snippet 1 · Appearance Probability</span>
-          </div>
-          <span class="code-lang">Python</span>
-        </div>
-        <pre><span class="py-kw">def</span> <span class="py-fn">_appearance_probability</span><span class="py-op">(</span>
-    <span class="py-param">years_appeared</span><span class="py-op">,</span> <span class="py-param">total_years_range</span><span class="py-op">,</span>
-    <span class="py-param">target_year</span><span class="py-op">,</span> <span class="py-param">max_year</span><span class="py-op">,</span> <span class="py-param">decay</span><span class="py-op">=</span><span class="py-num">1.5</span>
-<span class="py-op">):</span>
-    <span class="py-cmt"># Signal 1: Recency-weighted frequency (exponential decay)</span>
-    <span class="py-var">rwf</span> <span class="py-op">=</span> <span class="py-builtin">sum</span><span class="py-op">(</span>
-        <span class="py-num">1.0</span> <span class="py-op">/</span> <span class="py-op">((</span><span class="py-var">target_year</span> <span class="py-op">-</span> <span class="py-var">y</span><span class="py-op">) **</span> <span class="py-var">decay</span> <span class="py-op">+</span> <span class="py-num">1</span><span class="py-op">)</span>
-        <span class="py-kw">for</span> <span class="py-var">y</span> <span class="py-kw">in</span> <span class="py-var">years_appeared</span>
-    <span class="py-op">)</span>
-    <span class="py-var">max_possible</span> <span class="py-op">=</span> <span class="py-builtin">sum</span><span class="py-op">(</span>
-        <span class="py-num">1.0</span> <span class="py-op">/</span> <span class="py-op">((</span><span class="py-var">target_year</span> <span class="py-op">-</span> <span class="py-var">y</span><span class="py-op">) **</span> <span class="py-var">decay</span> <span class="py-op">+</span> <span class="py-num">1</span><span class="py-op">)</span>
-        <span class="py-kw">for</span> <span class="py-var">y</span> <span class="py-kw">in</span> <span class="py-builtin">range</span><span class="py-op">(</span><span class="py-var">total_years_range</span><span class="py-op">[</span><span class="py-num">0</span><span class="py-op">],</span> <span class="py-var">total_years_range</span><span class="py-op">[</span><span class="py-num">1</span><span class="py-op">] +</span> <span class="py-num">1</span><span class="py-op">)</span>
-    <span class="py-op">)</span>
-    <span class="py-var">rwf_norm</span> <span class="py-op">=</span> <span class="py-builtin">min</span><span class="py-op">(</span><span class="py-var">rwf</span> <span class="py-op">/</span> <span class="py-op">(</span><span class="py-var">max_possible</span> <span class="py-op">+</span> <span class="py-num">0.01</span><span class="py-op">),</span> <span class="py-num">1.0</span><span class="py-op">)</span>
-
-    <span class="py-cmt"># Signal 4: Gap return probability</span>
-    <span class="py-var">gap</span> <span class="py-op">=</span> <span class="py-var">target_year</span> <span class="py-op">-</span> <span class="py-builtin">max</span><span class="py-op">(</span><span class="py-var">years_appeared</span><span class="py-op">)</span>
-    <span class="py-var">mean_gap</span> <span class="py-op">=</span> <span class="py-var">np</span><span class="py-op">.</span><span class="py-fn">mean</span><span class="py-op">(</span><span class="py-var">inter_gaps</span><span class="py-op">)</span> <span class="py-kw">if</span> <span class="py-var">inter_gaps</span> <span class="py-kw">else</span> <span class="py-var">year_span</span>
-    <span class="py-var">gap_return</span> <span class="py-op">=</span> <span class="py-builtin">min</span><span class="py-op">(</span><span class="py-var">gap</span> <span class="py-op">/</span> <span class="py-op">(</span><span class="py-var">mean_gap</span> <span class="py-op">+</span> <span class="py-num">0.1</span><span class="py-op">),</span> <span class="py-num">2.0</span><span class="py-op">)</span> <span class="py-op">/</span> <span class="py-num">2.0</span>
-
-    <span class="py-cmt"># Weighted combination of all 7 signals</span>
-    <span class="py-var">score</span> <span class="py-op">=</span> (
-        <span class="py-num">0.25</span><span class="py-op">*</span><span class="py-var">rwf_norm</span>       <span class="py-op">+</span>
-        <span class="py-num">0.20</span><span class="py-op">*</span><span class="py-var">appearance_rate</span>  <span class="py-op">+</span>
-        <span class="py-num">0.15</span><span class="py-op">*</span><span class="py-var">recent_3yr</span>       <span class="py-op">+</span>
-        <span class="py-num">0.15</span><span class="py-op">*</span><span class="py-var">gap_return</span>       <span class="py-op">+</span>
-        <span class="py-num">0.12</span><span class="py-op">*</span><span class="py-var">trend_slope</span>      <span class="py-op">+</span>
-        <span class="py-num">0.08</span><span class="py-op">*</span><span class="py-var">cycle_match</span>      <span class="py-op">+</span>
-        <span class="py-num">0.05</span><span class="py-op">*</span><span class="py-var">recent_5yr</span>
-    <span class="py-op">)</span>
-    <span class="py-kw">return</span> <span class="py-builtin">min</span><span class="py-op">(</span><span class="py-var">score</span> <span class="py-op">*</span> <span class="py-num">1.8</span><span class="py-op">,</span> <span class="py-num">0.99</span><span class="py-op">),</span> <span class="py-var">signals</span></pre>
-      </div>
-
-      <!-- Snippet 2 -->
-      <div class="code-block reveal">
-        <div class="code-header">
-          <div style="display:flex;align-items:center;gap:1rem;">
-            <div class="code-dots">
-              <div class="code-dot dot-r"></div>
-              <div class="code-dot dot-y"></div>
-              <div class="code-dot dot-g"></div>
-            </div>
-            <span class="code-title">Snippet 2 · Subject-Balanced Reranking</span>
-          </div>
-          <span class="code-lang">Python</span>
-        </div>
-        <pre><span class="py-var">SUBJECT_QUOTAS</span> <span class="py-op">=</span> <span class="py-op">{</span>
-    <span class="py-str">"NEET"</span><span class="py-op">:</span>     <span class="py-op">{</span><span class="py-str">"Biology"</span><span class="py-op">:</span> <span class="py-num">0.50</span><span class="py-op">,</span> <span class="py-str">"Physics"</span><span class="py-op">:</span> <span class="py-num">0.25</span><span class="py-op">,</span> <span class="py-str">"Chemistry"</span><span class="py-op">:</span> <span class="py-num">0.25</span><span class="py-op">},</span>
-    <span class="py-str">"JEE Main"</span><span class="py-op">:</span> <span class="py-op">{</span><span class="py-str">"Physics"</span><span class="py-op">:</span> <span class="py-num">0.33</span><span class="py-op">,</span> <span class="py-str">"Chemistry"</span><span class="py-op">:</span> <span class="py-num">0.33</span><span class="py-op">,</span> <span class="py-str">"Mathematics"</span><span class="py-op">:</span> <span class="py-num">0.34</span><span class="py-op">},</span>
-<span class="py-op">}</span>
-
-<span class="py-kw">def</span> <span class="py-fn">_subject_balanced_rerank</span><span class="py-op">(</span><span class="py-param">predictions</span><span class="py-op">,</span> <span class="py-param">exam</span><span class="py-op">,</span> <span class="py-param">top_k</span><span class="py-op">=</span><span class="py-num">50</span><span class="py-op">):</span>
-    <span class="py-var">quotas</span> <span class="py-op">=</span> <span class="py-var">SUBJECT_QUOTAS</span><span class="py-op">.</span><span class="py-fn">get</span><span class="py-op">(</span><span class="py-var">exam</span><span class="py-op">,</span> <span class="py-op">{})</span>
-    <span class="py-var">slots</span>  <span class="py-op">=</span> <span class="py-op">{</span>
-        <span class="py-var">s</span><span class="py-op">:</span> <span class="py-builtin">max</span><span class="py-op">(</span><span class="py-num">3</span><span class="py-op">,</span> <span class="py-builtin">int</span><span class="py-op">(</span><span class="py-var">top_k</span> <span class="py-op">*</span> <span class="py-var">q</span><span class="py-op">))</span>
-        <span class="py-kw">for</span> <span class="py-var">s</span><span class="py-op">,</span> <span class="py-var">q</span> <span class="py-kw">in</span> <span class="py-var">quotas</span><span class="py-op">.</span><span class="py-fn">items</span><span class="py-op">()</span>
-    <span class="py-op">}</span>
-    <span class="py-cmt"># Fill per-subject buckets with highest-scoring topics</span>
-    <span class="py-var">result</span> <span class="py-op">=</span> <span class="py-op">[]</span>
-    <span class="py-kw">for</span> <span class="py-var">s</span><span class="py-op">,</span> <span class="py-var">slot_count</span> <span class="py-kw">in</span> <span class="py-var">slots</span><span class="py-op">.</span><span class="py-fn">items</span><span class="py-op">():</span>
-        <span class="py-var">subj_preds</span> <span class="py-op">=</span> <span class="py-op">[</span>
-            <span class="py-var">p</span> <span class="py-kw">for</span> <span class="py-var">p</span> <span class="py-kw">in</span> <span class="py-var">predictions</span>
-            <span class="py-kw">if</span> <span class="py-var">p</span><span class="py-op">[</span><span class="py-str">"subject"</span><span class="py-op">] ==</span> <span class="py-var">s</span>
-        <span class="py-op">]</span>
-        <span class="py-var">result</span><span class="py-op">.</span><span class="py-fn">extend</span><span class="py-op">(</span><span class="py-var">subj_preds</span><span class="py-op">[:</span><span class="py-var">slot_count</span><span class="py-op">])</span>
-    <span class="py-var">result</span><span class="py-op">.</span><span class="py-fn">sort</span><span class="py-op">(</span><span class="py-var">key</span><span class="py-op">=</span><span class="py-kw">lambda</span> <span class="py-var">x</span><span class="py-op">:</span> <span class="py-var">x</span><span class="py-op">[</span><span class="py-str">"final_score"</span><span class="py-op">],</span> <span class="py-var">reverse</span><span class="py-op">=</span><span class="py-kw">True</span><span class="py-op">)</span>
-    <span class="py-kw">return</span> <span class="py-var">result</span><span class="py-op">[:</span><span class="py-var">top_k</span><span class="py-op">]</span></pre>
-      </div>
-
-      <!-- Snippet 3 -->
-      <div class="code-block reveal">
-        <div class="code-header">
-          <div style="display:flex;align-items:center;gap:1rem;">
-            <div class="code-dots">
-              <div class="code-dot dot-r"></div>
-              <div class="code-dot dot-y"></div>
-              <div class="code-dot dot-g"></div>
-            </div>
-            <span class="code-title">Snippet 3 · Backtest Single Year</span>
-          </div>
-          <span class="code-lang">Python</span>
-        </div>
-        <pre><span class="py-kw">def</span> <span class="py-fn">backtest_single_year</span><span class="py-op">(</span>
-    <span class="py-param">db_path</span><span class="py-op">,</span> <span class="py-param">test_year</span><span class="py-op">,</span> <span class="py-param">exam</span><span class="py-op">,</span>
-    <span class="py-param">k</span><span class="py-op">=</span><span class="py-num">50</span><span class="py-op">,</span> <span class="py-param">level</span><span class="py-op">=</span><span class="py-str">"chapter"</span>
-<span class="py-op">):</span>
-    <span class="py-cmt"># Override holdout: train strictly on data before test_year</span>
-    <span class="py-var">HOLDOUT_YEARS</span> <span class="py-op">=</span> <span class="py-builtin">set</span><span class="py-op">(</span><span class="py-builtin">range</span><span class="py-op">(</span><span class="py-var">test_year</span><span class="py-op">,</span> <span class="py-num">2030</span><span class="py-op">))</span>
-    <span class="py-var">preds</span> <span class="py-op">=</span> <span class="py-fn">predict_chapters_v3</span><span class="py-op">(</span>
-        <span class="py-var">db_path</span><span class="py-op">,</span> <span class="py-var">target_year</span><span class="py-op">=</span><span class="py-var">test_year</span><span class="py-op">,</span>
-        <span class="py-var">exam</span><span class="py-op">=</span><span class="py-var">exam</span><span class="py-op">,</span> <span class="py-var">top_k</span><span class="py-op">=</span><span class="py-var">k</span>
-    <span class="py-op">)</span>
-
-    <span class="py-cmt"># Oracle-normalized coverage = questions covered / total actual questions</span>
-    <span class="py-var">covered_qs</span> <span class="py-op">=</span> <span class="py-builtin">sum</span><span class="py-op">(</span>
-        <span class="py-var">actual_qs_map</span><span class="py-op">.</span><span class="py-fn">get</span><span class="py-op">(</span><span class="py-var">ch</span><span class="py-op">,</span> <span class="py-num">0</span><span class="py-op">)</span>
-        <span class="py-kw">for</span> <span class="py-var">ch</span> <span class="py-kw">in</span> <span class="py-var">pred_set</span>
-    <span class="py-op">)</span>
-    <span class="py-var">coverage</span> <span class="py-op">=</span> <span class="py-var">covered_qs</span> <span class="py-op">/</span> <span class="py-var">actual_total</span>  <span class="py-cmt"># KEY METRIC</span>
-
-    <span class="py-var">combined</span> <span class="py-op">=</span> (
-        <span class="py-num">0.35</span><span class="py-op">*</span><span class="py-var">precision</span>    <span class="py-op">+</span>
-        <span class="py-num">0.40</span><span class="py-op">*</span><span class="py-var">coverage</span>     <span class="py-op">+</span>
-        <span class="py-num">0.15</span><span class="py-op">*</span><span class="py-var">heavy_recall</span> <span class="py-op">+</span>
-        <span class="py-num">0.10</span><span class="py-op">*</span><span class="py-var">avg_subj_cov</span>
-    <span class="py-op">)</span>
-    <span class="py-kw">return</span> <span class="py-var">summary</span></pre>
-      </div>
-
-    </div><!-- /code-blocks -->
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ BACKTEST RESULTS ═══════════════════════ -->
-<section id="backtest">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">05 · Validation</div>
-      <h2 class="section-title">Backtest Results</h2>
-      <p class="section-sub">Strict holdout evaluation — predictions only use data strictly before the test year</p>
-    </div>
-
-    <div class="metrics-legend reveal">
-      <div class="legend-item"><div class="legend-dot ld-prec"></div> Precision@50</div>
-      <div class="legend-item"><div class="legend-dot ld-cov"></div> Coverage@50</div>
-      <div class="legend-item"><div class="legend-dot ld-hr"></div> Heavy-Topic Recall</div>
-      <div class="legend-item"><div class="legend-dot ld-comb"></div> Combined Score</div>
-    </div>
-
-    <div class="chart-section reveal">
-
-      <!-- 2019 -->
-      <div class="chart-year">
-        <div class="chart-year-label">2019</div>
-        <div class="bar-row"><span class="bar-meta">Precision</span><div class="bar-outer"><div class="bar-fill bar-prec" style="width:94%">94%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Coverage</span><div class="bar-outer"><div class="bar-fill bar-cov" style="width:72%">72%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">H-Recall</span><div class="bar-outer"><div class="bar-fill bar-hr" style="width:80%">80%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Combined</span><div class="bar-outer"><div class="bar-fill bar-comb" style="width:81%">81%</div></div></div>
-      </div>
-
-      <!-- 2020 -->
-      <div class="chart-year">
-        <div class="chart-year-label">2020</div>
-        <div class="bar-row"><span class="bar-meta">Precision</span><div class="bar-outer"><div class="bar-fill bar-prec" style="width:96%">96%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Coverage</span><div class="bar-outer"><div class="bar-fill bar-cov" style="width:75%">75%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">H-Recall</span><div class="bar-outer"><div class="bar-fill bar-hr" style="width:83%">83%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Combined</span><div class="bar-outer"><div class="bar-fill bar-comb" style="width:83%">83%</div></div></div>
-      </div>
-
-      <!-- 2021 -->
-      <div class="chart-year">
-        <div class="chart-year-label">2021</div>
-        <div class="bar-row"><span class="bar-meta">Precision</span><div class="bar-outer"><div class="bar-fill bar-prec" style="width:93%">93%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Coverage</span><div class="bar-outer"><div class="bar-fill bar-cov" style="width:74%">74%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">H-Recall</span><div class="bar-outer"><div class="bar-fill bar-hr" style="width:79%">79%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Combined</span><div class="bar-outer"><div class="bar-fill bar-comb" style="width:81%">81%</div></div></div>
-      </div>
-
-      <!-- 2022 -->
-      <div class="chart-year">
-        <div class="chart-year-label">2022</div>
-        <div class="bar-row"><span class="bar-meta">Precision</span><div class="bar-outer"><div class="bar-fill bar-prec" style="width:95%">95%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Coverage</span><div class="bar-outer"><div class="bar-fill bar-cov" style="width:76%">76%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">H-Recall</span><div class="bar-outer"><div class="bar-fill bar-hr" style="width:82%">82%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Combined</span><div class="bar-outer"><div class="bar-fill bar-comb" style="width:83%">83%</div></div></div>
-      </div>
-
-      <!-- 2023 -->
-      <div class="chart-year">
-        <div class="chart-year-label">2023</div>
-        <div class="bar-row"><span class="bar-meta">Precision</span><div class="bar-outer"><div class="bar-fill bar-prec" style="width:94%">94%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Coverage</span><div class="bar-outer"><div class="bar-fill bar-cov" style="width:77%">77%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">H-Recall</span><div class="bar-outer"><div class="bar-fill bar-hr" style="width:78%">78%</div></div></div>
-        <div class="bar-row"><span class="bar-meta">Combined</span><div class="bar-outer"><div class="bar-fill bar-comb" style="width:82%">82%</div></div></div>
-      </div>
-
-    </div><!-- /chart-section -->
-
-    <div class="backtest-avg reveal">
-      <div style="font-size:0.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em;">5-Year Average</div>
-      <div class="avg-grid">
-        <div class="avg-card">
-          <div class="avg-val avg-prec">94.4%</div>
-          <div class="avg-lbl">Precision@50</div>
-        </div>
-        <div class="avg-card">
-          <div class="avg-val avg-cov">74.9%</div>
-          <div class="avg-lbl">Coverage@50</div>
-        </div>
-        <div class="avg-card">
-          <div class="avg-val avg-hr">80.5%</div>
-          <div class="avg-lbl">Heavy-Topic Recall</div>
-        </div>
-        <div class="avg-card">
-          <div class="avg-val avg-comb">82.1%</div>
-          <div class="avg-lbl">Combined Score</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="metric-defs reveal">
-      <div class="mdef">
-        <div class="mdef-name">Precision@K</div>
-        <div class="mdef-desc">What fraction of the K predicted chapters actually appeared in that year's exam?</div>
-      </div>
-      <div class="mdef">
-        <div class="mdef-name">Coverage@K ★</div>
-        <div class="mdef-desc">What fraction of the exam's actual questions fall within the predicted chapters? The most important metric for students.</div>
-      </div>
-      <div class="mdef">
-        <div class="mdef-name">Heavy-Topic Recall</div>
-        <div class="mdef-desc">Did we correctly predict the chapters that contributed 3 or more questions to the exam?</div>
-      </div>
-      <div class="mdef">
-        <div class="mdef-name">Combined Score</div>
-        <div class="mdef-desc">0.35 × Precision + 0.40 × Coverage + 0.15 × HeavyRecall + 0.10 × SubjectBalance</div>
-      </div>
-    </div>
-
-    <!-- ════════════════════════════════════════════════════════
-         FULL BACKTEST TABLE 2010–2025
-    ════════════════════════════════════════════════════════ -->
-    <div class="reveal" style="margin-top:3.5rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.15rem; font-weight:700; color:var(--text); margin-bottom:0.35rem;">
-        Full Backtest Matrix — 2010 to 2025
-      </h3>
-      <p style="font-size:0.82rem; color:var(--muted); margin-bottom:0.75rem;">
-        K = 40 · Strict temporal holdout (only pre-year data used) · Chapter &amp; Micro-Topic level · v3 heuristic predictor
-      </p>
-
-      <!-- Exam tab switcher -->
-      <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
-        <button class="bt-tab bt-active" onclick="switchBT('neet',this)">🧬 NEET</button>
-        <button class="bt-tab" onclick="switchBT('jee_main',this)">⚙️ JEE Main</button>
-        <button class="bt-tab" onclick="switchBT('jee_adv',this)">🔬 JEE Advanced</button>
-        <button class="bt-tab" onclick="switchBT('all',this)">📊 All Exams</button>
-      </div>
-    </div>
-
-    <style>
-      .bt-tab {
-        background: var(--bg3); border: 1px solid var(--border);
-        color: var(--muted); padding: 5px 16px; border-radius: 8px;
-        cursor: pointer; font-size: 0.8rem; font-weight: 600;
-        transition: all 0.15s;
-      }
-      .bt-tab.bt-active, .bt-tab:hover {
-        border-color: var(--indigo); color: var(--indigo);
-        background: rgba(99,102,241,0.08);
-      }
-      .bt-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border); }
-      .bt-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
-      .bt-table th {
-        background: rgba(99,102,241,0.1); color: var(--indigo);
-        font-weight: 700; font-size: 0.72rem; text-transform: uppercase;
-        letter-spacing: 0.05em; padding: 10px 12px; text-align: center;
-        border-bottom: 1px solid var(--border); white-space: nowrap;
-      }
-      .bt-table th.yr-col { text-align: left; color: var(--muted); }
-      .bt-table th.exam-hdr {
-        background: rgba(99,102,241,0.15);
-        border-bottom: 1px solid rgba(99,102,241,0.3);
-      }
-      .bt-table td {
-        padding: 8px 12px; text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.04);
-        font-family: 'SF Mono','Fira Code',monospace; font-size: 0.78rem;
-      }
-      .bt-table tr:last-child td { border-bottom: none; }
-      .bt-table tr:hover td { background: rgba(255,255,255,0.03); }
-      .bt-table td.yr { text-align: left; font-family: 'Space Grotesk',sans-serif; font-weight: 700; color: var(--text); }
-      /* Metric color coding */
-      .m-hi  { color: #34d399; font-weight: 700; }
-      .m-mid { color: #fbbf24; }
-      .m-lo  { color: #fb7185; }
-      .m-avg { background: rgba(99,102,241,0.12); font-weight: 700; color: var(--indigo); }
-      .sep-col { border-left: 1px solid rgba(255,255,255,0.08); }
-      .level-badge {
-        display: inline-block; font-size: 0.65rem; font-weight: 700;
-        text-transform: uppercase; letter-spacing: 0.06em;
-        padding: 1px 6px; border-radius: 4px; margin-left: 4px;
-        background: rgba(99,102,241,0.12); color: var(--indigo);
-      }
-      .note-chip {
-        display: inline-flex; align-items: center; gap: 6px;
-        font-size: 0.73rem; color: var(--muted); margin-top: 0.75rem;
-        padding: 6px 12px; background: var(--bg3); border: 1px solid var(--border);
-        border-radius: 8px;
-      }
-    </style>
-
-    <!-- NEET TABLE -->
-    <div id="bt-neet" class="bt-table-wrap reveal">
-      <table class="bt-table">
-        <thead>
-          <tr>
-            <th class="yr-col exam-hdr" rowspan="2">Year</th>
-            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
-            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
-          </tr>
-          <tr>
-            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
-            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="yr">2010</td><td class="m-hi">100.0%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td></tr>
-          <tr><td class="yr">2011</td><td class="m-hi">95.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td></tr>
-          <tr><td class="yr">2012</td><td class="m-hi">100.0%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td></tr>
-          <tr><td class="yr">2013</td><td class="m-hi">100.0%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td></tr>
-          <tr><td class="yr">2014</td><td class="m-hi">95.0%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td></tr>
-          <tr><td class="yr">2015</td><td class="m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td></tr>
-          <tr><td class="yr">2016</td><td class="m-hi">100.0%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td></tr>
-          <tr><td class="yr">2017</td><td class="m-hi">95.0%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">95.0%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td></tr>
-          <tr><td class="yr">2018</td><td class="m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td></tr>
-          <tr><td class="yr">2019</td><td class="m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td><td class="sep-col m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td></tr>
-          <tr><td class="yr">2020</td><td class="m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td></tr>
-          <tr><td class="yr">2021</td><td class="m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td></tr>
-          <tr><td class="yr">2022</td><td class="m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td></tr>
-          <tr><td class="yr">2023</td><td class="m-hi">100.0%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td></tr>
-          <tr><td class="yr">2024</td><td class="m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td></tr>
-          <tr><td class="yr">2025</td><td class="m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td></tr>
-          <tr style="background:rgba(99,102,241,0.06);">
-            <td class="yr" style="color:var(--indigo);">AVG</td>
-            <td class="m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
-            <td class="sep-col m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- JEE MAIN TABLE -->
-    <div id="bt-jee_main" class="bt-table-wrap reveal" style="display:none;">
-      <table class="bt-table">
-        <thead>
-          <tr>
-            <th class="yr-col exam-hdr" rowspan="2">Year</th>
-            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
-            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
-          </tr>
-          <tr>
-            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
-            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="yr">2010</td><td class="m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td></tr>
-          <tr><td class="yr">2011</td><td class="m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td></tr>
-          <tr><td class="yr">2012</td><td class="m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td><td class="sep-col m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td></tr>
-          <tr><td class="yr">2013</td><td class="m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td></tr>
-          <tr><td class="yr">2014</td><td class="m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td><td class="sep-col m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td></tr>
-          <tr><td class="yr">2015</td><td class="m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td></tr>
-          <tr><td class="yr">2016</td><td class="m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td></tr>
-          <tr><td class="yr">2017</td><td class="m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td></tr>
-          <tr><td class="yr">2018</td><td class="m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td></tr>
-          <tr><td class="yr">2019</td><td class="m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td></tr>
-          <tr><td class="yr">2020</td><td class="m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td></tr>
-          <tr><td class="yr">2021</td><td class="m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td></tr>
-          <tr><td class="yr">2022</td><td class="m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td></tr>
-          <tr><td class="yr">2023</td><td class="m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td></tr>
-          <tr><td class="yr">2024</td><td class="m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td></tr>
-          <tr><td class="yr">2025</td><td class="m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td></tr>
-          <tr style="background:rgba(99,102,241,0.06);">
-            <td class="yr" style="color:var(--indigo);">AVG</td>
-            <td class="m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
-            <td class="sep-col m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- JEE ADVANCED TABLE -->
-    <div id="bt-jee_adv" class="bt-table-wrap reveal" style="display:none;">
-      <table class="bt-table">
-        <thead>
-          <tr>
-            <th class="yr-col exam-hdr" rowspan="2">Year</th>
-            <th class="exam-hdr" colspan="3">Chapter Level <span class="level-badge">K=40</span></th>
-            <th class="exam-hdr sep-col" colspan="3">Micro-Topic Level <span class="level-badge">K=40</span></th>
-          </tr>
-          <tr>
-            <th>Precision@40</th><th>Coverage@40</th><th>Combined</th>
-            <th class="sep-col">Precision@40</th><th>Coverage@40</th><th>Combined</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="yr">2010</td><td class="m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td></tr>
-          <tr><td class="yr">2011</td><td class="m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td><td class="sep-col m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td></tr>
-          <tr><td class="yr">2012</td><td class="m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td><td class="sep-col m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td></tr>
-          <tr><td class="yr">2013</td><td class="m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td></tr>
-          <tr><td class="yr">2014</td><td class="m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td></tr>
-          <tr><td class="yr">2015</td><td class="m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td></tr>
-          <tr><td class="yr">2016</td><td class="m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td></tr>
-          <tr><td class="yr">2017</td><td class="m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td></tr>
-          <tr><td class="yr">2018</td><td class="m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td></tr>
-          <tr><td class="yr">2019</td><td class="m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td></tr>
-          <tr><td class="yr">2020</td><td class="m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td></tr>
-          <tr><td class="yr">2021</td><td class="m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td><td class="sep-col m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td></tr>
-          <tr><td class="yr">2022</td><td class="m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td></tr>
-          <tr><td class="yr">2023</td><td class="m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td></tr>
-          <tr><td class="yr">2024</td><td class="m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td></tr>
-          <tr><td class="yr">2025</td><td class="m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td></tr>
-          <tr style="background:rgba(99,102,241,0.06);">
-            <td class="yr" style="color:var(--indigo);">AVG</td>
-            <td class="m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
-            <td class="sep-col m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ALL EXAMS TABLE -->
-    <div id="bt-all" class="bt-table-wrap reveal" style="display:none;">
-      <table class="bt-table">
-        <thead>
-          <tr>
-            <th class="yr-col exam-hdr" rowspan="2">Year</th>
-            <th class="exam-hdr" colspan="3" style="color:#34d399;">🧬 NEET</th>
-            <th class="exam-hdr sep-col" colspan="3" style="color:#818cf8;">⚙️ JEE Main</th>
-            <th class="exam-hdr sep-col" colspan="3" style="color:#c084fc;">🔬 JEE Advanced</th>
-          </tr>
-          <tr>
-            <th>Prec</th><th>Cov</th><th>Comb</th>
-            <th class="sep-col">Prec</th><th>Cov</th><th>Comb</th>
-            <th class="sep-col">Prec</th><th>Cov</th><th>Comb</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="yr">2010</td><td class="m-hi">100%</td><td class="m-mid">61.6%</td><td class="m-mid">74.3%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.3%</td><td class="m-mid">69.1%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">67.4%</td><td class="m-mid">73.8%</td></tr>
-          <tr><td class="yr">2011</td><td class="m-hi">95%</td><td class="m-mid">64.9%</td><td class="m-mid">75.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.7%</td><td class="m-hi">82.9%</td><td class="sep-col m-hi">90.0%</td><td class="m-mid">62.0%</td><td class="m-mid">71.5%</td></tr>
-          <tr><td class="yr">2012</td><td class="m-hi">100%</td><td class="m-hi">71.0%</td><td class="m-hi">80.9%</td><td class="sep-col m-hi">85.0%</td><td class="m-mid">62.3%</td><td class="m-mid">70.9%</td><td class="sep-col m-hi">92.5%</td><td class="m-hi">75.0%</td><td class="m-hi">82.1%</td></tr>
-          <tr><td class="yr">2013</td><td class="m-hi">100%</td><td class="m-mid">63.5%</td><td class="m-mid">76.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">60.0%</td><td class="m-mid">63.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.8%</td><td class="m-mid">74.8%</td></tr>
-          <tr><td class="yr">2014</td><td class="m-hi">95%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">80.0%</td><td class="m-mid">64.9%</td><td class="m-mid">75.4%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">75.0%</td><td class="m-hi">85.9%</td></tr>
-          <tr><td class="yr">2015</td><td class="m-hi">97.5%</td><td class="m-hi">67.5%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.1%</td><td class="m-mid">72.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">70.0%</td><td class="m-mid">79.0%</td></tr>
-          <tr><td class="yr">2016</td><td class="m-hi">100%</td><td class="m-hi">67.0%</td><td class="m-hi">78.2%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.9%</td><td class="m-mid">77.0%</td><td class="sep-col m-hi">82.5%</td><td class="m-hi">71.3%</td><td class="m-mid">76.7%</td></tr>
-          <tr><td class="yr">2017</td><td class="m-hi">95%</td><td class="m-mid">62.8%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">97.5%</td><td class="m-mid">63.9%</td><td class="m-mid">76.4%</td><td class="sep-col m-hi">85.0%</td><td class="m-hi">73.1%</td><td class="m-mid">77.6%</td></tr>
-          <tr><td class="yr">2018</td><td class="m-hi">97.5%</td><td class="m-mid">64.6%</td><td class="m-hi">78.5%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">64.7%</td><td class="m-mid">76.8%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">71.3%</td><td class="m-mid">79.0%</td></tr>
-          <tr><td class="yr">2019</td><td class="m-hi">87.5%</td><td class="m-mid">61.4%</td><td class="m-mid">73.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">67.5%</td><td class="m-mid">76.9%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">77.8%</td><td class="m-hi">85.3%</td></tr>
-          <tr><td class="yr">2020</td><td class="m-hi">100%</td><td class="m-hi">66.0%</td><td class="m-hi">79.9%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">69.2%</td><td class="m-mid">77.7%</td><td class="sep-col m-hi">95.0%</td><td class="m-hi">69.6%</td><td class="m-hi">81.2%</td></tr>
-          <tr><td class="yr">2021</td><td class="m-hi">97.5%</td><td class="m-mid">65.5%</td><td class="m-mid">77.6%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">68.0%</td><td class="m-mid">77.0%</td><td class="sep-col m-mid">77.5%</td><td class="m-hi">68.4%</td><td class="m-mid">71.9%</td></tr>
-          <tr><td class="yr">2022</td><td class="m-hi">97.5%</td><td class="m-mid">60.4%</td><td class="m-mid">72.5%</td><td class="sep-col m-hi">100.0%</td><td class="m-hi">66.3%</td><td class="m-mid">76.2%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">74.1%</td><td class="m-hi">82.7%</td></tr>
-          <tr><td class="yr">2023</td><td class="m-hi">100%</td><td class="m-hi">67.6%</td><td class="m-hi">78.1%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">63.3%</td><td class="m-mid">74.6%</td><td class="sep-col m-hi">87.5%</td><td class="m-hi">68.6%</td><td class="m-mid">78.4%</td></tr>
-          <tr><td class="yr">2024</td><td class="m-hi">100%</td><td class="m-hi">66.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">62.3%</td><td class="m-mid">74.0%</td><td class="sep-col m-hi">80.0%</td><td class="m-hi">71.6%</td><td class="m-mid">77.6%</td></tr>
-          <tr><td class="yr">2025</td><td class="m-hi">97.5%</td><td class="m-mid">65.0%</td><td class="m-mid">76.7%</td><td class="sep-col m-hi">100.0%</td><td class="m-mid">60.0%</td><td class="m-mid">72.9%</td><td class="sep-col m-hi">82.5%</td><td class="m-mid">65.6%</td><td class="m-mid">75.0%</td></tr>
-          <tr style="background:rgba(99,102,241,0.06);">
-            <td class="yr" style="color:var(--indigo);">AVG</td>
-            <td class="m-avg">97.3%</td><td class="m-avg">65.1%</td><td class="m-avg">76.8%</td>
-            <td class="sep-col m-avg">93.9%</td><td class="m-avg">65.0%</td><td class="m-avg">74.6%</td>
-            <td class="sep-col m-avg">87.2%</td><td class="m-avg">70.4%</td><td class="m-avg">78.3%</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Notes + legend -->
-    <div class="reveal" style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
-      <div class="note-chip"><span style="color:var(--green); font-weight:700;">■</span> ≥ 75% = strong</div>
-      <div class="note-chip"><span style="color:var(--amber); font-weight:700;">■</span> 60–75% = good</div>
-      <div class="note-chip"><span style="color:var(--rose); font-weight:700;">■</span> &lt; 60% = moderate</div>
-      <div class="note-chip">📌 Chapter &amp; Micro-Topic scores match — both evaluate at chapter granularity</div>
-      <div class="note-chip">📌 K=40 used for all runs · Strict temporal holdout — no future data</div>
-    </div>
-
-    <script>
-      function switchBT(id, btn) {
-        ['neet','jee_main','jee_adv','all'].forEach(function(k) {
-          var el = document.getElementById('bt-'+k);
-          if (el) el.style.display = k === id ? '' : 'none';
-        });
-        document.querySelectorAll('.bt-tab').forEach(function(b) {
-          b.classList.toggle('bt-active', b === btn);
-        });
-      }
-    </script>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ SAMPLE PREDICTIONS ═══════════════════════ -->
-<section id="predictions">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">06 · Predictions</div>
-      <h2 class="section-title">Sample Predictions — NEET 2026</h2>
-      <p class="section-sub">Top 10 micro-topic predictions generated by PRAJNA for NEET 2026</p>
-    </div>
-
-    <div class="pred-table-wrap reveal">
-      <table class="pred-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Subject</th>
-            <th>Micro-Topic</th>
-            <th>Chapter</th>
-            <th>P(Appear)</th>
-            <th>Exp. Qs</th>
-            <th>Confidence</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td><span class="subj-bio">Biology</span></td>
-            <td>Meiosis &amp; Significance</td>
-            <td>Cell Cycle</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.9</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td><span class="subj-che">Chemistry</span></td>
-            <td>Chemical Reactions for Aldehydes</td>
-            <td>Aldehydes &amp; Ketones</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.9</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td><span class="subj-phy">Physics</span></td>
-            <td>AC Circuits &amp; Power</td>
-            <td>Alternating Current</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.9</span></td>
-            <td><span class="conf-badge conf-med">MEDIUM</span></td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td><span class="subj-bio">Biology</span></td>
-            <td>Mechanism of Evolution</td>
-            <td>Evolution</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.8</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>5</td>
-            <td><span class="subj-bio">Biology</span></td>
-            <td>Pollination</td>
-            <td>Sexual Reproduction</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.8</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>6</td>
-            <td><span class="subj-che">Chemistry</span></td>
-            <td>Electrochemical Series</td>
-            <td>Electrochemistry</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.5</span></td>
-            <td><span class="conf-badge conf-med">MEDIUM</span></td>
-          </tr>
-          <tr>
-            <td>7</td>
-            <td><span class="subj-phy">Physics</span></td>
-            <td>Refraction, TIR &amp; Prism</td>
-            <td>Geometrical Optics</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.0</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>8</td>
-            <td><span class="subj-bio">Biology</span></td>
-            <td>Eukaryotic Cell Organelles</td>
-            <td>Cell: Unit of Life</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.8</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>9</td>
-            <td><span class="subj-che">Chemistry</span></td>
-            <td>Hybridization &amp; VSEPR</td>
-            <td>Chemical Bonding</td>
-            <td><span class="appear-val">99%</span></td>
-            <td><span class="qs-val">2.1</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-          <tr>
-            <td>10</td>
-            <td><span class="subj-phy">Physics</span></td>
-            <td>Newton's Laws Applications</td>
-            <td>Laws of Motion</td>
-            <td><span class="appear-val">97%</span></td>
-            <td><span class="qs-val">2.5</span></td>
-            <td><span class="conf-badge conf-high">HIGH</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
-<section id="dashboard">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">07 · Prajna Intelligence</div>
-      <h2 class="section-title">Prajna Intelligence Dashboard</h2>
-      <p class="section-sub">A fully interactive analytics platform with Plotly visualizations, PDF exports, prediction cards, and a live PRAJNA copilot</p>
-    </div>
-
-    <!-- Global filters callout -->
-    <div class="reveal" style="background:var(--bg3); border:1px solid rgba(99,102,241,0.25); border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; gap:1.25rem; flex-wrap:wrap; align-items:center;">
-      <div style="font-size:0.78rem; font-weight:700; color:var(--indigo); text-transform:uppercase; letter-spacing:0.06em; white-space:nowrap;">Global Filters (all tabs)</div>
-      <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
-        <span class="tab-feat-pill">Exam: NEET / JEE Main / JEE Advanced / All</span>
-        <span class="tab-feat-pill">Subject: Physics / Chemistry / Biology / Mathematics / All</span>
-        <span class="tab-feat-pill">Target Year (2024–2030)</span>
-        <span class="tab-feat-pill">Top K: 20 / 40 / 60 / 80 / 100</span>
-        <span class="tab-feat-pill">Level: Micro-Topic / Chapter</span>
-      </div>
-    </div>
-
-    <div class="tab-grid">
-
-      <!-- Tab 1 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">📊</div>
-          <div class="tab-name">Predictions</div>
-          <div class="tab-tag">Core</div>
-        </div>
-        <div class="tab-desc">Main prediction dashboard. Ranked list of top-K topics/micro-topics with probability scores, expected question counts, confidence ratings, and signal breakdowns. Shows KPI strip with aggregate stats.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Score bar chart</span>
-          <span class="tab-feat-pill">Confidence breakdown</span>
-          <span class="tab-feat-pill">Subject distribution</span>
-          <span class="tab-feat-pill">SLM vs v3 toggle</span>
-          <span class="tab-feat-pill">Trend tags (RISING/DECLINING)</span>
-          <span class="tab-feat-pill">Syllabus status badges</span>
-        </div>
-      </div>
-
-      <!-- Tab 2 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">🎯</div>
-          <div class="tab-name">Backtest</div>
-          <div class="tab-tag">Validation</div>
-        </div>
-        <div class="tab-desc">Interactive historical validation. Pick any year (2018–2023), run predictions using only pre-year data, and see side-by-side comparison of predicted vs actual paper. Full metric breakdown.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Year selector</span>
-          <span class="tab-feat-pill">Precision@K</span>
-          <span class="tab-feat-pill">Coverage@K</span>
-          <span class="tab-feat-pill">Heavy-Topic Recall</span>
-          <span class="tab-feat-pill">Subject coverage heatmap</span>
-          <span class="tab-feat-pill">Miss analysis</span>
-        </div>
-      </div>
-
-      <!-- Tab 3 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">🔬</div>
-          <div class="tab-name">Topic Deep Dive</div>
-          <div class="tab-tag">Analysis</div>
-        </div>
-        <div class="tab-desc">Full historical analysis for any specific topic. 48-year frequency timeline, difficulty evolution, question type breakdown, micro-topic tree, cross-exam presence, and gap analysis.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Frequency timeline</span>
-          <span class="tab-feat-pill">Micro-topic tree</span>
-          <span class="tab-feat-pill">Difficulty evolution</span>
-          <span class="tab-feat-pill">Cross-exam heatmap</span>
-          <span class="tab-feat-pill">Gap signal viz</span>
-          <span class="tab-feat-pill">Signal breakdown table</span>
-        </div>
-      </div>
-
-      <!-- Tab 4 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">📚</div>
-          <div class="tab-name">Lesson Plan</div>
-          <div class="tab-tag">Study Tool</div>
-        </div>
-        <div class="tab-desc">Auto-generated study plan based on predictions. Ranked list with time allocation, priority buckets, and one-click CSV export. Separate Top-20 focused plan and full coverage plan available.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Priority buckets</span>
-          <span class="tab-feat-pill">Top-20 CSV export</span>
-          <span class="tab-feat-pill">Full plan CSV export</span>
-          <span class="tab-feat-pill">Subject-wise breakdown</span>
-          <span class="tab-feat-pill">Time allocation estimate</span>
-        </div>
-      </div>
-
-      <!-- Tab 5 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">📈</div>
-          <div class="tab-name">Historical Timeline</div>
-          <div class="tab-tag">Exploration</div>
-        </div>
-        <div class="tab-desc">48-year macro trend analysis. Year-by-year subject weightage evolution, question type distribution over time, difficulty trends per subject, and cross-exam correlation matrix.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Subject weightage over time</span>
-          <span class="tab-feat-pill">Question type drift</span>
-          <span class="tab-feat-pill">Difficulty trends</span>
-          <span class="tab-feat-pill">Cross-exam correlation</span>
-          <span class="tab-feat-pill">Historical events overlay</span>
-        </div>
-      </div>
-
-      <!-- Tab 6 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">❓</div>
-          <div class="tab-name">Question Explorer</div>
-          <div class="tab-tag">Drill-Down</div>
-        </div>
-        <div class="tab-desc">Direct question-level database search. Filter by exam, year, subject, topic, difficulty, and question type. View full question text, correct answer, and source paper metadata.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Full-text search</span>
-          <span class="tab-feat-pill">Multi-filter</span>
-          <span class="tab-feat-pill">Year range</span>
-          <span class="tab-feat-pill">Difficulty filter</span>
-          <span class="tab-feat-pill">Question type filter</span>
-          <span class="tab-feat-pill">Answer reveal</span>
-        </div>
-      </div>
-
-      <!-- Tab 7 -->
-      <div class="tab-card reveal">
-        <div class="tab-header">
-          <div class="tab-emoji">📄</div>
-          <div class="tab-name">Paper Generator</div>
-          <div class="tab-tag">Export</div>
-        </div>
-        <div class="tab-desc">Generate a custom mock exam paper from predicted topics. Selects real historical questions matching predicted chapters, formats into a proper exam paper, and exports to PDF using fpdf2.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">Question selection from DB</span>
-          <span class="tab-feat-pill">PDF generation (fpdf2)</span>
-          <span class="tab-feat-pill">Subject balance enforcement</span>
-          <span class="tab-feat-pill">Difficulty mix control</span>
-          <span class="tab-feat-pill">One-click download</span>
-        </div>
-      </div>
-
-      <!-- Tab 8 -->
-      <div class="tab-card reveal" style="border-color:rgba(34,197,94,0.25);">
-        <div class="tab-header">
-          <div class="tab-emoji">🤖</div>
-          <div class="tab-name">Ask PRAJNA</div>
-          <div class="tab-tag" style="background:rgba(34,197,94,0.15); color:var(--green);">AI Chat</div>
-        </div>
-        <div class="tab-desc">Natural language chatbot with persistent conversation history. Routes queries through intent classifier (6 types) then either executes a handler or falls back to semantic search over 23,119 questions.</div>
-        <div class="tab-features">
-          <span class="tab-feat-pill">6 intent types</span>
-          <span class="tab-feat-pill">Semantic search fallback</span>
-          <span class="tab-feat-pill">Chat history</span>
-          <span class="tab-feat-pill">Intent-based chart rendering</span>
-          <span class="tab-feat-pill">Example queries</span>
-          <span class="tab-feat-pill">SLM badge</span>
-        </div>
-      </div>
-
-    </div><!-- /tab-grid -->
-
-    <!-- Stack details -->
-    <div class="reveal" style="margin-top:1rem; padding:1.1rem 1.5rem; background:var(--bg3); border:1px solid var(--border); border-radius:12px; font-size:0.82rem; color:var(--muted); line-height:1.6;">
-      <strong style="color:var(--text);">Technical details:</strong> All prediction calls are cached with <code style="color:var(--indigo);">@st.cache_data(ttl=300s)</code>. Dark-theme Plotly charts via custom <code style="color:var(--indigo);">PLOT_LAYOUT</code> dict with transparent backgrounds. Custom CSS hides Prajna Intelligence's deploy button and default footer. Prajna Intelligence session state manages chatbot history and backtest runs. Deployed on <strong style="color:var(--text);">Railway</strong> with a Procfile.
-    </div>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ ASK PRAJNA CHATBOT ═══════════════════════ -->
-<section id="chatbot">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">08 · Ask PRAJNA</div>
-      <h2 class="section-title">Exam Intelligence Chatbot</h2>
-      <p class="section-sub">RAG-style conversational interface over 23,119 questions — ask anything about exam trends, topic difficulty, or historical patterns</p>
-    </div>
-
-    <div class="chatbot-layout reveal">
-
-      <!-- Intent types panel -->
-      <div class="chatbot-panel">
-        <div class="chatbot-panel-title">🎯 6 Intent Types — Auto-Detected</div>
-        <ul class="intent-list">
-          <li class="intent-item">
-            <span class="intent-icon">📊</span>
-            <div>
-              <div class="intent-name">Count / Frequency</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "how many", "count", "total", "number of"</div>
-              <div class="intent-ex">"How many times has Thermodynamics appeared in NEET?"</div>
-            </div>
-          </li>
-          <li class="intent-item">
-            <span class="intent-icon">📈</span>
-            <div>
-              <div class="intent-name">Trend Analysis</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "trend", "rising", "declining", "hot", "cold", "popular"</div>
-              <div class="intent-ex">"Is Organic Chemistry getting more important in JEE Main?"</div>
-            </div>
-          </li>
-          <li class="intent-item">
-            <span class="intent-icon">🎯</span>
-            <div>
-              <div class="intent-name">Difficulty Analysis</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "difficult", "hardest", "easiest", "hard", "easy", "tough"</div>
-              <div class="intent-ex">"What are the hardest Physics topics in JEE Advanced?"</div>
-            </div>
-          </li>
-          <li class="intent-item">
-            <span class="intent-icon">⏰</span>
-            <div>
-              <div class="intent-name">Gap / Overdue</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "gap", "overdue", "missing", "not appeared", "absent"</div>
-              <div class="intent-ex">"Which chapters are overdue in NEET 2026?"</div>
-            </div>
-          </li>
-          <li class="intent-item">
-            <span class="intent-icon">⚖️</span>
-            <div>
-              <div class="intent-name">Subject Comparison</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Keywords: "compare", "vs", "versus", "comparison", "difference"</div>
-              <div class="intent-ex">"Compare Physics vs Chemistry difficulty in NEET"</div>
-            </div>
-          </li>
-          <li class="intent-item">
-            <span class="intent-icon">🔍</span>
-            <div>
-              <div class="intent-name">Topic Detail + Semantic Search</div>
-              <div class="intent-ex" style="color:rgba(99,102,241,0.7); font-size:0.68rem;">Detected topic in query → handler · otherwise → ST cosine-sim fallback</div>
-              <div class="intent-ex">"Tell me everything about Thermodynamics in JEE Main"</div>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Chat demo panel -->
-      <div class="chatbot-panel">
-        <div class="chatbot-panel-title">💬 Sample Conversation</div>
-
-        <div class="chat-bubble">
-          <div class="chat-avatar user">U</div>
-          <div class="chat-msg">How many times has Human Physiology appeared in NEET?</div>
-        </div>
-        <div class="chat-bubble">
-          <div class="chat-avatar bot">P</div>
-          <div class="chat-msg bot-msg">Human Physiology has appeared in <strong>42 of 48 NEET papers</strong> (87.5% rate). It averaged <strong>11.3 questions per year</strong> and is the single highest-weighted chapter. Last appeared: 2025.</div>
-        </div>
-
-        <div class="chat-bubble" style="margin-top:1rem;">
-          <div class="chat-avatar user">U</div>
-          <div class="chat-msg">Which Physics topic is most likely due for a comeback in JEE 2026?</div>
-        </div>
-        <div class="chat-bubble">
-          <div class="chat-avatar bot">P</div>
-          <div class="chat-msg bot-msg">Based on gap analysis: <strong>Semiconductor Devices</strong> (last seen 2022, mean gap 2.1y), <strong>Communication Systems</strong> (last 2021, mean gap 1.8y), and <strong>Magnetism &amp; Matter</strong> (last 2020) are the top 3 "overdue" chapters.</div>
-        </div>
-
-        <div style="margin-top:1.5rem; padding:0.85rem; background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2); border-radius:10px; font-size:0.78rem; color:var(--muted); line-height:1.5;">
-          <strong style="color:var(--indigo);">How it works:</strong> Each query is passed through an intent classifier. If semantic search is needed, the question is embedded via sentence-transformers and matched against all 23,119 question embeddings using cosine similarity. Results are re-ranked by recency and exam relevance.
-        </div>
-      </div>
-    </div>
-
-    <!-- Knowledge base stats -->
-    <div class="avg-grid reveal" style="margin-top:2rem;">
-      <div class="avg-card">
-        <div class="avg-val avg-prec">23,119</div>
-        <div class="avg-lbl">Questions Indexed</div>
-      </div>
-      <div class="avg-card">
-        <div class="avg-val avg-cov">292</div>
-        <div class="avg-lbl">Exam Papers Covered</div>
-      </div>
-      <div class="avg-card">
-        <div class="avg-val avg-hr">384</div>
-        <div class="avg-lbl">Embedding Dimensions</div>
-      </div>
-      <div class="avg-card">
-        <div class="avg-val avg-comb">6</div>
-        <div class="avg-lbl">Intent Types Detected</div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ TECH STACK ═══════════════════════ -->
-<section id="tech">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">07 · Stack</div>
-      <h2 class="section-title">Tech Stack</h2>
-      <p class="section-sub">Lean, purpose-built tooling — no bloated ML frameworks, just precise statistical signal</p>
-    </div>
-
-    <div class="tech-grid">
-      <div class="tech-card reveal reveal-delay-1">
-        <div class="tech-icon">🐍</div>
-        <div><div class="tech-name">Python 3.9+</div><div class="tech-role">Core language</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-1">
-        <div class="tech-icon">🗄️</div>
-        <div><div class="tech-name">SQLite 3</div><div class="tech-role">23,119-question DB</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-2">
-        <div class="tech-icon">🐼</div>
-        <div><div class="tech-name">Pandas ≥2.0</div><div class="tech-role">Data manipulation</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-2">
-        <div class="tech-icon">🔢</div>
-        <div><div class="tech-name">NumPy</div><div class="tech-role">Signal computation</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-2">
-        <div class="tech-icon">📐</div>
-        <div><div class="tech-name">SciPy ≥1.11</div><div class="tech-role">Spearman correlation</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-3">
-        <div class="tech-icon">🔥</div>
-        <div><div class="tech-name">PyTorch ≥2.0</div><div class="tech-role">SLM training + inference</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-3">
-        <div class="tech-icon">🤗</div>
-        <div><div class="tech-name">sentence-transformers ≥2.2</div><div class="tech-role">all-MiniLM-L6-v2 encoder</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-3">
-        <div class="tech-icon">🎈</div>
-        <div><div class="tech-name">Streamlit ≥1.28</div><div class="tech-role">8-tab interactive dashboard</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-3">
-        <div class="tech-icon">📊</div>
-        <div><div class="tech-name">Plotly ≥5.15</div><div class="tech-role">Dark-theme visualizations</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-4">
-        <div class="tech-icon">📄</div>
-        <div><div class="tech-name">fpdf2 ≥2.7</div><div class="tech-role">Mock paper PDF export</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-4">
-        <div class="tech-icon">🤖</div>
-        <div><div class="tech-name">scikit-learn ≥1.3</div><div class="tech-role">Preprocessing utilities</div></div>
-      </div>
-      <div class="tech-card reveal reveal-delay-4">
-        <div class="tech-icon">🚂</div>
-        <div><div class="tech-name">Railway</div><div class="tech-role">Cloud deployment</div></div>
-      </div>
-    </div>
-
-    <!-- Deployment details -->
-    <div class="reveal" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem;">Deployment Configuration</h3>
-    </div>
-    <div class="deploy-grid reveal">
-      <div class="deploy-card">
-        <div class="deploy-title">Procfile</div>
-        <div class="deploy-line"><span style="color:var(--indigo);">web:</span> streamlit run dashboard/app.py \</div>
-        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.port $PORT \</div>
-        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.headless true \</div>
-        <div class="deploy-line">&nbsp;&nbsp;&nbsp;&nbsp;--server.address 0.0.0.0</div>
-      </div>
-      <div class="deploy-card">
-        <div class="deploy-title">railway.toml</div>
-        <div class="deploy-line"><span style="color:var(--purple);">[build]</span></div>
-        <div class="deploy-line">builder = <span style="color:var(--green);">"NIXPACKS"</span></div>
-        <div class="deploy-line"><span style="color:var(--purple);">[deploy]</span></div>
-        <div class="deploy-line">startCommand = <span style="color:var(--green);">"streamlit run ..."</span></div>
-        <div class="deploy-line">healthcheckPath = <span style="color:var(--green);">"/"</span></div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ HOW TO USE ═══════════════════════ -->
-<section id="usage">
-  <div class="container">
-    <div class="reveal">
-      <div class="section-label">08 · Usage</div>
-      <h2 class="section-title">How to Use PRAJNA</h2>
-      <p class="section-sub">Three steps from launch to focused study list</p>
-    </div>
-
-    <div class="steps steps-wrapper">
-      <div class="step-card reveal reveal-delay-1" data-step="1">
-        <div class="step-num">1</div>
-        <div class="step-title">Set Global Filters</div>
-        <div class="step-desc">Use the filter bar at the top of every tab to select your exam, subject, target year, and top-K count. All 8 tabs update simultaneously.</div>
-        <div class="step-options">
-          <span class="opt-pill">NEET / JEE Main / JEE Advanced</span>
-          <span class="opt-pill">Target Year 2024–2030</span>
-          <span class="opt-pill">Top K 20–100</span>
-        </div>
-      </div>
-
-      <div class="step-card reveal reveal-delay-2" data-step="2">
-        <div class="step-num">2</div>
-        <div class="step-title">Explore Predictions &amp; Backtest</div>
-        <div class="step-desc">Open the Predictions tab for your ranked topic list. Use the Backtest tab to validate on any historical year — see exactly which topics PRAJNA would have predicted vs what actually appeared.</div>
-        <div class="step-options">
-          <span class="opt-pill">📊 Predictions tab</span>
-          <span class="opt-pill">🎯 Backtest tab</span>
-          <span class="opt-pill">SLM vs v3 toggle</span>
-        </div>
-      </div>
-
-      <div class="step-card reveal reveal-delay-3" data-step="3">
-        <div class="step-num">3</div>
-        <div class="step-title">Deep Dive &amp; Export</div>
-        <div class="step-desc">Use Topic Deep Dive for any chapter's 48-year history. Export a Lesson Plan CSV or generate a full mock paper PDF. Ask the chatbot anything about trends, difficulty, or gaps.</div>
-        <div class="step-options">
-          <span class="opt-pill">🔬 Deep Dive</span>
-          <span class="opt-pill">📚 Lesson Plan CSV</span>
-          <span class="opt-pill">📄 Paper PDF</span>
-          <span class="opt-pill">🤖 Ask PRAJNA</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="gradient-divider"></div>
-
-<!-- ═══════════════════════ TEAM ═══════════════════════ -->
-<section id="team">
-  <div class="container">
-    <div class="reveal" style="text-align:center;">
-      <div class="section-label" style="margin:0 auto 1.5rem;">09 · Team</div>
-      <h2 class="section-title" style="-webkit-text-fill-color:unset; color:#e2e8f0; background:none;">Built by Curious Labs</h2>
-      <p class="section-sub" style="margin:0 auto;">Two engineers, one mission: make exam preparation data-driven</p>
-    </div>
-
-    <div class="team-grid">
-      <div class="team-card reveal reveal-delay-1">
-        <div class="avatar">AA</div>
-        <div class="team-name">Aman Arora</div>
-        <div class="team-org">Curious Labs</div>
-        <div class="team-details">
-          <div class="team-detail">
-            <span class="team-detail-icon">🎓</span>
-            <span>PW ID: PW16130</span>
-          </div>
-          <div class="team-detail">
-            <span class="team-detail-icon">📞</span>
-            <span>7505484120</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="team-card reveal reveal-delay-2">
-        <div class="avatar">HS</div>
-        <div class="team-name">Himanshu Sharma</div>
-        <div class="team-org">Curious Labs</div>
-        <div class="team-details">
-          <div class="team-detail">
-            <span class="team-detail-icon">🎓</span>
-            <span>PW ID: PW1925</span>
-          </div>
-          <div class="team-detail">
-            <span class="team-detail-icon">📞</span>
-            <span>9694948108</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo-row">
-      <div class="pw-circle" style="width:32px;height:32px;font-size:11px;">PW</div>
-      <span class="footer-brand">PRAJNA</span>
-    </div>
-    <p class="footer-meta">
-      PRAJNA v1.0 · Built for <span>PW AI Hackathon 2026</span> · <span>23,119 questions</span> · <span>292 papers</span> · <span>1978–2026</span>
-    </p>
-    <p class="footer-meta" style="margin-top:0.5rem;">
-      Curious Labs · Aman Arora &amp; Himanshu Sharma
-    </p>
-  </div>
-</footer>
+  </div><!-- /track -->
+</div><!-- /carousel -->
 
 <script>
-  // ── Scroll Reveal ──────────────────────────────────────
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+const TOTAL = 12;
+let current = 0;
+let timer;
+const track = document.getElementById('track');
+const counter = document.getElementById('counter');
+const dotsEl = document.getElementById('dots');
 
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+// Build dots
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('button');
+  d.className='dot'+(i===0?' active':'');
+  d.setAttribute('aria-label','Slide '+(i+1));
+  d.onclick=()=>goTo(i);
+  dotsEl.appendChild(d);
+}
 
-  // ── Counter Animation ──────────────────────────────────
-  function animateCounter(el) {
-    const target = parseInt(el.dataset.target, 10);
-    const suffix = el.dataset.suffix || '';
-    const duration = 1800;
-    const start = performance.now();
+function goTo(n){
+  current=(n+TOTAL)%TOTAL;
+  track.style.transform=`translateX(-${current*100}vw)`;
+  counter.textContent=`${current+1} / ${TOTAL}`;
+  dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+}
 
-    function step(now) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      // ease-out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(eased * target);
+function next(){goTo(current+1)}
+function prev(){goTo(current-1)}
 
-      if (suffix === '%') {
-        // display as xx.x%
-        el.textContent = (current / 10).toFixed(1) + '%';
-      } else {
-        el.textContent = current.toLocaleString();
-      }
+document.getElementById('next').onclick=()=>{resetTimer();next()};
+document.getElementById('prev').onclick=()=>{resetTimer();prev()};
 
-      if (progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){resetTimer();next()}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){resetTimer();prev()}
+});
 
-  const counterObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        animateCounter(entry.target);
-        counterObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.3 });
+function startTimer(){timer=setInterval(next,6000)}
+function resetTimer(){clearInterval(timer);startTimer()}
 
-  document.querySelectorAll('.counter-value[data-target]').forEach(el => counterObserver.observe(el));
+// Pause on hover
+document.getElementById('carousel').addEventListener('mouseenter',()=>clearInterval(timer));
+document.getElementById('carousel').addEventListener('mouseleave',startTimer);
 
-  // ── Smooth Scroll for CTA ──────────────────────────────
-  document.querySelector('.hero-cta').addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
-  });
+// Touch swipe
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50){resetTimer();dx<0?next():prev()}
+},{passive:true});
 
-  // ── Active nav link highlight ──────────────────────────
-  const sections = document.querySelectorAll('section[id]');
-  const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
-
-  const sectionObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        navLinks.forEach(a => {
-          a.style.color = a.getAttribute('href') === '#' + id
-            ? 'var(--text)'
-            : '';
-        });
-      }
-    });
-  }, { threshold: 0.4 });
-
-  sections.forEach(s => sectionObserver.observe(s));
-
-  // ── Bar chart animation ────────────────────────────────
-  const barObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.querySelectorAll('.bar-fill').forEach(bar => {
-          const w = bar.style.width;
-          bar.style.width = '0';
-          setTimeout(() => { bar.style.width = w; }, 100);
-        });
-        barObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.2 });
-
-  document.querySelectorAll('.chart-section').forEach(el => barObserver.observe(el));
+startTimer();
 </script>
-
 </body>
 </html>
