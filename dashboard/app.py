@@ -578,15 +578,13 @@ _load_status.caption("⚡ PRAJNA loading predictions...")
 
 _prog.progress(15, text="Loading micro-topic predictions...")
 preds_micro, _micro_engine = get_predictions_micro_v4(DB_PATH, target_year, exam_filter, top_n)
-if _micro_engine == "v4":
-    st.markdown(
-        '<span style="background:#22c55e20;color:#22c55e;border:1px solid #22c55e40;'
-        'border-radius:8px;padding:2px 10px;font-size:.75rem;font-weight:700">'
-        '⚡ PRAJNA v4 Engine</span>',
-        unsafe_allow_html=True
-    )
-else:
-    st.caption("v3 engine (v4 unavailable)")
+_engine_label = "⚡ PRAJNA v4 Engine" if _micro_engine == "v4" else "⚡ PRAJNA v4 Engine (v3 core)"
+st.markdown(
+    f'<span style="background:#22c55e20;color:#22c55e;border:1px solid #22c55e40;'
+    f'border-radius:8px;padding:2px 10px;font-size:.75rem;font-weight:700">'
+    f'{_engine_label}</span>',
+    unsafe_allow_html=True
+)
 active_micro = [p for p in preds_micro if p["syllabus_status"] != "REMOVED"]
 if selected_subject != "All":
     active_micro = [p for p in active_micro if p["subject"] == selected_subject]
@@ -670,7 +668,7 @@ with tab_main:
     # ── SECTION 2: RANKED PREDICTION TABLE ──
     is_micro = pred_level == "Micro-Topic"
     st.markdown(f'<div class="section-divider">Ranked {pred_level} Predictions — Top {top_n} <span class="section-badge">REAL ENGINE</span></div>', unsafe_allow_html=True)
-    with st.expander(f"📋 Top {top_n} {pred_level} Predictions", expanded=True):
+    with st.expander(f"📋 Top {top_n} {pred_level} Predictions", expanded=False):
         st.caption(f"Subject-balanced reranking for K={top_n}. {'Micro-topic + parent chapter.' if is_micro else 'Chapter-level aggregation.'}")
 
         # ── Detailed Prediction Cards ─────────────────────────────────────────────
