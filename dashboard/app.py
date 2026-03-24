@@ -97,11 +97,16 @@ st.markdown("""
 .stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
 .block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
 [data-testid="stHeader"] { background:transparent !important; }
-/* Sidebar — always visible, not collapsible */
-[data-testid="stSidebar"] { background:#0c0c18 !important; border-right:1px solid #1e1e3a !important; min-width:260px !important; }
+/* Sidebar — always visible, never collapsible */
+[data-testid="stSidebar"] {
+  background:#0c0c18 !important; border-right:1px solid #1e1e3a !important;
+  min-width:260px !important; width:260px !important;
+  transform:none !important; position:relative !important;
+}
 [data-testid="stSidebar"] button[kind="headerNoPadding"],
 [data-testid="stSidebarCollapseButton"],
-[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"] { display:none !important; }
+[data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"] { display:none !important; }
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#94a3b8; font-size:.82rem; }
 [data-testid="stSidebar"] .stRadio label { font-size:.84rem !important; padding:6px 8px !important; border-radius:6px; transition:background .15s; }
 [data-testid="stSidebar"] .stRadio label:hover { background:#ffffff08; }
