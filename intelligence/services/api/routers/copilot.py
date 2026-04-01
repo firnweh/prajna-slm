@@ -46,52 +46,86 @@ def _is_concept_question(question: str) -> bool:
 
 
 def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[dict]:
-    """Search qbg.db for relevant questions with solutions."""
+    """Search qbg.db for relevant questions with solutions.
+
+    Strategy: LIKE search first (finds questions containing the topic keywords),
+    then FTS5 fallback for broader semantic matching.
+    """
     try:
         if not Path(QBG_DB).exists():
             return []
         conn = sqlite3.connect(QBG_DB)
         conn.row_factory = sqlite3.Row
 
-        # Clean query for FTS5 — use key nouns, skip stopwords
+        # Extract key topic words (remove stopwords)
         stopwords = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been',
                       'what', 'how', 'why', 'when', 'where', 'which', 'who',
                       'do', 'does', 'did', 'can', 'could', 'should', 'would',
                       'explain', 'describe', 'define', 'give', 'me', 'with',
                       'and', 'or', 'of', 'in', 'on', 'for', 'to', 'from', 'by',
-                      'it', 'its', 'this', 'that', 'these', 'those', 'some', 'any'}
+                      'it', 'its', 'this', 'that', 'these', 'those', 'some', 'any',
+                      'examples', 'example', 'about', 'between', 'using', 'find'}
         clean_query = re.sub(r'[^\w\s]', ' ', query).strip().lower()
         words = [w for w in clean_query.split() if w not in stopwords and len(w) > 2][:6]
         if not words:
             words = clean_query.split()[:4]
-        fts_query = ' AND '.join(words) if len(words) <= 3 else ' OR '.join(words)
 
-        # Try exact phrase match first, fall back to OR match
-        sql = """
-            SELECT q.qbgid, q.subject, q.difficulty, q.question_clean,
-                   q.answer_clean, q.text_solution, q.gpt_analysis,
-                   rank
-            FROM questions_fts fts
-            JOIN questions q ON q.rowid = fts.rowid
-            WHERE fts.questions_fts MATCH ?
+        rows = []
+
+        # Strategy 1: LIKE search with key words — most accurate for topic matching
+        like_conditions = " AND ".join(f"question_clean LIKE ?" for w in words[:3])
+        like_params = [f"%{w}%" for w in words[:3]]
+
+        like_sql = f"""
+            SELECT qbgid, subject, difficulty, question_clean,
+                   answer_clean, text_solution, gpt_analysis
+            FROM questions
+            WHERE {like_conditions}
         """
-        # Use phrase match with OR fallback: "newton law motion" first
-        phrase_query = '"' + ' '.join(words[:4]) + '"'
-        params = [phrase_query]
         if subject:
-            sql += " AND q.subject = ?"
-            params.append(subject)
-        sql += f" ORDER BY rank LIMIT {top_n}"
+            like_sql += " AND subject = ?"
+            like_params.append(subject)
+        # Prefer questions with GPT analysis
+        like_sql += " ORDER BY (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END), RANDOM()"
+        like_sql += f" LIMIT {top_n}"
 
-        rows = conn.execute(sql, params).fetchall()
+        rows = conn.execute(like_sql, like_params).fetchall()
 
-        # If phrase match returns too few, fall back to OR match
-        if len(rows) < 3:
-            params[0] = fts_query
-            rows = conn.execute(sql, params).fetchall()
+        # Strategy 2: If LIKE returns too few, try with fewer words
+        if len(rows) < 3 and len(words) > 1:
+            like_conditions2 = " AND ".join(f"question_clean LIKE ?" for w in words[:2])
+            like_params2 = [f"%{w}%" for w in words[:2]]
+            like_sql2 = f"""
+                SELECT qbgid, subject, difficulty, question_clean,
+                       answer_clean, text_solution, gpt_analysis
+                FROM questions
+                WHERE {like_conditions2}
+            """
+            if subject:
+                like_sql2 += " AND subject = ?"
+                like_params2.append(subject)
+            like_sql2 += " ORDER BY (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END), RANDOM()"
+            like_sql2 += f" LIMIT {top_n}"
+            rows = conn.execute(like_sql2, like_params2).fetchall()
+
+        # Strategy 3: FTS5 fallback
+        if len(rows) < 2:
+            fts_query = ' OR '.join(words)
+            fts_sql = """
+                SELECT q.qbgid, q.subject, q.difficulty, q.question_clean,
+                       q.answer_clean, q.text_solution, q.gpt_analysis
+                FROM questions_fts fts
+                JOIN questions q ON q.rowid = fts.rowid
+                WHERE fts.questions_fts MATCH ?
+            """
+            fts_params = [fts_query]
+            if subject:
+                fts_sql += " AND q.subject = ?"
+                fts_params.append(subject)
+            fts_sql += f" ORDER BY rank LIMIT {top_n}"
+            rows = conn.execute(fts_sql, fts_params).fetchall()
 
         conn.close()
-
         return [{k: row[k] for k in row.keys()} for row in rows]
     except Exception:
         return []
@@ -117,17 +151,21 @@ def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
         best = qbg_results[0]
 
     parts = []
-    parts.append(f"📚 **Related to your question: \"{question}\"**\n")
+    parts.append(f"📚 **Related to: \"{question}\"**\n")
 
     # Show the best explanation
     explanation = best.get("gpt_analysis") or best.get("text_solution") or ""
     if explanation:
         # Clean HTML tags
         clean = re.sub(r'<[^>]+>', '', explanation)
+        # Remove GPT analysis prefix noise (e.g., "analysisWe need to...", "assistantfinal**...")
+        clean = re.sub(r'^(analysis|assistant|final|user|system)\s*', '', clean, flags=re.IGNORECASE)
+        clean = re.sub(r'\b(analysis|assistantfinal|assistant)\b', '', clean)
+        clean = clean.strip()
         # Truncate if too long
-        if len(clean) > 1500:
-            clean = clean[:1500] + "..."
-        parts.append(f"**Concept Explanation:**\n{clean}\n")
+        if len(clean) > 1200:
+            clean = clean[:1200] + "..."
+        parts.append(f"**Explanation:**\n{clean}\n")
 
     # Show related practice questions
     parts.append(f"\n📝 **Practice Questions ({len(qbg_results)} found):**\n")
