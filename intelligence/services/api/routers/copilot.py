@@ -24,10 +24,14 @@ QBG_DB = str(Path(__file__).resolve().parent.parent.parent.parent.parent / "data
 # Keywords that indicate a concept/explanation question vs strategy question
 CONCEPT_KEYWORDS = [
     "explain", "what is", "what are", "define", "describe", "how does",
-    "how do", "why does", "why do", "difference between", "derive",
-    "prove", "formula", "equation", "law", "principle", "theorem",
-    "mechanism", "process", "function", "structure", "diagram",
-    "example", "solve", "calculate", "find the", "evaluate",
+    "how do", "why does", "why do", "what happens", "what occur",
+    "difference between", "derive", "prove", "formula", "equation",
+    "law", "principle", "theorem", "mechanism", "process", "function",
+    "structure", "diagram", "example", "solve", "calculate", "find the",
+    "evaluate", "meaning of", "concept of", "types of", "steps of",
+    "phases of", "stages of", "properties of", "characteristics of",
+    "reaction", "cycle", "cell division", "meiosis", "mitosis",
+    "photosynthesis", "respiration", "digestion", "excretion",
 ]
 
 STRATEGY_KEYWORDS = [
@@ -36,6 +40,65 @@ STRATEGY_KEYWORDS = [
     "probability", "trending", "rising", "which topic", "which chapter",
     "how many hours", "weak", "strong", "roi", "exam brief",
 ]
+
+# Phrases that indicate GPT "thinking" rather than actual answer content
+THINKING_PREFIXES = [
+    'we need to', 'we should', 'let me', 'i need to', 'the user',
+    'likely', 'probably', 'so the answer', 'the sentence',
+    'they want', 'the question', 'this is a', 'user asks',
+    'user says', 'user writes', 'we have', 'we can', 'let\'s',
+    'i\'ll', 'i will', 'maybe', 'perhaps', 'it seems', 'it looks',
+    'asks:', 'asks \"', 'says:', 'writes:', 'straightforward',
+    'provide', 'respond', 'answer:', 'succinctly', 'briefly',
+    'here we', 'here is', 'so we', 'so,', 'thus,', 'hence,',
+    'note:', 'ok,', 'ok.', 'alright', 'well,', 'now,',
+]
+
+
+def _clean_gpt_analysis(raw: str) -> str:
+    """Clean GPT analysis text: remove channel markers, thinking prefix, format for display."""
+    if not raw:
+        return ""
+
+    # Remove channel markers
+    text = re.sub(r'<\|channel\|>\w+<\|message\|>', '\n', raw)
+    # Remove HTML tags
+    text = re.sub(r'<[^>]+>', '', text)
+    # Remove leading "analysis" / "assistant" / "final" words
+    text = re.sub(r'^(analysis|assistant|final|user|system)\s*', '', text.strip(), flags=re.IGNORECASE)
+
+    # Split into sentences
+    sentences = re.split(r'(?<=[.!?\n])\s+', text.strip())
+    if not sentences:
+        return text.strip()
+
+    # Skip thinking/reasoning sentences, keep answer sentences
+    clean_sentences = []
+    found_answer = False
+    for s in sentences:
+        s = s.strip()
+        if not s:
+            continue
+        s_lower = s.lower()
+
+        # Skip meta-thinking sentences
+        if not found_answer and any(s_lower.startswith(p) for p in THINKING_PREFIXES):
+            continue
+
+        # Found first non-thinking sentence — this is the start of the real answer
+        found_answer = True
+        # Also skip single-word "sentences" that are leftovers
+        if len(s) < 10:
+            continue
+        clean_sentences.append(s)
+
+    result = ' '.join(clean_sentences) if clean_sentences else text.strip()
+
+    # Clean up repeated whitespace and newlines
+    result = re.sub(r'\n{3,}', '\n\n', result)
+    result = re.sub(r'  +', ' ', result)
+
+    return result.strip()
 
 
 def _is_concept_question(question: str) -> bool:
@@ -72,9 +135,18 @@ def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[
 
         rows = []
 
-        # Strategy 1: LIKE search with key words — most accurate for topic matching
-        like_conditions = " AND ".join(f"question_clean LIKE ?" for w in words[:3])
-        like_params = [f"%{w}%" for w in words[:3]]
+        # Pick the most specific/rare words for LIKE search
+        # Generic words that appear in many subjects — deprioritize
+        generic_words = {'happens', 'during', 'process', 'division', 'reaction',
+                         'method', 'effect', 'change', 'type', 'form', 'nature',
+                         'following', 'given', 'correct', 'statement', 'true', 'false'}
+        # Score: domain-specific words first, then by length
+        specific_words = sorted(words, key=lambda w: (w.lower() not in generic_words, len(w)), reverse=True)
+
+        # Strategy 1: LIKE search with top 2-3 most specific words
+        use_words = specific_words[:min(3, len(specific_words))]
+        like_conditions = " AND ".join(f"question_clean LIKE ?" for w in use_words)
+        like_params = [f"%{w}%" for w in use_words]
 
         like_sql = f"""
             SELECT qbgid, subject, difficulty, question_clean,
@@ -91,10 +163,10 @@ def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[
 
         rows = conn.execute(like_sql, like_params).fetchall()
 
-        # Strategy 2: If LIKE returns too few, try with fewer words
-        if len(rows) < 3 and len(words) > 1:
-            like_conditions2 = " AND ".join(f"question_clean LIKE ?" for w in words[:2])
-            like_params2 = [f"%{w}%" for w in words[:2]]
+        # Strategy 2: If LIKE returns too few, try with just the most specific word
+        if len(rows) < 3 and specific_words:
+            like_conditions2 = "question_clean LIKE ?"
+            like_params2 = [f"%{specific_words[0]}%"]
             like_sql2 = f"""
                 SELECT qbgid, subject, difficulty, question_clean,
                        answer_clean, text_solution, gpt_analysis
@@ -187,17 +259,10 @@ def _build_topic_overview(question: str, qbg_results: list[dict]) -> str:
             break
 
     if best_gpt:
-        clean = re.sub(r'<[^>]+>', '', best_gpt)
-        clean = re.sub(r'<\|channel\|>[^<]*<\|message\|>', '', clean)
-        for marker in ['assistantfinal', 'assistant final', 'assistant\n']:
-            if marker in clean.lower():
-                idx = clean.lower().index(marker)
-                clean = clean[idx + len(marker):]
-                break
-        clean = re.sub(r'^(analysis|assistant|final)\s*', '', clean, flags=re.IGNORECASE).strip()
+        clean = _clean_gpt_analysis(best_gpt)
         if clean and len(clean) > 50:
-            if len(clean) > 800:
-                clean = clean[:800] + "..."
+            if len(clean) > 600:
+                clean = clean[:600] + "..."
             parts.append(f"\n**Concept note:**\n{clean}")
 
     parts.append("\n💡 **Tip:** Ask a more specific question for detailed explanations, e.g.:")
@@ -208,87 +273,71 @@ def _build_topic_overview(question: str, qbg_results: list[dict]) -> str:
     return "\n".join(parts)
 
 
-def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
-    """Build an answer for concept questions using qbg.db results."""
-    if not qbg_results:
-        return f"I don't have specific content on \"{question}\" in my question bank. Try rephrasing or asking about a specific topic."
+def _clean_html(text: str) -> str:
+    """Remove HTML/MathML tags, keep LaTeX."""
+    text = re.sub(r'<math[^>]*>.*?</math>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'&nbsp;', ' ', text)
+    text = re.sub(r'&[a-z]+;', '', text)
+    return re.sub(r'\s+', ' ', text).strip()
 
-    # For broad queries, show topic overview instead of specific question solution
+
+def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
+    """Build a clean answer using question bank data (no LLM calls).
+
+    Uses text_solution (human-written) and answer_clean directly.
+    No GPT analysis — it's raw thinking text that reads poorly.
+    """
+    if not qbg_results:
+        return f"I couldn't find questions matching \"{question}\" in the question bank. Try more specific terms."
+
     if _is_broad_query(question):
         return _build_topic_overview(question, qbg_results)
 
-    # Use GPT analysis if available, otherwise use text_solution
-    best = None
-    for q in qbg_results:
-        if q.get("gpt_analysis") and len(q["gpt_analysis"]) > 50:
-            best = q
-            break
-    if not best:
-        for q in qbg_results:
-            if q.get("text_solution") and len(q["text_solution"]) > 50:
-                best = q
-                break
-    if not best:
-        best = qbg_results[0]
+    # Prefer questions with text_solution (human-written explanation)
+    with_solution = [q for q in qbg_results if q.get("text_solution") and len(str(q["text_solution"])) > 30]
+    best = with_solution[0] if with_solution else qbg_results[0]
 
     parts = []
-    parts.append(f"📚 **Related to: \"{question}\"**\n")
+    parts.append(f"📚 **{question}**\n")
 
-    # Build explanation from best match
-    explanation = best.get("gpt_analysis") or best.get("text_solution") or ""
-    if explanation:
-        # Clean: remove HTML tags, channel tokens, GPT formatting noise
-        clean = re.sub(r'<[^>]+>', '', explanation)
-        clean = re.sub(r'<\|channel\|>[^<]*<\|message\|>', '', clean)
-        # Split on "assistantfinal" or "assistant" marker — take only the final answer part
-        for marker in ['assistantfinal', 'assistant final', 'assistant\n']:
-            if marker in clean.lower():
-                idx = clean.lower().index(marker)
-                clean = clean[idx + len(marker):]
-                break
-        # Remove leading analysis/thinking text (before the actual answer)
-        clean = re.sub(r'^(analysis|assistant|final|user|system)\s*', '', clean, flags=re.IGNORECASE)
-        clean = clean.strip()
-        # Remove "We need to..." thinking prefix if still present
-        if clean.lower().startswith(('we need to', 'we should', 'let me', 'i need to', 'the user')):
-            # Find the first sentence that looks like an actual answer
-            sentences = re.split(r'(?<=[.!?])\s+', clean)
-            # Skip thinking sentences, keep answer sentences
-            answer_sentences = []
-            started = False
-            for s in sentences:
-                s_lower = s.lower().strip()
-                if not started and any(s_lower.startswith(p) for p in ('we need', 'we should', 'let me', 'i need', 'the user', 'likely', 'probably', 'so ')):
-                    continue
-                started = True
-                answer_sentences.append(s)
-            if answer_sentences:
-                clean = ' '.join(answer_sentences)
-        clean = clean.strip()
-        if len(clean) > 1200:
-            clean = clean[:1200] + "..."
-        parts.append(f"**Explanation:**\n{clean}\n")
+    # Show the answer first — clearly
+    answer = best.get("answer_clean", "")
+    if answer:
+        clean_a = _clean_html(answer)
+        if len(clean_a) > 300:
+            clean_a = clean_a[:300] + "..."
+        parts.append(f"**Answer:** {clean_a}\n")
 
-    # Show the source question for context
-    best_q = best.get("question_clean", "")
-    best_a = best.get("answer_clean", "")
+    # Show human-written solution
+    solution = str(best.get("text_solution") or "")
+    if solution and len(solution) > 30:
+        clean_sol = _clean_html(solution)
+        if len(clean_sol) > 600:
+            clean_sol = clean_sol[:600] + "..."
+        parts.append(f"**Explanation:**\n{clean_sol}\n")
+
+    # Source question context
+    best_q = _clean_html(best.get("question_clean", ""))
     if best_q:
-        parts.append(f"\n**Source question:** {best_q[:200]}")
-    if best_a:
-        parts.append(f"**Answer:** {best_a[:200]}\n")
+        if len(best_q) > 200:
+            best_q = best_q[:200] + "..."
+        parts.append(f"*Based on:* {best_q}\n")
 
-    # Show related practice questions
-    parts.append(f"\n📝 **Practice Questions ({len(qbg_results)} found):**\n")
-    for i, q in enumerate(qbg_results[:3], 1):
-        q_text = q.get("question_clean", "")
-        if len(q_text) > 200:
-            q_text = q_text[:200] + "..."
-        answer = q.get("answer_clean", "—")
-        difficulty = q.get("difficulty", "unknown")
-        parts.append(f"{i}. [{difficulty.upper()}] {q_text}")
-        parts.append(f"   → Answer: {answer}\n")
-
-    parts.append("\n💡 Try asking me to **explain the solution** for any of these, or ask for **more practice problems**.")
+    # Practice questions
+    others = [q for q in qbg_results if q.get("qbgid") != best.get("qbgid")]
+    if others:
+        parts.append(f"\n📝 **Practice ({len(others)} more):**\n")
+        for i, q in enumerate(others[:3], 1):
+            q_text = _clean_html(q.get("question_clean", ""))
+            if len(q_text) > 150:
+                q_text = q_text[:150] + "..."
+            ans = _clean_html(q.get("answer_clean", "—"))
+            if len(ans) > 80:
+                ans = ans[:80] + "..."
+            diff = (q.get("difficulty") or "unknown").upper()
+            parts.append(f"{i}. **[{diff}]** {q_text}")
+            parts.append(f"   → {ans}\n")
 
     return "\n".join(parts)
 
