@@ -131,10 +131,91 @@ def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[
         return []
 
 
+def _is_broad_query(question: str) -> bool:
+    """Detect if the query is too broad/vague for a specific question match."""
+    q = question.lower().strip()
+    # Broad queries: short, generic topic names, no specific numbers/formulas
+    broad_patterns = [
+        r'^(explain|describe|what is|what are|tell me about)\s+\w+\s+\w+$',  # "explain X Y"
+        r'reaction mechanism',
+        r'types of',
+        r'laws of',
+        r'properties of',
+        r'difference between .+ and',
+        r'classification of',
+    ]
+    if len(q.split()) <= 5 and not any(c.isdigit() for c in q):
+        return True
+    for p in broad_patterns:
+        if re.search(p, q):
+            return True
+    return False
+
+
+def _build_topic_overview(question: str, qbg_results: list[dict]) -> str:
+    """For broad queries, show a topic overview with categorized practice questions."""
+    parts = []
+    parts.append(f"📚 **{question}**\n")
+
+    # Group practice questions by difficulty
+    easy = [q for q in qbg_results if q.get("difficulty") == "easy"]
+    medium = [q for q in qbg_results if q.get("difficulty") == "medium"]
+    hard = [q for q in qbg_results if q.get("difficulty") == "hard"]
+
+    parts.append("This is a broad topic. Here are practice questions at different difficulty levels:\n")
+
+    for label, qs in [("🟢 Easy", easy), ("🟡 Medium", medium), ("🔴 Hard", hard)]:
+        if not qs:
+            continue
+        parts.append(f"\n**{label}:**")
+        for q in qs[:2]:
+            q_text = re.sub(r'<[^>]+>', '', q.get("question_clean", ""))
+            if len(q_text) > 180:
+                q_text = q_text[:180] + "..."
+            answer = q.get("answer_clean", "—")
+            if len(answer) > 100:
+                answer = answer[:100] + "..."
+            parts.append(f"• {q_text}")
+            parts.append(f"  → **Answer:** {answer}\n")
+
+    # If any have GPT analysis, show the best explanation
+    best_gpt = None
+    for q in qbg_results:
+        gpt = q.get("gpt_analysis", "")
+        if gpt and len(gpt) > 100:
+            best_gpt = gpt
+            break
+
+    if best_gpt:
+        clean = re.sub(r'<[^>]+>', '', best_gpt)
+        clean = re.sub(r'<\|channel\|>[^<]*<\|message\|>', '', clean)
+        for marker in ['assistantfinal', 'assistant final', 'assistant\n']:
+            if marker in clean.lower():
+                idx = clean.lower().index(marker)
+                clean = clean[idx + len(marker):]
+                break
+        clean = re.sub(r'^(analysis|assistant|final)\s*', '', clean, flags=re.IGNORECASE).strip()
+        if clean and len(clean) > 50:
+            if len(clean) > 800:
+                clean = clean[:800] + "..."
+            parts.append(f"\n**Concept note:**\n{clean}")
+
+    parts.append("\n💡 **Tip:** Ask a more specific question for detailed explanations, e.g.:")
+    parts.append("• \"What is SN1 reaction mechanism?\"")
+    parts.append("• \"Explain electrophilic addition with example\"")
+    parts.append("• \"Difference between SN1 and SN2\"")
+
+    return "\n".join(parts)
+
+
 def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
     """Build an answer for concept questions using qbg.db results."""
     if not qbg_results:
         return f"I don't have specific content on \"{question}\" in my question bank. Try rephrasing or asking about a specific topic."
+
+    # For broad queries, show topic overview instead of specific question solution
+    if _is_broad_query(question):
+        return _build_topic_overview(question, qbg_results)
 
     # Use GPT analysis if available, otherwise use text_solution
     best = None
