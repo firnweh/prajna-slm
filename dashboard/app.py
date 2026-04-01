@@ -84,19 +84,22 @@ st.plotly_chart = styled_plotly_chart
 
 
 # --- Page Config ---
-st.set_page_config(page_title="PRAJNA — Deep Dive by Physics Wallah", page_icon="🧠", layout="wide", initial_sidebar_state="expanded")
-# Prevent sidebar from being collapsed — hide the collapse button
+_embed_mode = st.query_params.get("embed", "false") == "true"
+st.set_page_config(
+    page_title="PRAJNA — Deep Dive by Physics Wallah",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="collapsed" if _embed_mode else "expanded",
+)
 
 
 # --- Custom CSS ---
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-
-/* ── Global ── */
-.stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
-.block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
-[data-testid="stHeader"] { background:transparent !important; }
+_sidebar_css = """
+/* Sidebar — hidden in embed mode */
+[data-testid="stSidebar"] { display:none !important; }
+[data-testid="stSidebarCollapsedControl"] { display:none !important; }
+section[data-testid="stMain"] { margin-left:0 !important; }
+""" if _embed_mode else """
 /* Sidebar — always visible, never collapsible */
 [data-testid="stSidebar"] {
   background:#0c0c18 !important; border-right:1px solid #1e1e3a !important;
@@ -107,6 +110,17 @@ st.markdown("""
 [data-testid="stSidebarCollapseButton"],
 [data-testid="stSidebar"] [data-testid="stSidebarCollapseButton"],
 [data-testid="stSidebarCollapsedControl"] { display:none !important; }
+"""
+
+st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+
+/* ── Global ── */
+.stApp { background:#080810 !important; font-family:'Inter',system-ui,sans-serif; }
+.block-container { padding-top:0 !important; max-width:1520px; padding-left:1.5rem; padding-right:1.5rem; }
+[data-testid="stHeader"] { background:transparent !important; }
+{_sidebar_css}
 [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p { color:#94a3b8; font-size:.82rem; }
 [data-testid="stSidebar"] .stRadio label { font-size:.84rem !important; padding:6px 8px !important; border-radius:6px; transition:background .15s; }
 [data-testid="stSidebar"] .stRadio label:hover { background:#ffffff08; }
