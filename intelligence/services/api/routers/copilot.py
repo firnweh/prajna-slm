@@ -41,6 +41,146 @@ STRATEGY_KEYWORDS = [
     "how many hours", "weak", "strong", "roi", "exam brief",
 ]
 
+# Topic names for topic-aware search (must match labels in qbg.db)
+KNOWN_TOPICS = {
+    "kinematics": "Kinematics",
+    "laws of motion": "Laws of Motion",
+    "newton": "Laws of Motion",
+    "work energy": "Work Energy Power",
+    "work energy power": "Work Energy Power",
+    "gravitation": "Gravitation",
+    "gravity": "Gravitation",
+    "thermodynamics": "Thermodynamics",
+    "oscillations": "Oscillations",
+    "shm": "Oscillations",
+    "simple harmonic": "Oscillations",
+    "waves": "Waves",
+    "sound": "Waves",
+    "electrostatics": "Electrostatics",
+    "coulomb": "Electrostatics",
+    "capacitor": "Electrostatics",
+    "current electricity": "Current Electricity",
+    "ohm": "Current Electricity",
+    "kirchhoff": "Current Electricity",
+    "magnetism": "Magnetism",
+    "magnetic": "Magnetism",
+    "electromagnetic induction": "Electromagnetic Induction",
+    "faraday": "Electromagnetic Induction",
+    "alternating current": "Alternating Current",
+    "optics": "Optics",
+    "lens": "Optics",
+    "mirror": "Optics",
+    "refraction": "Optics",
+    "modern physics": "Modern Physics",
+    "photoelectric": "Modern Physics",
+    "bohr": "Modern Physics",
+    "nuclear": "Modern Physics",
+    "semiconductor": "Semiconductor",
+    "diode": "Semiconductor",
+    "transistor": "Semiconductor",
+    "rotational motion": "Rotational Motion",
+    "moment of inertia": "Rotational Motion",
+    "torque": "Rotational Motion",
+    "fluid mechanics": "Fluid Mechanics",
+    "bernoulli": "Fluid Mechanics",
+    "viscosity": "Fluid Mechanics",
+    "elasticity": "Elasticity",
+    "stress strain": "Elasticity",
+    "kinetic theory": "Kinetic Theory",
+    "ideal gas": "Kinetic Theory",
+    "organic chemistry": "Organic Chemistry",
+    "alkane": "Organic Chemistry",
+    "alkene": "Organic Chemistry",
+    "benzene": "Organic Chemistry",
+    "inorganic chemistry": "Inorganic Chemistry",
+    "periodic table": "Inorganic Chemistry",
+    "coordination compound": "Inorganic Chemistry",
+    "d-block": "Inorganic Chemistry",
+    "p-block": "Inorganic Chemistry",
+    "physical chemistry": "Physical Chemistry",
+    "electrochemistry": "Physical Chemistry",
+    "chemical kinetics": "Physical Chemistry",
+    "equilibrium": "Physical Chemistry",
+    "solutions": "Solutions",
+    "molarity": "Solutions",
+    "colligative": "Solutions",
+    "chemical bonding": "Chemical Bonding",
+    "hybridization": "Chemical Bonding",
+    "vsepr": "Chemical Bonding",
+    "atomic structure": "Atomic Structure",
+    "quantum number": "Atomic Structure",
+    "electron configuration": "Atomic Structure",
+    "redox": "Redox Reactions",
+    "oxidation reduction": "Redox Reactions",
+    "genetics": "Genetics",
+    "dna": "Genetics",
+    "rna": "Genetics",
+    "heredity": "Genetics",
+    "mendel": "Genetics",
+    "cell biology": "Cell Biology",
+    "mitosis": "Cell Biology",
+    "meiosis": "Cell Biology",
+    "cell cycle": "Cell Biology",
+    "ecology": "Ecology",
+    "ecosystem": "Ecology",
+    "biodiversity": "Ecology",
+    "food chain": "Ecology",
+    "human physiology": "Human Physiology",
+    "digestion": "Human Physiology",
+    "respiration": "Human Physiology",
+    "circulation": "Human Physiology",
+    "excretion": "Human Physiology",
+    "nervous system": "Human Physiology",
+    "endocrine": "Human Physiology",
+    "plant physiology": "Plant Physiology",
+    "photosynthesis": "Plant Physiology",
+    "transpiration": "Plant Physiology",
+    "reproduction": "Reproduction",
+    "fertilization": "Reproduction",
+    "gametogenesis": "Reproduction",
+    "evolution": "Evolution",
+    "natural selection": "Evolution",
+    "darwin": "Evolution",
+    "molecular biology": "Molecular Biology",
+    "transcription": "Molecular Biology",
+    "translation": "Molecular Biology",
+    "replication": "Molecular Biology",
+    "biotechnology": "Biotechnology",
+    "genetic engineering": "Biotechnology",
+    "algebra": "Algebra",
+    "quadratic": "Algebra",
+    "polynomial": "Algebra",
+    "permutation": "Algebra",
+    "combination": "Algebra",
+    "calculus": "Calculus",
+    "differentiation": "Calculus",
+    "integration": "Calculus",
+    "derivative": "Calculus",
+    "limit": "Calculus",
+    "coordinate geometry": "Coordinate Geometry",
+    "parabola": "Coordinate Geometry",
+    "ellipse": "Coordinate Geometry",
+    "hyperbola": "Coordinate Geometry",
+    "conic": "Coordinate Geometry",
+    "trigonometry": "Trigonometry",
+    "vectors": "Vectors",
+    "vector": "Vectors",
+    "probability": "Probability",
+    "bayes": "Probability",
+    "matrices": "Matrices",
+    "matrix": "Matrices",
+    "determinant": "Matrices",
+    "statistics": "Statistics",
+    "3d geometry": "3D Geometry",
+    "direction cosine": "3D Geometry",
+}
+
+# Regex to detect useless solutions like "(1)", "(a)", "(2)", "(d)", "option b", etc.
+_BAD_SOLUTION_RE = re.compile(
+    r'^\s*(\([1-4a-d]\)|\(?option\s*[1-4a-d]\)?|[1-4a-d]\.?\s*)$',
+    re.IGNORECASE,
+)
+
 # Phrases that indicate GPT "thinking" rather than actual answer content
 THINKING_PREFIXES = [
     'we need to', 'we should', 'let me', 'i need to', 'the user',
@@ -101,6 +241,46 @@ def _clean_gpt_analysis(raw: str) -> str:
     return result.strip()
 
 
+def _find_topic(words: list[str]) -> str | None:
+    """Check if any search word(s) match a known topic name.
+
+    Tries multi-word combinations first (e.g. "organic chemistry"),
+    then single words (e.g. "kinematics").
+    """
+    query_lower = " ".join(words).lower()
+
+    # Try full query match first
+    if query_lower in KNOWN_TOPICS:
+        return KNOWN_TOPICS[query_lower]
+
+    # Try 2-word and 3-word combos
+    for n in (3, 2):
+        for i in range(len(words) - n + 1):
+            combo = " ".join(words[i:i+n]).lower()
+            if combo in KNOWN_TOPICS:
+                return KNOWN_TOPICS[combo]
+
+    # Try single words
+    for w in words:
+        wl = w.lower()
+        if wl in KNOWN_TOPICS:
+            return KNOWN_TOPICS[wl]
+
+    return None
+
+
+def _has_good_solution(row: dict) -> bool:
+    """Check if a question has a real, useful solution (not just option labels)."""
+    sol = row.get("text_solution") or ""
+    if not sol or len(sol.strip()) < 10:
+        return False
+    # Filter out solutions that are just option labels like "(2)", "(d)", etc.
+    clean = re.sub(r'<[^>]+>', '', sol).strip()
+    if _BAD_SOLUTION_RE.match(clean):
+        return False
+    return True
+
+
 def _is_concept_question(question: str) -> bool:
     q = question.lower().strip()
     concept_score = sum(1 for kw in CONCEPT_KEYWORDS if kw in q)
@@ -111,8 +291,13 @@ def _is_concept_question(question: str) -> bool:
 def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[dict]:
     """Search qbg.db for relevant questions with solutions.
 
-    Strategy: LIKE search first (finds questions containing the topic keywords),
-    then FTS5 fallback for broader semantic matching.
+    Strategy:
+    0. Topic-aware search — if query matches a known topic, search by topic column first
+    1. LIKE search (finds questions containing the topic keywords)
+    2. Single-word LIKE fallback
+    3. FTS5 fallback for broader semantic matching
+
+    Results are ranked by solution quality: prefer questions with real explanations.
     """
     try:
         if not Path(QBG_DB).exists():
@@ -135,50 +320,113 @@ def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[
 
         rows = []
 
-        # Pick the most specific/rare words for LIKE search
-        # Generic words that appear in many subjects — deprioritize
-        generic_words = {'happens', 'during', 'process', 'division', 'reaction',
-                         'method', 'effect', 'change', 'type', 'form', 'nature',
-                         'following', 'given', 'correct', 'statement', 'true', 'false'}
-        # Score: domain-specific words first, then by length
-        specific_words = sorted(words, key=lambda w: (w.lower() not in generic_words, len(w)), reverse=True)
-
-        # Strategy 1: LIKE search with top 2-3 most specific words
-        use_words = specific_words[:min(3, len(specific_words))]
-        like_conditions = " AND ".join(f"question_clean LIKE ?" for w in use_words)
-        like_params = [f"%{w}%" for w in use_words]
-
-        like_sql = f"""
-            SELECT qbgid, subject, difficulty, question_clean,
-                   answer_clean, text_solution, gpt_analysis
-            FROM questions
-            WHERE {like_conditions}
-        """
-        if subject:
-            like_sql += " AND subject = ?"
-            like_params.append(subject)
-        # Prefer questions with GPT analysis
-        like_sql += " ORDER BY (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END), RANDOM()"
-        like_sql += f" LIMIT {top_n}"
-
-        rows = conn.execute(like_sql, like_params).fetchall()
-
-        # Strategy 2: If LIKE returns too few, try with just the most specific word
-        if len(rows) < 3 and specific_words:
-            like_conditions2 = "question_clean LIKE ?"
-            like_params2 = [f"%{specific_words[0]}%"]
-            like_sql2 = f"""
+        # Strategy 0: Topic-aware search — use topic column if query matches a topic
+        topic_match = _find_topic(words)
+        if topic_match:
+            topic_sql = """
                 SELECT qbgid, subject, difficulty, question_clean,
                        answer_clean, text_solution, gpt_analysis
                 FROM questions
-                WHERE {like_conditions2}
+                WHERE topic = ?
+                AND text_solution IS NOT NULL
+                AND LENGTH(text_solution) > 50
+            """
+            topic_params = [topic_match]
+            if subject:
+                topic_sql += " AND subject = ?"
+                topic_params.append(subject)
+            # Rank by solution quality: longer solutions first, then GPT analysis presence
+            topic_sql += """
+                ORDER BY
+                    (CASE WHEN gpt_analysis IS NOT NULL AND LENGTH(gpt_analysis) > 50 THEN 0 ELSE 1 END),
+                    LENGTH(text_solution) DESC
+                LIMIT ?
+            """
+            topic_params.append(top_n * 3)  # fetch more, then filter
+            topic_rows = conn.execute(topic_sql, topic_params).fetchall()
+
+            # Filter out bad solutions and take top_n
+            for row in topic_rows:
+                rd = {k: row[k] for k in row.keys()}
+                if _has_good_solution(rd):
+                    rows.append(row)
+                if len(rows) >= top_n:
+                    break
+
+        # Pick the most specific/rare words for LIKE search
+        generic_words = {'happens', 'during', 'process', 'division', 'reaction',
+                         'method', 'effect', 'change', 'type', 'form', 'nature',
+                         'following', 'given', 'correct', 'statement', 'true', 'false'}
+        specific_words = sorted(words, key=lambda w: (w.lower() not in generic_words, len(w)), reverse=True)
+
+        # Strategy 1: LIKE search with top 2-3 most specific words
+        if len(rows) < top_n:
+            use_words = specific_words[:min(3, len(specific_words))]
+            like_conditions = " AND ".join(f"question_clean LIKE ?" for w in use_words)
+            like_params = [f"%{w}%" for w in use_words]
+
+            like_sql = f"""
+                SELECT qbgid, subject, difficulty, question_clean,
+                       answer_clean, text_solution, gpt_analysis
+                FROM questions
+                WHERE {like_conditions}
+                AND text_solution IS NOT NULL
+                AND LENGTH(text_solution) > 20
+            """
+            if subject:
+                like_sql += " AND subject = ?"
+                like_params.append(subject)
+            like_sql += """
+                ORDER BY
+                    (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END),
+                    LENGTH(text_solution) DESC
+            """
+            like_sql += f" LIMIT {top_n * 3}"
+
+            like_rows = conn.execute(like_sql, like_params).fetchall()
+            # Deduplicate by qbgid and filter bad solutions
+            seen_ids = {row["qbgid"] for row in rows} if rows else set()
+            for row in like_rows:
+                if row["qbgid"] in seen_ids:
+                    continue
+                rd = {k: row[k] for k in row.keys()}
+                if _has_good_solution(rd):
+                    rows.append(row)
+                    seen_ids.add(row["qbgid"])
+                if len(rows) >= top_n:
+                    break
+
+        # Strategy 2: If LIKE returns too few, try with just the most specific word
+        if len(rows) < 3 and specific_words:
+            like_params2 = [f"%{specific_words[0]}%"]
+            like_sql2 = """
+                SELECT qbgid, subject, difficulty, question_clean,
+                       answer_clean, text_solution, gpt_analysis
+                FROM questions
+                WHERE question_clean LIKE ?
+                AND text_solution IS NOT NULL
+                AND LENGTH(text_solution) > 20
             """
             if subject:
                 like_sql2 += " AND subject = ?"
                 like_params2.append(subject)
-            like_sql2 += " ORDER BY (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END), RANDOM()"
-            like_sql2 += f" LIMIT {top_n}"
-            rows = conn.execute(like_sql2, like_params2).fetchall()
+            like_sql2 += """
+                ORDER BY
+                    (CASE WHEN gpt_analysis IS NOT NULL AND gpt_analysis != '' THEN 0 ELSE 1 END),
+                    LENGTH(text_solution) DESC
+            """
+            like_sql2 += f" LIMIT {top_n * 3}"
+            like_rows2 = conn.execute(like_sql2, like_params2).fetchall()
+            seen_ids = {row["qbgid"] for row in rows} if rows else set()
+            for row in like_rows2:
+                if row["qbgid"] in seen_ids:
+                    continue
+                rd = {k: row[k] for k in row.keys()}
+                if _has_good_solution(rd):
+                    rows.append(row)
+                    seen_ids.add(row["qbgid"])
+                if len(rows) >= top_n:
+                    break
 
         # Strategy 3: FTS5 fallback
         if len(rows) < 2:
@@ -194,8 +442,16 @@ def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[
             if subject:
                 fts_sql += " AND q.subject = ?"
                 fts_params.append(subject)
-            fts_sql += f" ORDER BY rank LIMIT {top_n}"
-            rows = conn.execute(fts_sql, fts_params).fetchall()
+            fts_sql += f" ORDER BY rank LIMIT {top_n * 3}"
+            fts_rows = conn.execute(fts_sql, fts_params).fetchall()
+            seen_ids = {row["qbgid"] for row in rows} if rows else set()
+            for row in fts_rows:
+                if row["qbgid"] in seen_ids:
+                    continue
+                rows.append(row)
+                seen_ids.add(row["qbgid"])
+                if len(rows) >= top_n:
+                    break
 
         conn.close()
         return [{k: row[k] for k in row.keys()} for row in rows]
