@@ -7,7 +7,15 @@ from __future__ import annotations
 import re
 import uuid
 import sqlite3
+import httpx
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3.2:3b"
+OLLAMA_TIMEOUT = 30  # seconds
 from fastapi import APIRouter, Depends
 from packages.schemas.contracts import CopilotRequest, CopilotResponse
 from services.api.deps import (
@@ -483,7 +491,7 @@ def _is_broad_query(question: str) -> bool:
     return False
 
 
-def _build_topic_overview(question: str, qbg_results: list[dict]) -> str:
+async def _build_topic_overview(question: str, qbg_results: list[dict]) -> str:
     """For broad queries, show a topic overview with categorized practice questions."""
     parts = []
     parts.append(f"📚 **{question}**\n")
@@ -541,9 +549,71 @@ def _clean_html(text: str) -> str:
     return re.sub(r'\s+', ' ', text).strip()
 
 
-def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
-    """Build a clean answer using question bank data (no LLM calls).
+async def _llm_format(question: str, context_items: list[dict]) -> str | None:
+    """Use local Llama 3.2 (via Ollama) to structure a clean answer from qbg.db results.
 
+    Returns None if Ollama is offline — caller should fall back to rule-based formatting.
+    """
+    # Build context from top 3 results
+    context_parts = []
+    for q in context_items[:3]:
+        q_text = _clean_html(q.get("question_clean", ""))
+        answer = _clean_html(q.get("answer_clean", ""))
+        solution = _clean_html(q.get("text_solution", ""))
+        if q_text:
+            context_parts.append(f"Q: {q_text[:300]}")
+        if answer:
+            context_parts.append(f"A: {answer[:200]}")
+        if solution and len(solution) > 20:
+            context_parts.append(f"Solution: {solution[:400]}")
+        context_parts.append("")
+
+    context = "\n".join(context_parts)
+
+    prompt = f"""You are PRAJNA, an AI tutor for NEET/JEE exam preparation.
+
+A student asked: "{question}"
+
+Here are relevant questions and answers from the question bank:
+
+{context}
+
+Based on the above, give a clear, structured answer to the student's question.
+Rules:
+- Be direct and educational
+- Use LaTeX for formulas: \\(V = IR\\) for inline, \\[E = mc^2\\] for display
+- Keep it concise (3-5 sentences for simple questions, up to 8 for complex ones)
+- Include the key formula or concept first, then explain
+- End with one practical exam tip if relevant
+- Do NOT say "based on the question bank" or reference the source data"""
+
+    try:
+        async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT) as client:
+            resp = await client.post(OLLAMA_URL, json={
+                "model": OLLAMA_MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.3,
+                    "num_predict": 400,
+                }
+            })
+            if resp.status_code == 200:
+                data = resp.json()
+                answer = data.get("response", "").strip()
+                if answer and len(answer) > 20:
+                    return answer
+    except Exception as e:
+        logger.warning(f"Ollama unavailable: {e}")
+
+    return None
+
+
+async def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
+    """Build a clean answer using question bank data.
+
+    Tries Llama 3.2 (via Ollama) first for structured answers.
+    Falls back to rule-based formatting if Ollama is offline.
     Uses text_solution (human-written) and answer_clean directly.
     No GPT analysis — it's raw thinking text that reads poorly.
     """
@@ -551,9 +621,28 @@ def _build_concept_answer(question: str, qbg_results: list[dict]) -> str:
         return f"I couldn't find questions matching \"{question}\" in the question bank. Try more specific terms."
 
     if _is_broad_query(question):
-        return _build_topic_overview(question, qbg_results)
+        return await _build_topic_overview(question, qbg_results)
 
-    # Prefer questions with text_solution (human-written explanation)
+    # Try Llama 3.2 for structured answer
+    llm_answer = await _llm_format(question, qbg_results)
+    if llm_answer:
+        # Add practice questions below the LLM answer
+        others = qbg_results[1:4]
+        practice = ""
+        if others:
+            practice = "\n\n📝 **Practice:**\n"
+            for i, q in enumerate(others, 1):
+                q_text = _clean_html(q.get("question_clean", ""))
+                if len(q_text) > 150:
+                    q_text = q_text[:150] + "..."
+                ans = _clean_html(q.get("answer_clean", "—"))
+                if len(ans) > 80:
+                    ans = ans[:80] + "..."
+                diff = (q.get("difficulty") or "unknown").upper()
+                practice += f"\n{i}. **[{diff}]** {q_text}\n   → {ans}\n"
+        return f"🧠 **{question}**\n\n{llm_answer}{practice}"
+
+    # Fallback: rule-based formatting (Ollama offline)
     with_solution = [q for q in qbg_results if q.get("text_solution") and len(str(q["text_solution"])) > 30]
     best = with_solution[0] if with_solution else qbg_results[0]
 
@@ -625,7 +714,7 @@ async def ask_copilot(
             subject=request.subject_filter,
             top_n=5,
         )
-        answer = _build_concept_answer(request.question, qbg_results)
+        answer = await _build_concept_answer(request.question, qbg_results)
 
         # Build follow-ups based on the content
         subject_hint = qbg_results[0]["subject"] if qbg_results else "Physics"
