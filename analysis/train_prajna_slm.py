@@ -54,22 +54,32 @@ def run_training(stage: str, epochs: int, batch_size: int, learning_rate: float)
 ╚══════════════════════════════════════════════════════╝
 """)
 
+    # Create LoRA config YAML
+    config_path = adapter_path / "lora_config.yaml"
+    config_content = f"""
+# PRAJNA SLM LoRA Config
+model: {BASE_MODEL}
+data: {data_dir}
+adapter_path: {adapter_path}
+train: true
+fine_tune_type: lora
+num_layers: 16
+batch_size: {batch_size}
+iters: {iters}
+learning_rate: {learning_rate}
+val_batches: 25
+steps_per_eval: {max(100, iters // 10)}
+steps_per_report: 50
+max_seq_length: 1024
+seed: 42
+grad_checkpoint: true
+"""
+    with open(config_path, "w") as f:
+        f.write(config_content)
+
     cmd = [
         sys.executable, "-m", "mlx_lm.lora",
-        "--model", BASE_MODEL,
-        "--data", str(data_dir),
-        "--adapter-path", str(adapter_path),
-        "--train",
-        "--iters", str(iters),
-        "--batch-size", str(batch_size),
-        "--learning-rate", str(learning_rate),
-        "--lora-layers", "16",
-        "--lora-rank", "16",
-        "--val-batches", "25",
-        "--steps-per-eval", str(max(100, iters // 10)),
-        "--steps-per-report", "50",
-        "--max-seq-length", "1024",
-        "--seed", "42",
+        "--config", str(config_path),
     ]
 
     print("Starting training...")
