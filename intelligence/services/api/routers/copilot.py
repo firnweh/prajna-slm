@@ -293,7 +293,9 @@ def _is_concept_question(question: str) -> bool:
     q = question.lower().strip()
     concept_score = sum(1 for kw in CONCEPT_KEYWORDS if kw in q)
     strategy_score = sum(1 for kw in STRATEGY_KEYWORDS if kw in q)
-    return concept_score > strategy_score
+    # Default to CONCEPT when both scores are 0 — most questions ask to learn
+    # Only route to strategy when strategy keywords are explicitly present
+    return concept_score >= strategy_score
 
 
 def _search_qbg(query: str, subject: str | None = None, top_n: int = 5) -> list[dict]:
